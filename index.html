@@ -263,6 +263,22 @@
   .assetfulfil-strip{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
   .afx{font-size:10.5px;padding:2px 7px;border-radius:5px;font-weight:600}
   .afx.ok{background:var(--good-bg);color:var(--good)} .afx.under{background:var(--warn-bg);color:var(--warn)} .afx.none{background:var(--line-soft);color:var(--ink-faint)}
+
+  /* Decision modules */
+  .module-nav{display:flex;gap:5px;overflow-x:auto;padding:4px 2px 12px;margin:-4px 0 6px;scrollbar-width:thin}
+  .module-nav button{white-space:nowrap;padding:8px 11px;border-radius:8px;font-size:12px;font-weight:600;color:var(--ink-soft)}
+  .module-nav button:hover{background:var(--line-soft);color:var(--ink)} .module-nav button.on{background:var(--ink);color:#fff}
+  .module-hero{background:linear-gradient(135deg,#16181D,#2a313d);color:#fff;border-radius:var(--radius);padding:22px 24px;margin-bottom:18px;box-shadow:var(--shadow)}
+  .module-hero .eyebrow{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#aeb7c6}.module-hero h2{font-family:'Space Grotesk';font-size:23px;letter-spacing:-.02em;margin:5px 0 6px}.module-hero p{margin:0;color:#cbd2dc;max-width:720px;font-size:13px}
+  .metric-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}.metric-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius-sm);padding:14px;box-shadow:var(--shadow)}
+  .metric-card .label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint)}.metric-card .value{font-family:'Space Grotesk';font-size:22px;font-weight:700;letter-spacing:-.03em;margin-top:4px}.metric-card .compare{font-size:11.5px;color:var(--ink-soft);margin-top:4px}.delta.good{color:var(--good);font-weight:700}.delta.bad{color:var(--bad);font-weight:700}.delta.warn{color:var(--warn);font-weight:700}
+  .dtable{width:100%;border-collapse:collapse;font-size:12.5px}.dtable th{text-align:left;color:var(--ink-faint);font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;padding:8px 9px;border-bottom:1px solid var(--line);white-space:nowrap}.dtable td{padding:10px 9px;border-bottom:1px solid var(--line-soft)}.dtable tr:last-child td{border-bottom:0}.dtable .num{text-align:right;font-family:'JetBrains Mono';font-size:12px}.dtable .muted{color:var(--ink-faint)}
+  .stackbar{height:12px;border-radius:6px;overflow:hidden;background:var(--track);display:flex;margin:12px 0}.stackbar span{height:100%}.legend{display:flex;gap:13px;flex-wrap:wrap;font-size:11.5px;color:var(--ink-soft)}.legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px}
+  .funnel{display:flex;align-items:stretch;gap:5px;overflow-x:auto;padding:4px 0}.funnel-step{min-width:112px;flex:1;background:var(--accent-soft);border-radius:8px;padding:11px}.funnel-step:nth-child(2){background:#e9f0fb}.funnel-step:nth-child(3){background:#edf5f2}.funnel-step:nth-child(4){background:#f8f0e4}.funnel-step .fnum{font-family:'Space Grotesk';font-size:19px;font-weight:700}.funnel-step .flab{font-size:10.5px;color:var(--ink-soft);text-transform:uppercase;font-weight:700;letter-spacing:.04em}
+  .summary-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:18px}.summary-list{margin:0;padding:0;list-style:none}.summary-list li{padding:10px 0;border-bottom:1px solid var(--line-soft);font-size:13px}.summary-list li:last-child{border-bottom:0}.summary-list .evidence{display:block;color:var(--ink-faint);font-size:11.5px;margin-top:3px}.decision-card{border-radius:var(--radius);padding:18px;border:1px solid var(--accent);background:var(--accent-soft)}.decision-card .decision{font-family:'Space Grotesk';font-size:24px;font-weight:700;color:var(--accent);margin:3px 0 7px}.timeline{border-left:2px solid var(--line);margin:4px 0 0 6px;padding-left:15px}.timeline div{position:relative;padding:0 0 14px;font-size:12.5px}.timeline div:before{content:'';position:absolute;left:-20px;top:4px;width:8px;height:8px;border-radius:50%;background:var(--accent)}.timeline small{color:var(--ink-faint);display:block;margin-top:2px}
+  .insight{border-left:3px solid var(--accent);padding:13px 15px;background:#f8faff;border-radius:0 9px 9px 0;margin-bottom:14px;font-size:13.5px;line-height:1.55}.ai-note{font-size:11.5px;color:var(--ink-faint);margin-top:10px}.data-note{font-size:11.5px;color:var(--ink-faint);margin-top:12px;padding-top:11px;border-top:1px solid var(--line-soft)}
+  @media(max-width:860px){.metric-strip{grid-template-columns:1fr 1fr}.summary-grid{grid-template-columns:1fr}}@media(max-width:520px){.metric-strip{grid-template-columns:1fr}.module-hero{padding:18px}.dtable{font-size:11.5px}.dtable th,.dtable td{padding:8px 6px}}
+  @media print{header.top,.module-nav,.linkbtn,.btn,.filters,#modalMount,#toastMount{display:none!important}body{background:#fff}main{max-width:none;padding:0}.panel,.metric-card{box-shadow:none}.module-hero{background:#fff;color:var(--ink);border:1px solid var(--line)}.module-hero p,.module-hero .eyebrow{color:var(--ink-soft)}}
 </style>
 </head>
 <body>
@@ -313,7 +329,7 @@ const db={
 };
 
 let STATE=null;
-let view={screen:'board',pid:null,sid:null,filter:'all',mode:'internal',partnerPid:null,role:null,email:null};
+let view={screen:'board',pid:null,sid:null,filter:'all',mode:'internal',partnerPid:null,role:null,email:null,module:'overview',benchmarkBasis:'portfolio'};
 const CATEGORIES=['Racing','AFL','NRL','US Sports','Soccer','Other'];
 const CALLS=['renew','evolve','renegotiate','exit'];
 const LEVERS=[['growth','Growth'],['audience','Audience'],['channels','Channels & coverage'],['compliance','Compliance']];
@@ -800,6 +816,13 @@ function renderDetail(){
     ${s.context?`<div style="margin-top:12px;font-size:12.5px;color:var(--ink-soft);border-top:1px solid var(--line-soft);padding-top:11px">${esc(s.context)}</div>`:''}
   </div>`;
 
+  const modules=[['overview','Overview'],['benchmarking','Benchmarking'],['efficiency','Commercial efficiency'],['executive','Executive summary'],['ai','AI insights']];
+  html+=`<nav class="module-nav" aria-label="Partnership review modules">${modules.map(([id,label])=>`<button class="${view.module===id?'on':''}" onclick="setModule('${id}')">${label}</button>`).join('')}</nav>`;
+  if(view.module!=='overview'){
+    html+=view.module==='benchmarking'?renderBenchmarking(p,s):view.module==='efficiency'?renderEfficiency(p,s):view.module==='executive'?renderExecutive(p,s):renderAIInsights(p,s);
+    document.getElementById('app').innerHTML=html; return;
+  }
+
   html+=`<div class="grid2">`;
 
   /* commercial */
@@ -1108,10 +1131,86 @@ async function publishPartner(pid,sid){
   }catch(e){ m.textContent='Error: '+e.message; }
 }
 
+/* ============================================================ DECISION MODULES ============================================================ */
+function setModule(id){ view.module=id; render(); }
+function moduleHero(kicker,title,copy,actions=''){
+  return `<section class="module-hero"><div class="eyebrow">${kicker}</div><h2>${title}</h2><p>${copy}</p>${actions?`<div style="margin-top:14px">${actions}</div>`:''}</section>`;
+}
+function metricCard(label,value,compare='',tone=''){
+  return `<div class="metric-card"><div class="label">${label}</div><div class="value ${tone}">${value}</div>${compare?`<div class="compare">${compare}</div>`:''}</div>`;
+}
+function metricValue(s,key){
+  const m=mediaRoll(s), c=s.commercial||{};
+  if(key==='media_value') return m.inv;
+  if(key==='reach') return m.del!==null?m.del:m.guar;
+  if(key==='cpm') return m.delCpm!==null?m.delCpm:m.propCpm;
+  if(key==='ngr') return n(c.ngrAct);
+  if(key==='actives') return n(c.activesAct);
+  if(key==='delivery'){
+    const comps=(s.media.components||[]).filter(x=>(x.assets||[]).length); let target=0,delivered=0;
+    comps.forEach(x=>(x.assets||[]).forEach(a=>{target+=(+a.perWeek||0)*weeksLogged(x);delivered+=assetDeliveredTotal(x,a.id);}));
+    return target?delivered/target*100:null;
+  }
+  return null;
+}
+function metricFormat(key,v){ if(v===null||v===undefined)return '—'; if(key==='media_value'||key==='ngr')return money(v); if(key==='reach')return aud(v); if(key==='cpm')return '$'+v.toFixed(2); if(key==='delivery')return Math.round(v)+'%'; return num(v); }
+function metricDirection(key){return key==='cpm'?'lower':'higher';}
+function previousSnapshot(p,s){ const i=p.snapshots.findIndex(x=>x.id===s.id); return i>0?p.snapshots[i-1]:null; }
+function benchmarkBase(p,s,key){
+  if(view.benchmarkBasis==='previous'){ const prev=previousSnapshot(p,s); return {label:'Previous review',value:prev?metricValue(prev,key):null,sample:prev?1:0}; }
+  if(view.benchmarkBasis==='target'){
+    const c=s.commercial||{}; const m=mediaRoll(s);
+    const maps={ngr:n(c.ngrExp),actives:n(c.activesExp),reach:m.guar,cpm:m.propCpm,delivery:100,media_value:n(p.contractedValue)};
+    return {label:'Plan / target',value:maps[key]??null,sample:1};
+  }
+  const vals=STATE.partnerships.map(x=>metricValue(currentSnap(x),key)).filter(v=>v!==null);
+  return {label:'Portfolio average',value:vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null,sample:vals.length};
+}
+function deltaInfo(key,current,base){
+  if(current===null||base===null||base===0)return {text:'—',cls:'',pct:null};
+  const pct=(current-base)/Math.abs(base)*100, favourable=metricDirection(key)==='lower'?pct<=0:pct>=0;
+  return {text:`${pct>0?'+':''}${Math.round(pct)}%`,cls:favourable?'good':'bad',pct};
+}
+function renderBenchmarking(p,s){
+  const keys=['media_value','reach','cpm','ngr','actives','delivery'];
+  const labels={media_value:'Investment',reach:'Reach',cpm:'CPM',ngr:'Net gaming revenue',actives:'Active customers',delivery:'Entitlement delivery'};
+  const basis=keys.map(k=>benchmarkBase(p,s,k)); const first=basis[0];
+  const selector=`<select class="sel" style="width:auto" onchange="setBenchmarkBasis(this.value)"><option value="portfolio" ${view.benchmarkBasis==='portfolio'?'selected':''}>Portfolio average</option><option value="previous" ${view.benchmarkBasis==='previous'?'selected':''}>Previous review</option><option value="target" ${view.benchmarkBasis==='target'?'selected':''}>Plan / target</option></select>`;
+  let html=moduleHero('Module 02 · metric-level comparison','Benchmarking','Compare individual metrics against a meaningful baseline. No aggregate rank or partnership score is calculated.',selector);
+  html+=`<div class="metric-strip">${keys.slice(0,4).map((k,i)=>{const cur=metricValue(s,k),b=basis[i],d=deltaInfo(k,cur,b.value);return metricCard(labels[k],metricFormat(k,cur),`${b.label}: ${metricFormat(k,b.value)} · <span class="delta ${d.cls}">${d.text}</span>`);}).join('')}</div>`;
+  html+=`<section class="panel"><div class="panel-head"><h3>Benchmark matrix</h3><span class="lil">${first.sample?`${first.sample} comparable record${first.sample===1?'':'s'}`:'No comparable records'}</span></div><div class="panel-body"><div style="overflow:auto"><table class="dtable"><thead><tr><th>Metric</th><th class="num">Current</th><th class="num">${esc(first.label)}</th><th class="num">Variance</th><th class="num">Direction</th><th>Data quality</th></tr></thead><tbody>${keys.map((k,i)=>{const cur=metricValue(s,k),b=basis[i],d=deltaInfo(k,cur,b.value);const quality=cur===null?'Missing current value':b.value===null?'No valid comparison':'Current data available';return `<tr><td><b>${labels[k]}</b></td><td class="num">${metricFormat(k,cur)}</td><td class="num">${metricFormat(k,b.value)}</td><td class="num"><span class="delta ${d.cls}">${d.text}</span></td><td class="num">${metricDirection(k)==='lower'?'Lower is better':'Higher is better'}</td><td class="muted">${quality}</td></tr>`;}).join('')}</tbody></table></div><div class="data-note">Comparison values are shown only at metric level. Values with no valid denominator or comparison are displayed as an em dash.</div></div></section>`;
+  const reach=metricValue(s,'reach'), base=benchmarkBase(p,s,'reach').value, max=Math.max(reach||0,base||0,1); const w1=Math.round((reach||0)/max*100),w2=Math.round((base||0)/max*100);
+  html+=`<section class="panel"><div class="panel-head"><h3>Reach comparison</h3><span class="lil">Selected baseline</span></div><div class="panel-body"><div style="font-size:12px;color:var(--ink-soft)">Current partnership <b style="color:var(--ink)">${metricFormat('reach',reach)}</b></div><div class="stackbar"><span style="width:${w1}%;background:var(--accent)"></span></div><div style="font-size:12px;color:var(--ink-soft)">${esc(first.label)} <b style="color:var(--ink)">${metricFormat('reach',base)}</b></div><div class="stackbar"><span style="width:${w2}%;background:#AEB7C6"></span></div><div class="data-note">A deliberately simple comparison chart: it communicates one metric and one baseline, not a composite performance judgement.</div></div></section>`;
+  return html;
+}
+function setBenchmarkBasis(value){view.benchmarkBasis=value;render();}
+function defaultCosts(s){ if(!Array.isArray(s.costEntries)||!s.costEntries.length){const total=mediaRoll(s).inv||0;s.costEntries=[{category:'Rights fee',amount:total,currency:'AUD',state:'Actual',note:'Derived from existing media package investment'}];}return s.costEntries; }
+function efficiencyOutputs(s){const m=mediaRoll(s),c=s.commercial||{};return {reach:m.del!==null?m.del:m.guar,impressions:null,views:null,clicks:null,signups:null,ftds:null,actives:n(c.activesAct),ngr:n(c.ngrAct)};}
+function renderEfficiency(p,s){
+  const costs=defaultCosts(s), total=costs.reduce((a,x)=>a+(n(x.amount)||0),0),o=efficiencyOutputs(s);
+  const calc=[['Cost per reach',o.reach?total/o.reach:null,'currency'],['CPM',o.impressions?total/o.impressions*1000:null,'currency'],['Cost per active customer',o.actives?total/o.actives:null,'currency'],['NGR per dollar invested',total&&o.ngr!==null?o.ngr/total:null,'ratio']];
+  let html=moduleHero('Module 03 · operational finance','Commercial efficiency','See how approved investment converts into media and commercial outcomes. Status is always tied to a named metric—not a rolled-up score.',`<button class="btn btn-primary" onclick="editCosts()">Edit investment ledger</button>`);
+  html+=`<div class="metric-strip">${metricCard('Total investment',money(total),'Actual costs recorded')}${metricCard('Reach',metricFormat('reach',o.reach),'Delivered or guaranteed reach')}${metricCard('Active customers',num(o.actives),'Attributable outcomes')}${metricCard('NGR',money(o.ngr),'Attributable outcomes')}</div>`;
+  const colors=['#2F6BE0','#7A5AF8','#1D9A6C','#EC7B4E','#AEB7C6']; let off=0;
+  html+=`<div class="grid2"><section class="panel"><div class="panel-head"><h3>Investment breakdown</h3><span class="lil">${costs.length} cost categor${costs.length===1?'y':'ies'}</span></div><div class="panel-body"><div class="stackbar">${costs.map((x,i)=>{const w=total?((n(x.amount)||0)/total*100):0,col=colors[i%colors.length];off+=w;return `<span style="width:${w}%;background:${col}" title="${esc(x.category)}"></span>`;}).join('')}</div><div class="legend">${costs.map((x,i)=>`<span><i style="background:${colors[i%colors.length]}"></i>${esc(x.category)} ${money(x.amount)}</span>`).join('')}</div><div class="data-note">Costs preserve their category, currency and state. Partner users never see this ledger.</div></div></section><section class="panel"><div class="panel-head"><h3>Efficiency metrics</h3><span class="lil">Formula driven</span></div><div class="panel-body"><table class="dtable"><tbody>${calc.map(([l,v,type])=>`<tr><td><b>${l}</b></td><td class="num">${v===null?'—':type==='ratio'?v.toFixed(2)+'×':money(v)}</td></tr>`).join('')}</tbody></table><div class="data-note">Missing denominators show as an em dash. “NGR per dollar invested” is not labelled ROI.</div></div></section></div>`;
+  const funnel=[['Reach',o.reach],['Clicks',o.clicks],['Sign-ups',o.signups],['FTDs',o.ftds],['Active',o.actives]];
+  html+=`<section class="panel"><div class="panel-head"><h3>Commercial funnel</h3><span class="lil">Available data only</span></div><div class="panel-body"><div class="funnel">${funnel.map(([l,v])=>`<div class="funnel-step"><div class="fnum">${l==='Reach'?aud(v):num(v)}</div><div class="flab">${l}</div></div>`).join('')}</div><div class="data-note">The funnel intentionally leaves unavailable stages blank; it does not estimate conversion or invent attribution.</div></div></section>`;
+  return html;
+}
+function editCosts(){const s=curSnap(),costs=defaultCosts(s);mount(scrim(`<div class="modal-head"><h3>Investment ledger</h3><button class="x" onclick="closeModal()">×</button></div><div class="modal-body"><p style="margin-top:0;color:var(--ink-soft);font-size:13px">Keep costs internal. Each line is included in total investment.</p><div id="costRows">${costs.map((x,i)=>costRow(x,i)).join('')}</div><button class="linkbtn" onclick="addCostRow()">＋ Add cost category</button></div><div class="modal-foot"><div></div><div style="display:flex;gap:8px"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveCosts()">Save ledger</button></div></div>`,true));}
+function costRow(x,i){return `<div class="frow" style="margin-bottom:10px"><div class="field" style="margin:0"><label>Category</label><input class="inp" data-cost="category" value="${esc(x.category||'')}"></div><div class="field" style="margin:0"><label>Amount (AUD)</label><input class="inp" data-cost="amount" type="number" min="0" value="${n(x.amount)??''}"></div></div>`;}
+function addCostRow(){document.getElementById('costRows').insertAdjacentHTML('beforeend',costRow({category:'Other approved costs',amount:''},0));}
+async function saveCosts(){const fields=[...document.querySelectorAll('[data-cost]')],rows=[];for(let i=0;i<fields.length;i+=2){const category=fields[i].value.trim(),amount=n(fields[i+1].value);if(category&&amount!==null)rows.push({category,amount,currency:'AUD',state:'Actual',note:''});}curSnap().costEntries=rows;await persist();closeModal();render();toast('Investment ledger saved');}
+function executiveFacts(s){const a=s.assessment||blankAssess(), m=mediaRoll(s), c=s.commercial||{};const highlights=[...(a.winning||[])],risks=[...(a.falling||[])],opps=[...(a.evolution||[])];if(!highlights.length&&m.del!==null&&m.guar!==null&&m.del>=m.guar)highlights.push(`Audience delivery is ${Math.round((m.del-m.guar)/m.guar*100)}% above guarantee.`);if(!risks.length&&m.del===null)risks.push('Delivered audience has not been recorded for this review point.');if(!opps.length)opps.push('Confirm the next review priorities with the partnership owner.');return {highlights:highlights.slice(0,5),risks:risks.slice(0,5),opps:opps.slice(0,5),m,c};}
+function renderExecutive(p,s){const f=executiveFacts(s),action=s.call||'not set',label={'renew':'Renew','evolve':'Renew with revised terms','renegotiate':'Renew with revised terms','exit':'Exit','not set':'Not set'}[action]||'Not set';const status={good:'Performing above expectations',warn:'Mixed performance',bad:'Requires commercial review'}[s.status]||'Insufficient data';const metrics=[['Investment',money(mediaRoll(s).inv)],['Reach',metricFormat('reach',metricValue(s,'reach'))],['NGR',money(n(s.commercial.ngrAct))],['Delivery',metricFormat('delivery',metricValue(s,'delivery'))]];
+ let html=moduleHero('Module 04 · board-ready view','Executive summary','A concise, printable decision surface. It presents named evidence and a recommended action—never an overall partnership score.',`<button class="btn btn-ghost" onclick="window.print()">Print / save PDF</button>`);
+ html+=`<div class="metric-strip">${metrics.map(x=>metricCard(x[0],x[1],`As at ${fmtDate(s.date)}`)).join('')}</div><div class="summary-grid"><div><section class="panel"><div class="panel-head"><h3>Decision brief</h3><span class="lil">${status}</span></div><div class="panel-body"><h4 style="margin:0 0 8px;font-size:12px;text-transform:uppercase;color:var(--good)">Key achievements</h4><ul class="summary-list">${f.highlights.map(x=>`<li>✓ ${esc(x)}<span class="evidence">Source: assessment or verified delivery</span></li>`).join('')}</ul><h4 style="margin:18px 0 8px;font-size:12px;text-transform:uppercase;color:var(--bad)">Risks</h4><ul class="summary-list">${f.risks.map(x=>`<li>⚠ ${esc(x)}<span class="evidence">Owner: partnership lead</span></li>`).join('')}</ul><h4 style="margin:18px 0 8px;font-size:12px;text-transform:uppercase;color:var(--accent)">Opportunities</h4><ul class="summary-list">${f.opps.map(x=>`<li>• ${esc(x)}</li>`).join('')}</ul></div></section></div><aside><div class="decision-card"><div style="font-size:11px;text-transform:uppercase;font-weight:700;letter-spacing:.06em">Recommended action</div><div class="decision">${label}</div><div style="font-size:12.5px;color:var(--ink-soft)">${s.verdict?esc(s.verdict):'Add a verdict to document the decision rationale.'}</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px">${CALLS.map(x=>`<button class="chip ${s.call===x?'on':''}" onclick="setCall('${x}')">${x==='renegotiate'?'Revised terms':x[0].toUpperCase()+x.slice(1)}</button>`).join('')}</div></div><section class="panel" style="margin-top:18px"><div class="panel-head"><h3>Timeline</h3></div><div class="panel-body"><div class="timeline"><div>Next review<small>${fmtDate(s.date)} · partnership owner</small></div><div>Negotiation window<small>Confirm with commercial lead</small></div><div>Contract expiry<small>${fmtDate(p.termEnd) || 'Not recorded'}</small></div><div>Activation planning<small>Before next review period</small></div></div></div></section></aside></div>`;return html;}
+function renderAIInsights(p,s){const f=executiveFacts(s),m=f.m,c=f.c;const change=m.del!==null&&m.guar!==null?`Audience delivery is ${Math.round((m.del-m.guar)/m.guar*100)}% against the current guarantee.`:'Audience delivery is not yet complete enough to compare with the guarantee.';const commercial=n(c.ngrAct)!==null?`Attributable NGR is ${money(c.ngrAct)}${n(c.ngrExp)!==null?` against ${money(c.ngrExp)} expected`:''}.`:'No attributable NGR has been recorded in this review point.';let html=moduleHero('Module 05 · reviewer-assisted drafting','AI partnership insights','Evidence-grounded drafts to help reviewers prepare a summary, risks and negotiation points. Review and edit before sharing.',`<button class="btn btn-primary" onclick="editAssessment()">Review source evidence</button>`);html+=`<section class="panel"><div class="panel-head"><h3>Draft executive summary</h3><span class="lil">Human review required</span></div><div class="panel-body"><div class="insight">${esc(p.name)} is currently marked ${s.status==='good'?'on track':s.status==='warn'?'for review':'with insufficient or mixed evidence'}. ${change} ${commercial} The current recommended action is ${s.call?esc(s.call):'not set'}.</div><div class="grid2"><div><h4 style="margin:0 0 8px">Strengths</h4><ul class="summary-list">${f.highlights.map(x=>`<li>✓ ${esc(x)}</li>`).join('')}</ul><h4 style="margin:18px 0 8px">Risks to validate</h4><ul class="summary-list">${f.risks.map(x=>`<li>⚠ ${esc(x)}</li>`).join('')}</ul></div><div><h4 style="margin:0 0 8px">Opportunities</h4><ul class="summary-list">${f.opps.map(x=>`<li>• ${esc(x)}</li>`).join('')}</ul><h4 style="margin:18px 0 8px">Negotiation prompts</h4><ul class="summary-list"><li>Confirm inventory and delivery commitments for the next period.</li><li>Use the metric-level benchmark view to identify the specific terms to improve.</li><li>Replace unused assets with measurable digital or content inventory where appropriate.</li></ul></div></div><div class="ai-note">Grounding: this draft uses only the selected snapshot’s commercial results, media delivery, assessment and verdict. It does not infer missing values or send anything automatically.</div></div></section>`;return html;}
+
 /* ============================================================ ACTIONS (continued) ============================================================ */
 Object.assign(window,{sendMagicLink,signOut,editPartnerAccess,publishPartner});
-function go(s){ view.screen=s; view.sid=null; render(); }
-function openDetail(pid){ view.screen='detail'; view.pid=pid; view.sid=null; render(); }
+function go(s){ view.screen=s; view.sid=null; view.module='overview'; render(); }
+function openDetail(pid){ view.screen='detail'; view.pid=pid; view.sid=null; view.module='overview'; render(); }
 function setFilter(f){ view.filter=f; render(); }
 function pickSnap(sid){ view.sid=sid; render(); }
 async function setStatus(v){ const s=curSnap(); s.status=(s.status===v?'':v); await persist(); render(); }
@@ -1262,7 +1361,7 @@ function importData(input){ const f=input.files[0]; if(!f)return; const r=new Fi
 async function resetData(){ if(!confirm('Reset to seeded data? Current entries will be lost.'))return; STATE=seed(); await persist(); closeModal(); go('board'); toast('Reset'); }
 
 document.getElementById('btnData').onclick=dataMenu;
-Object.assign(window,{editPartnership,go,openDetail,setFilter,pickSnap,setStatus,setCall,saveVerdict,savePartnership,deletePartnership,addSnapshot,saveSnapshot,deleteSnapshot,editCommercial,saveCommercial,editValueAdd,saveValueAdd,editComponent,compModeFields,saveComponent,delComponent,editAssessment,saveAssessment,exportData,importData,resetData,closeModal,setMode,setPartner,openWeekForm,saveWeek,deleteWeek,verifyWeek});
+Object.assign(window,{editPartnership,go,openDetail,setFilter,pickSnap,setStatus,setCall,saveVerdict,savePartnership,deletePartnership,addSnapshot,saveSnapshot,deleteSnapshot,editCommercial,saveCommercial,editValueAdd,saveValueAdd,editComponent,compModeFields,saveComponent,delComponent,editAssessment,saveAssessment,exportData,importData,resetData,closeModal,setMode,setPartner,openWeekForm,saveWeek,deleteWeek,verifyWeek,setModule,setBenchmarkBasis,editCosts,addCostRow,saveCosts});
 
 (async function boot(){
   if(SB){
