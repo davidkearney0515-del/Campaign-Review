@@ -592,28 +592,85 @@ const MONTHLY = {
         Apr:{yt:421114,  soc:314809,  ac:34957},
         May:{yt:1230400, soc:1436162, ac:44552},
         Jun:{yt:951923,  soc:2588082, ac:53774}
+      }},
+      'Take the Points':{ baselineUntil:null, data:{
+        Mar:{yt:937,   soc:0,     ac:0},
+        Apr:{yt:10823, soc:17411, ac:0},
+        May:{yt:12220, soc:81108, ac:0},
+        Jun:{yt:7850,  soc:11047, ac:0}
       }}
     }
   }
 };
+/* July audience composition (from Fanatics July Audience Report, accurate 24/7/26) — backs the Audience lever */
+const COMPOSITION = {
+  'Kenty Blitz':{ male:95.7, ageTop:'35–54 (46%)', au:72.8, device:'TV 43% · Mobile 40%' },
+  'Rugby League Insider':{ male:96.6, ageTop:'25–44 (47%)', au:71.9, device:'Mobile 45% · TV 38%' },
+  'Take the Points':{ male:65.4, ageTop:'55+ (66%)', au:90.7, device:'TV 38% · Mobile 34%' }
+};
+/* Live data comes from verified pr_week submissions only — a month with no verified
+   submission for a show shows as a gap ("–"), it never falls back to any placeholder. */
+function platformBucket(name){ if(name==='YouTube')return 'yt'; if(name==='Acast')return 'ac'; return 'soc'; }
+function parseMonthKey(lbl){ const d=new Date(lbl); const t=d.getTime(); return isNaN(t)?null:t; }
+function sortMonthLabels(labels){ return labels.slice().sort((a,b)=>{ const da=parseMonthKey(a),db=parseMonthKey(b); if(da!==null&&db!==null)return da-db; return a<b?-1:(a>b?1:0); }); }
+function liveShowMonthly(comp){
+  const data={}, tiktok={};
+  weeksOf(comp).filter(w=>w.status==='verified').forEach(w=>{
+    const mo=w.label; if(!mo) return;
+    const bucket=data[mo]||(data[mo]={yt:0,soc:0,ac:0});
+    Object.entries(w.audience||{}).forEach(([plat,v])=>{
+      const val=+v||0; bucket[platformBucket(plat)]+=val;
+      if(plat==='TikTok') tiktok[mo]=(tiktok[mo]||0)+val;
+    });
+  });
+  return {data,tiktok};
+}
 function monthlyGraphPanel(p){
-  const M=MONTHLY[p.name]; if(!M) return '';
+  const s=currentSnap(p);
+  const staticM=MONTHLY[p.name];
+  const staticMonths=staticM?staticM.months.slice():[];
+  const staticShows=staticM?staticM.shows:{};
+  const staticTiktok=staticM?staticM.tiktok:{};
+
+  /* merge: static months are locked history and are never overwritten by a live submission
+     that happens to reuse the same label; live submissions only ever add new months. */
+  const shows={};
+  Object.keys(staticShows).forEach(nm=>{ shows[nm]={ baselineUntil:staticShows[nm].baselineUntil, data:{...staticShows[nm].data} }; });
+  const liveTiktok={};
+  (s.media.components||[]).filter(c=>c.mode==='audience'&&(c.platforms||[]).length).forEach(c=>{
+    const {data:liveData,tiktok:liveTk}=liveShowMonthly(c);
+    const newMonths=Object.keys(liveData).filter(mo=>!staticMonths.includes(mo));
+    if(newMonths.length){ if(!shows[c.name])shows[c.name]={baselineUntil:null,data:{}}; newMonths.forEach(mo=>{ shows[c.name].data[mo]=liveData[mo]; }); }
+    else if(!shows[c.name] && Object.keys(liveData).length){ shows[c.name]={baselineUntil:null,data:{}}; }
+    Object.entries(liveTk).forEach(([mo,v])=>{ if(!staticMonths.includes(mo)) liveTiktok[mo]=(liveTiktok[mo]||0)+v; });
+  });
+  const showNames=Object.keys(shows);
+  if(!showNames.length) return '';
+
+  const liveMonthSet=new Set();
+  showNames.forEach(nm=>Object.keys(shows[nm].data).forEach(mo=>{ if(!staticMonths.includes(mo)) liveMonthSet.add(mo); }));
+  const months=[...staticMonths, ...sortMonthLabels([...liveMonthSet])];
+  const tiktok={...staticTiktok, ...liveTiktok};
+  const M={months, shows, tiktok};
+
   const metric=view.graphMetric||'total';
   const METRICS=[['total','Total'],['yt','YouTube'],['soc','Social (FB+IG)'],['ac','Acast']];
   const val=d=> !d?null:(metric==='total'?(d.yt+d.soc+d.ac):d[metric]);
-  const showNames=Object.keys(M.shows);
-  const palette=['#2F6BE0','#7A5AF8'];
+  const palette=['#2F6BE0','#7A5AF8','#EC7B4E','#1D9A6C'];
   const colors={}; showNames.forEach((s,i)=>colors[s]=palette[i%palette.length]);
-  let max=0; M.months.forEach(mo=>showNames.forEach(s=>{const v=val(M.shows[s].data[mo]); if(v!==null&&v>max)max=v;}));
+  if(!view.graphShows) view.graphShows=['Kenty Blitz'];
+  const active=showNames.filter(s=>view.graphShows.includes(s));
+  const A=active.length?active:showNames;
+  let max=0; M.months.forEach(mo=>A.forEach(s=>{const v=val(M.shows[s].data[mo]); if(v!==null&&v>max)max=v;}));
   max=max*1.14||1;
   const W=640,H=290,top=42,base=238,x0=34,plotW=W-46;
-  const groupW=plotW/M.months.length, barW=Math.min(30,(groupW-26)/showNames.length);
+  const groupW=plotW/M.months.length, barW=Math.min(34,(groupW-26)/A.length);
   let bars='';
   M.months.forEach((mo,gi)=>{
     const gx=x0+gi*groupW;
-    showNames.forEach((s,si)=>{
+    A.forEach((s,si)=>{
       const sh=M.shows[s], d=sh.data[mo], v=val(d);
-      const spread=showNames.length*barW+(showNames.length-1)*6;
+      const spread=A.length*barW+(A.length-1)*6;
       const bx=gx+groupW/2-spread/2+si*(barW+6);
       if(v===null){ bars+=`<text x="${(bx+barW/2).toFixed(1)}" y="${base-4}" text-anchor="middle" font-size="10" fill="#B8BDC7">–</text>`; return; }
       const h=(v/max)*(base-top);
@@ -624,18 +681,106 @@ function monthlyGraphPanel(p){
     });
     bars+=`<text x="${(gx+groupW/2).toFixed(1)}" y="${base+16}" text-anchor="middle" font-size="11" fill="#5A616E" font-weight="600">${mo}</text>`;
   });
-  const legend=showNames.map(s=>`<span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;margin-right:14px"><span style="width:10px;height:10px;border-radius:2px;background:${colors[s]};display:inline-block"></span>${esc(s)}</span>`).join('')
-    +`<span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--ink-faint)"><span style="width:10px;height:10px;border-radius:2px;background:${palette[1]};opacity:.35;border:1px dashed ${palette[1]};display:inline-block"></span>pre-sponsorship (not counted)</span>`;
+  const showChips=showNames.map(s=>`<label style="display:inline-flex;align-items:center;gap:6px;font-size:12.5px;margin-right:14px;cursor:pointer"><input type="checkbox" ${view.graphShows.includes(s)?'checked':''} onchange="toggleGraphShow('${s}')" style="accent-color:${colors[s]};cursor:pointer"><span style="width:10px;height:10px;border-radius:2px;background:${colors[s]};display:inline-block"></span>${esc(s)}</label>`).join('');
+  const baseNote = A.some(s=>M.shows[s].baselineUntil) ? `<span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--ink-faint)"><span style="width:10px;height:10px;border-radius:2px;background:${palette[1]};opacity:.35;border:1px dashed ${palette[1]};display:inline-block"></span>pre-sponsorship (not counted)</span>` : '';
   const btns=METRICS.map(([k,l])=>`<button class="chip ${metric===k?'on':''}" onclick="setGraphMetric('${k}')">${l}</button>`).join('');
+  // month-over-month (last two months present), for selected shows + metric
+  const withData=M.months.filter(mo=>A.some(s=>M.shows[s].data[mo]));
+  const last=withData[withData.length-1], prev=withData[withData.length-2];
+  let mom='';
+  if(last&&prev){
+    const cells=A.map(s=>{ const a=val(M.shows[s].data[last]), b=val(M.shows[s].data[prev]);
+      if(a==null||b==null||b===0) return '';
+      const p=Math.round((a-b)/b*100);
+      return `<span style="margin-right:16px"><span style="width:9px;height:9px;border-radius:2px;background:${colors[s]};display:inline-block;margin-right:5px"></span>${esc(s)} <b style="font-family:'JetBrains Mono',monospace;color:var(--${p>=0?'good':'bad'})">${p>0?'+':''}${p}%</b></span>`;
+    }).filter(Boolean).join('');
+    mom=`<div style="margin-top:6px;font-size:12px;color:var(--ink-soft)"><span style="color:var(--ink-faint);text-transform:uppercase;letter-spacing:.04em;font-size:10.5px;font-weight:600;margin-right:10px">MoM · ${last} vs ${prev}</span>${cells}</div>`;
+  }
+  // July audience composition — backs the Audience lever (follows the show filter)
+  let comp='';
+  const compShows=A.filter(s=>COMPOSITION[s]);
+  if(compShows.length){
+    comp=`<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line-soft)">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint);font-weight:700;margin-bottom:8px">Audience composition · July — backs the Audience lever</div>
+      <table class="dtable"><thead><tr><th>Show</th><th>Male</th><th>Core age</th><th>Australia</th><th>Lead device</th></tr></thead><tbody>
+      ${compShows.map(s=>{const d=COMPOSITION[s];return `<tr><td>${esc(s)}</td><td class="num">${d.male}%</td><td>${esc(d.ageTop)}</td><td class="num">${d.au}%</td><td>${esc(d.device)}</td></tr>`;}).join('')}
+      </tbody></table></div>`;
+  }
   return `<div class="panel"><div class="panel-head"><h3>Monthly performance</h3><div class="filters">${btns}</div></div><div class="panel-body">
-    <div style="margin-bottom:10px">${legend}</div>
+    <div style="margin-bottom:12px;display:flex;flex-wrap:wrap;align-items:center;gap:6px 0">${showChips}${baseNote}</div>
     <svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:100%;display:block"><line x1="${x0}" y1="${base}" x2="${W-10}" y2="${base}" stroke="#E1E4E9"/>${bars}</svg>
-    <div style="margin-top:8px;font-size:12px;color:var(--ink-soft);border-top:1px solid var(--line-soft);padding-top:10px"><b>TikTok — Fanatics channel total</b> (channel-wide, not show-attributable): ${M.months.filter(mo=>M.tiktok[mo]!=null).map(mo=>mo+' '+aud(M.tiktok[mo])).join(' · ')}.</div>
-    <div style="margin-top:6px;font-size:11.5px;color:var(--ink-faint)">RLI Mar–May greyed as pre-sponsorship baseline (delivery clock from June). Kenty Blitz includes Ask Kenty. Figures from Fanatics' reissued per-platform reports (Mar–Jun 2026).</div>
+    ${mom}
+    ${Object.keys(M.tiktok).length?`<div style="margin-top:8px;font-size:12px;color:var(--ink-soft);border-top:1px solid var(--line-soft);padding-top:10px"><b>TikTok — Fanatics channel total</b> (channel-wide, not show-attributable): ${M.months.filter(mo=>M.tiktok[mo]!=null).map(mo=>mo+' '+aud(M.tiktok[mo])).join(' · ')}.</div>`:''}
+    <div style="margin-top:6px;font-size:11.5px;color:var(--ink-faint)">${staticMonths.length?`RLI Mar–May greyed as pre-sponsorship baseline (delivery clock from June). Kenty Blitz includes Ask Kenty. ${staticMonths.join('–')} figures from Fanatics' reissued per-platform reports.`:''} ${liveMonthSet.size?`${sortMonthLabels([...liveMonthSet]).join(', ')} from partner-submitted monthly reports, counted once PointsBet verifies them.`:''}</div>
+    ${comp}
   </div></div>`;
 }
+function toggleGraphShow(nm){ if(!view.graphShows)view.graphShows=['Kenty Blitz']; const i=view.graphShows.indexOf(nm); if(i>=0){ if(view.graphShows.length>1) view.graphShows.splice(i,1); } else view.graphShows.push(nm); render(); }
+Object.assign(window,{toggleGraphShow});
 function setGraphMetric(m){ view.graphMetric=m; render(); }
 Object.assign(window,{setGraphMetric});
+
+/* ===== Entitlement delivery (per-round schedule; monthly target = per-round × rounds that month) =====
+   Schedule now comes straight off each component's own `assets` array — the same list partners see and
+   submit against in "Log a month" — instead of a separate hand-maintained table, so the two can't drift.
+   Delivered figures come only from verified pr_week rows; nothing here is hand-typed or sample data. */
+const ENT = {
+  months:['Mar','Apr','May','Jun'],       // locked NRL-round history, pre-dates the live submission flow
+  rounds:{Mar:4, Apr:4, May:5, Jun:4}     // rounds per month — real schedule fact, owner-editable per month
+};
+function entitlementPanel(p){
+  const s=currentSnap(p);
+  const comps=(s.media.components||[]).filter(c=>(c.assets||[]).length);
+  if(!comps.length) return '';
+
+  const liveMonthSet=new Set();
+  comps.forEach(c=>weeksOf(c).filter(w=>w.status==='verified').forEach(w=>{ if(w.label && !ENT.months.includes(w.label)) liveMonthSet.add(w.label); }));
+  const months=[...ENT.months, ...sortMonthLabels([...liveMonthSet])];
+
+  if(!view.entMonth || !months.includes(view.entMonth)) view.entMonth=months[months.length-1];
+  const mo=view.entMonth, rounds=ENT.rounds[mo]||0;
+  const monthChips=months.map(m=>`<button class="chip ${m===mo?'on':''}" onclick="setEntMonth('${m}')">${m}</button>`).join('');
+  const inp=(val,ph,handler,w)=>`<input type="number" value="${val}" placeholder="${ph||''}" onchange="${handler}" style="width:${w}px;text-align:right;border:1px solid var(--line);border-radius:6px;padding:3px 6px;font-family:'JetBrains Mono',monospace;font-size:12px">`;
+  let body='';
+  comps.forEach(c=>{
+    let onT=0,scored=0;
+    const verifiedThisMonth=weeksOf(c).filter(w=>w.status==='verified'&&w.label===mo);
+    const rows=c.assets.map(e=>{
+      const target=(+e.perWeek||0)*rounds;
+      const has=verifiedThisMonth.some(w=>(w.assets||{})[e.id]!==undefined&&(w.assets||{})[e.id]!==null&&(w.assets||{})[e.id]!=='');
+      const dv=has?verifiedThisMonth.reduce((a,w)=>a+(+((w.assets||{})[e.id])||0),0):null;
+      const pct=(has&&target>0)?Math.round(dv/target*100):null;
+      if(has&&target>0){scored++; if(pct>=100)onT++;}
+      const cls=pct===null?'':(pct>=100?'good':(pct>=85?'warn':'bad'));
+      const status=pct===null?'<span style="color:var(--ink-faint)">—</span>':`<b style="font-family:'JetBrains Mono',monospace;color:var(--${cls})">${pct}%</b>`;
+      return `<tr><td>${esc(e.name)}</td>
+        <td class="num">${inp(e.perWeek,'',`setAssetPerWeek('${c.id}','${e.id}',this.value)`,42)}</td>
+        <td class="num">${target}</td>
+        <td class="num">${has?dv:'<span style="color:var(--ink-faint)">—</span>'}</td>
+        <td class="num">${status}</td></tr>`;
+    }).join('');
+    const summ=scored?`${onT}/${scored} on target`:(verifiedThisMonth.length?'submitted, none scoreable':'no verified submission');
+    const summCls=scored&&onT===scored?'var(--good)':(scored?'var(--warn)':'var(--ink-faint)');
+    body+=`<div style="margin-top:16px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-weight:600;font-size:13.5px">${esc(c.name)}</span><span style="font-size:12px;color:${summCls};font-weight:600">${summ}</span></div>
+      <table class="dtable"><thead><tr><th>Entitlement</th><th class="num">/round</th><th class="num">Target</th><th class="num">Delivered</th><th class="num">Fulfil</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  });
+  return `<div class="panel"><div class="panel-head"><h3>Entitlement delivery</h3><div class="filters">${monthChips}</div></div><div class="panel-body">
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px">
+      <span style="color:var(--ink-faint);text-transform:uppercase;letter-spacing:.04em;font-size:11px;font-weight:600">NRL rounds in ${mo}</span>
+      ${inp(rounds,'',`setEntRounds('${mo}',this.value)`,52)}
+      <span style="color:var(--ink-faint);font-size:12px">target = per-round × rounds · edit /round when the contract changes · override rounds for bye/Origin months</span>
+    </div>
+    ${body}
+    <div style="margin-top:14px;font-size:11.5px;color:var(--ink-faint)">Delivered figures are drawn only from partner submissions PointsBet has verified — pending submissions aren't counted until reviewed. Shows with no assets schedule (e.g. Take the Points) don't appear here.</div>
+  </div></div>`;
+}
+function setEntMonth(m){ view.entMonth=m; render(); }
+function setEntRounds(m,v){ ENT.rounds[m]=+v||0; render(); }
+async function setAssetPerWeek(cid,id,v){
+  const s=curSnap(); const c=(s.media.components||[]).find(x=>x.id===cid); const e=c&&(c.assets||[]).find(x=>x.id===id);
+  if(!e)return; e.perWeek=+v||0; await persist(); render();
+}
+Object.assign(window,{setEntMonth,setEntRounds,setAssetPerWeek});
 
 function renderDetail(){
   const p=STATE.partnerships.find(x=>x.id===view.pid);
@@ -693,6 +838,9 @@ function renderDetail(){
 
   /* monthly performance graph (additive; renders when monthly data exists for this partnership) */
   html+=monthlyGraphPanel(p);
+
+  /* entitlement delivery (additive; renders when a schedule exists for this partnership) */
+  html+=entitlementPanel(p);
 
   /* assessment */
   const a=s.assessment;
@@ -788,14 +936,13 @@ function renderPartner(){
   const p=STATE.partnerships.find(x=>x.id===view.partnerPid)||STATE.partnerships[0];
   const s=latestSnap(p);
   const comps=(s.media.components||[]);
-  // preview-only partner switcher (production: auth decides who this is)
   const picker=`<select class="sel" style="width:auto;background:#252a33;color:#fff;border-color:#333a45" onchange="setPartner(this.value)">${STATE.partnerships.map(x=>`<option value="${x.id}" ${x.id===p.id?'selected':''}>${esc(x.name||'Your shows')}</option>`).join('')}</select>`;
   const eyebrow = SB ? `PointsBet partner portal` : `PointsBet partner portal · preview — simulating ${picker}`;
-  const title = (p.name&&p.name.trim()) ? esc(p.name)+' — weekly delivery' : 'Weekly delivery';
+  const title = (p.name&&p.name.trim()) ? esc(p.name)+' — monthly delivery' : 'Monthly delivery';
   let html=`<div class="pbanner">
     <div class="pb-eyebrow">${eyebrow}</div>
     <h1>${title}</h1>
-    <p>Log each week's audience by platform and the assets delivered by type, for every show. PointsBet reviews and verifies each submission.</p>
+    <p>Each month, log the audience by platform and the entitlements delivered, for every show. PointsBet reviews and verifies each submission.</p>
     <div class="pb-note"><i></i>Submissions land as “pending” until PointsBet verifies them.</div>
   </div>`;
 
@@ -806,13 +953,12 @@ function renderPartner(){
     const total=deliveredFromWeeks(c);
     html+=`<div class="pshow"><div class="pshow-head">
       <span class="ps-name">${esc(c.name)}</span>
-      <span class="ps-sum">${c.mode==='audience'?`<b>${total!==null?aud(total):'0'}</b>audience across ${wl} week${wl!==1?'s':''} logged`:`<b>${wl}</b>week${wl!==1?'s':''} logged`}</span>
+      <span class="ps-sum">${c.mode==='audience'?`<b>${total!==null?aud(total):'0'}</b>audience across ${wl} month${wl!==1?'s':''} logged`:`<b>${wl}</b>month${wl!==1?'s':''} logged`}</span>
     </div><div class="pshow-body">`;
-    // weeks list
     if(wl){ html+=`<div class="wk-list">`+weeksOf(c).map(w=>`<div class="wk-item"><div class="wk-l"><span class="wk-status wk-${w.status||'pending'}">${w.status||'pending'}</span><span>${esc(w.label)}</span></div>
-        <div style="display:flex;align-items:center;gap:12px">${c.mode==='audience'?`<span class="wk-aud">${aud(weekAudTotal(w))}</span>`:''}${(w.status!=='verified')?`<button class="linkbtn" onclick="openWeekForm('${c.id}','${w.id}')">Edit</button>`:'<span style="font-size:11px;color:var(--ink-faint)">locked</span>'}</div></div>`).join('')+`</div>`;
-    } else html+=`<div class="wk-empty">No weeks logged yet — add your first week below.</div>`;
-    html+=`<button class="btn btn-primary" onclick="openWeekForm('${c.id}')">＋ Log a week</button>`;
+        <div style="display:flex;align-items:center;gap:12px">${c.mode==='audience'?`<span class="wk-aud">${aud(weekAudTotal(w))}</span>`:''}${(w.status!=='verified')?`<button class="linkbtn" onclick="openWeekForm('${c.id}','${w.id}')">Edit</button>`:'<span style="font-size:11px;color:var(--ink-faint)">verified · locked</span>'}</div></div>`).join('')+`</div>`;
+    } else html+=`<div class="wk-empty">No months logged yet — add your first month below.</div>`;
+    html+=`<button class="btn btn-primary" onclick="openWeekForm('${c.id}')">＋ Log a month</button>`;
     html+=`</div></div>`;
   });
   document.getElementById('app').innerHTML=html;
@@ -831,24 +977,24 @@ function openWeekForm(cid,wid){
   }
   let assetFields='';
   if(assets.length){
-    assetFields=`<div class="wk-sub">Assets delivered by type</div><div class="wk-grid">`+assets.map(as=>`<div class="wk-fld"><label>${esc(as.name)} <span class="tgt">· ${as.perWeek}/wk</span></label><input type="number" id="wk_${as.id}" value="${w&&w.assets?(w.assets[as.id]??''):''}" placeholder="${as.perWeek}"></div>`).join('')+`</div>`;
+    assetFields=`<div class="wk-sub">Entitlements delivered this month</div><div class="wk-grid">`+assets.map(as=>`<div class="wk-fld"><label>${esc(as.name)} <span class="tgt">· ${as.perWeek}/round</span></label><input type="number" id="wk_${as.id}" value="${w&&w.assets?(w.assets[as.id]??''):''}" placeholder="0"></div>`).join('')+`</div>`;
   } else if(c.mode==='fulfilment'){
-    assetFields=`<div class="wk-sub">Delivered this week</div><div class="wk-grid"><div class="wk-fld"><label>${esc(c.unit||'units')} delivered</label><input type="number" id="wk_qty" value="${w&&w.assets?(w.assets.qty??''):''}"></div></div>`;
+    assetFields=`<div class="wk-sub">Delivered this month</div><div class="wk-grid"><div class="wk-fld"><label>${esc(c.unit||'units')} delivered</label><input type="number" id="wk_qty" value="${w&&w.assets?(w.assets.qty??''):''}"></div></div>`;
   }
-  mount(scrim(`<div class="modal-head"><h3>${wid?'Edit week':'Log a week'} — ${esc(c.name)}</h3><button class="x" onclick="closeModal()">×</button></div>
+  mount(scrim(`<div class="modal-head"><h3>${wid?'Edit month':'Log a month'} — ${esc(c.name)}</h3><button class="x" onclick="closeModal()">×</button></div>
     <div class="modal-body">
-      <div class="frow"><div class="field"><label>Week label</label><input class="inp" id="w_label" value="${w?esc(w.label):''}" placeholder="e.g. Round 14"></div>
+      <div class="frow"><div class="field"><label>Month</label><input class="inp" id="w_label" value="${w?esc(w.label):''}" placeholder="e.g. Jul 2026"></div>
         <div class="field"><label>Source note (optional)</label><input class="inp" id="w_note" value="${w?esc(w.note||''):''}" placeholder="e.g. YouTube Analytics"></div></div>
       ${audFields}${assetFields}
     </div>
-    <div class="modal-foot"><div>${wid?`<button class="btn btn-danger" onclick="deleteWeek('${cid}','${wid}')">Delete week</button>`:''}</div>
+    <div class="modal-foot"><div>${wid?`<button class="btn btn-danger" onclick="deleteWeek('${cid}','${wid}')">Delete month</button>`:''}</div>
       <div style="display:flex;gap:8px"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveWeek('${cid}','${wid||''}')">Submit</button></div></div>`,true));
 }
 function slug(s){ return s.replace(/[^a-zA-Z0-9]/g,'_'); }
 async function saveWeek(cid,wid){
   const s=latestSnap(STATE.partnerships.find(x=>x.id===view.partnerPid));
   const c=s.media.components.find(x=>x.id===cid);
-  const label=document.getElementById('w_label').value.trim(); if(!label){toast('Give the week a label');return;}
+  const label=document.getElementById('w_label').value.trim(); if(!label){toast('Give the month a label, e.g. Jul 2026');return;}
   const note=document.getElementById('w_note').value.trim();
   const audience={}; (c.platforms||[]).forEach(pl=>{ const v=document.getElementById('wa_'+slug(pl)); if(v&&v.value!=='')audience[pl]=+v.value; });
   const assetsObj={};
@@ -858,7 +1004,7 @@ async function saveWeek(cid,wid){
     try{
       if(wid) await sbUpdateWeek(wid,{label,audience,assets:assetsObj,note});
       else await sbInsertWeek({partnership_id:c.partnership_id||view.partnerPid,component_id:cid,label,audience,assets:assetsObj,note});
-      await refreshPartner(); closeModal(); toast(wid?'Week updated':'Week submitted');
+      await refreshPartner(); closeModal(); toast(wid?'Month updated':'Month submitted');
     }catch(e){ toast('Error: '+e.message); }
     return;
   }
@@ -866,12 +1012,12 @@ async function saveWeek(cid,wid){
   if(wid){ const wk=c.weeks.find(x=>x.id===wid); Object.assign(wk,{label,note,audience,assets:assetsObj,status:'pending'}); }
   else c.weeks.push({id:uid(),label,note,audience,assets:assetsObj,status:'pending',submittedAt:new Date().toISOString().slice(0,10)});
   if(c.mode==='fulfilment') c.deliveredQty=c.weeks.reduce((a,w)=>a+(+((w.assets||{}).qty)||0),0);
-  await persist(); closeModal(); render(); toast(wid?'Week updated':'Week submitted');
+  await persist(); closeModal(); render(); toast(wid?'Month updated':'Month submitted');
 }
 async function deleteWeek(cid,wid){
   const s=latestSnap(STATE.partnerships.find(x=>x.id===view.partnerPid));
   const c=s.media.components.find(x=>x.id===cid);
-  if(!confirm('Delete this week?'))return;
+  if(!confirm('Delete this month?'))return;
   if(SB){ try{ await sbDeleteWeek(wid); await refreshPartner(); closeModal(); toast('Deleted'); }catch(e){ toast('Error: '+e.message); } return; }
   c.weeks=(c.weeks||[]).filter(x=>x.id!==wid);
   if(c.mode==='fulfilment') c.deliveredQty=c.weeks.reduce((a,w)=>a+(+((w.assets||{}).qty)||0),0);
@@ -937,11 +1083,11 @@ function editPartnerAccess(){
   const p=STATE.partnerships.find(x=>x.id===view.pid); const s=currentSnap(p);
   const comps=(s.media.components||[]).filter(c=>c.mode==='audience');
   if(!SB){ mount(scrim(`<div class="modal-head"><h3>Partner access</h3><button class="x" onclick="closeModal()">×</button></div>
-    <div class="modal-body"><p style="font-size:13px;color:var(--ink-soft);margin-top:0">Publishing to a partner works once Supabase is connected (add your anon key and deploy). It will register the partner's login and let them log weekly delivery for these shows — and nothing else:</p>
+    <div class="modal-body"><p style="font-size:13px;color:var(--ink-soft);margin-top:0">Publishing to a partner works once Supabase is connected (add your anon key and deploy). It will register the partner's login and let them log monthly delivery for these shows — and nothing else:</p>
     <ul style="font-size:13px">${comps.map(c=>`<li>${esc(c.name)}</li>`).join('')||'<li>No audience shows in this review point</li>'}</ul></div>
     <div class="modal-foot"><div></div><button class="btn btn-primary" onclick="closeModal()">OK</button></div>`)); return; }
   mount(scrim(`<div class="modal-head"><h3>Partner access — ${esc(p.name)}</h3><button class="x" onclick="closeModal()">×</button></div>
-    <div class="modal-body"><p style="font-size:13px;color:var(--ink-soft);margin-top:0">Enter the partner's email. They'll be able to sign in and log weekly delivery for the shows below — and can never see targets, CPM, your assessment, or any other partner.</p>
+    <div class="modal-body"><p style="font-size:13px;color:var(--ink-soft);margin-top:0">Enter the partner's email. They'll be able to sign in and log monthly delivery for the shows below — and can never see targets, CPM, your assessment, or any other partner.</p>
       <div class="field"><label>Partner email</label><input class="inp" id="pa_email" type="email" placeholder="delivery@fanatics.com"></div>
       <label style="font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);font-weight:600">Shows they'll log (${comps.length})</label>
       <ul style="font-size:13px;margin-top:8px">${comps.map(c=>`<li>${esc(c.name)} <span style="color:var(--ink-faint)">· ${(c.platforms||[]).length} platforms · ${(c.assets||[]).length} assets</span></li>`).join('')||'<li>No audience shows in this review point</li>'}</ul>
