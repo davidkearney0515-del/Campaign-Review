@@ -241,12 +241,18 @@
   .wkform{background:#fafbfc;border:1px solid var(--line);border-radius:var(--radius-sm);padding:16px}
   .wkform h5{font-family:'Space Grotesk';font-size:13px;margin:0 0 12px;font-weight:600}
   .wk-sub{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint);font-weight:700;margin:14px 0 8px}
+  .wk-hint{font-size:11.5px;color:var(--ink-faint);margin:-4px 0 10px;line-height:1.4}
   .wk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
-  .wk-fld label{display:block;font-size:11.5px;color:var(--ink-soft);font-weight:500;margin-bottom:4px}
+  .wk-fld{display:flex;flex-direction:column}
+  .wk-fld label{display:block;font-size:11.5px;color:var(--ink-soft);font-weight:500;margin-bottom:4px;min-height:2.7em;line-height:1.35}
   .wk-fld label b{color:var(--ink);font-weight:600}
   .wk-fld .tgt{color:var(--ink-faint);font-size:11px;font-weight:500}
-  .wk-fld input{width:100%;border:1px solid var(--line);border-radius:7px;padding:7px 9px;font-size:13px}
+  .wk-fld input[type=number]{width:100%;border:1px solid var(--line);border-radius:7px;padding:7px 9px;font-size:13px}
   .wk-fld input:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:var(--accent)}
+  .wk-clip{margin-top:7px}
+  .wk-clip a{display:block;font-size:11px;color:var(--accent);margin-bottom:5px;text-decoration:none}
+  .wk-clip a:hover{text-decoration:underline}
+  .wk-clip input[type=file]{width:100%;font-size:10.5px;color:var(--ink-faint);border:1px dashed var(--line);border-radius:7px;padding:6px 7px;background:transparent}
   .asset-fulfil{font-size:11px;color:var(--ink-soft);margin-top:3px}
   .asset-fulfil.ok{color:var(--good)} .asset-fulfil.under{color:var(--warn)}
 
@@ -258,6 +264,11 @@
   .wklog th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-faint);font-weight:600;padding:4px 6px}
   .wklog td{padding:5px 6px;border-top:1px solid var(--line-soft)}
   .wklog td.num{font-family:'JetBrains Mono';text-align:right}
+  .clip-toggle summary{cursor:pointer;color:var(--accent);font-size:11px;font-weight:600;list-style:none}
+  .clip-toggle summary::-webkit-details-marker{display:none}
+  .clip-toggle .clip-list{margin-top:5px}
+  .clip-toggle .clip-list a{display:block;font-size:11px;color:var(--accent);text-decoration:none;margin-bottom:3px;white-space:nowrap}
+  .clip-toggle .clip-list a:hover{text-decoration:underline}
   .verifybtn{font-size:11px;font-weight:600;color:var(--good);padding:3px 8px;border-radius:5px;border:1px solid var(--good)}
   .verifybtn:hover{background:var(--good-bg)}
   .assetfulfil-strip{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
@@ -333,6 +344,7 @@ let STATE=null;
 let view={screen:'board',pid:null,sid:null,filter:'all',mode:'internal',partnerPid:null,role:null,email:null,module:'overview',benchmarkBasis:'portfolio'};
 const CATEGORIES=['Racing','AFL','NRL','US Sports','Soccer','Other'];
 const CALLS=['renew','evolve','renegotiate','exit'];
+const MONTH_OPTIONS=['Mar 2026','Apr 2026','May 2026','Jun 2026','Jul 2026','Aug 2026','Sep 2026','Oct 2026'];
 const LEVERS=[['growth','Growth'],['audience','Audience'],['channels','Channels & coverage'],['compliance','Compliance']];
 const uid=()=>Math.random().toString(36).slice(2,9);
 
@@ -356,21 +368,60 @@ function curSnap(){ const p=STATE.partnerships.find(x=>x.id===view.pid); return 
 /* weekly log helpers */
 function weeksOf(c){ return c.weeks||[]; }
 function weekAudTotal(w){ return Object.values(w.audience||{}).reduce((a,b)=>a+(+b||0),0); }
-function deliveredFromWeeks(c){ const ws=weeksOf(c); if(!ws.length)return null; return ws.reduce((a,w)=>a+weekAudTotal(w),0); }
+function deliveredFromWeeks(c){ const ws=dedupedVerifiedWeeks(c); if(!ws.length)return null; return ws.reduce((a,w)=>a+weekAudTotal(w),0); }
 function weeksLogged(c){ return weeksOf(c).length; }
+function distinctLabelsLogged(c){ return new Set(weeksOf(c).map(w=>w.label)).size; }
 function assetDeliveredTotal(c,assetId){ return weeksOf(c).reduce((a,w)=>a+(+((w.assets||{})[assetId])||0),0); }
+/* Verified-only variants — used anywhere a figure is meant to agree with the entitlement panel,
+   which counts only submissions PointsBet has verified (pending submissions are excluded).
+   dedupedVerifiedWeeks collapses to ONE row per month label (the most recently submitted wins) —
+   a corrected resubmission for a month replaces the old figure instead of adding on top of it. */
+function dedupedVerifiedWeeks(c){
+  const byLabel={};
+  weeksOf(c).filter(w=>w.status==='verified').forEach(w=>{
+    const existing=byLabel[w.label];
+    if(!existing || (w.submittedAt||'')>=(existing.submittedAt||'')) byLabel[w.label]=w;
+  });
+  return Object.values(byLabel);
+}
+function verifiedWeeksOf(c){ return dedupedVerifiedWeeks(c); }
+function verifiedWeeksLogged(c){ return dedupedVerifiedWeeks(c).length; }
+function verifiedAssetDeliveredTotal(c,assetId){ return dedupedVerifiedWeeks(c).reduce((a,w)=>a+(+((w.assets||{})[assetId])||0),0); }
 function audDelivered(c){ const dw=deliveredFromWeeks(c); return dw!==null?dw:n(c.audienceDelivered); }
 
-/* media roll-up for a snapshot */
-function mediaRoll(s){
+/* Contract term length in whole calendar months (inclusive) — used to spread investment evenly
+   across the term so Delivered CPM can be compared against a matching period of spend. */
+function termMonths(p){
+  if(!p||!p.termStart||!p.termEnd) return null;
+  const a=new Date(p.termStart+'T00:00'), b=new Date(p.termEnd+'T00:00');
+  if(isNaN(a)||isNaN(b)||b<a) return null;
+  return Math.max(1,(b.getFullYear()-a.getFullYear())*12+(b.getMonth()-a.getMonth())+1);
+}
+/* media roll-up for a snapshot.
+   p (optional) enables period-matched Delivered CPM: investment is spread evenly across the
+   contract term, and only the portion covering the months actually verified-and-delivered is
+   compared against the audience delivered in those same months. Without p, delCpm falls back to
+   full-term investment ÷ cumulative delivered (the old, coarser method) — used only where a
+   partnership isn't available to look up term dates from. Proposed CPM is never period-matched:
+   it's the fixed deal economics agreed at signing, and is the benchmark delivered CPM is judged against. */
+function mediaRoll(s,p){
   let inv=0,guar=0,del=0,hasAud=false,hasInv=false;
+  let spendToDate=0,hasSpendToDate=false;
+  const totalMonths=termMonths(p);
   (s.media.components||[]).forEach(c=>{
     const ci=n(c.investment); if(ci!==null){inv+=ci;hasInv=true;}
-    if(c.mode==='audience'){ const g=n(c.audienceGuaranteed),d=audDelivered(c);
-      if(g!==null){guar+=g;hasAud=true;} if(d!==null)del+=d; }
+    if(c.mode==='audience'){
+      const g=n(c.audienceGuaranteed),d=audDelivered(c);
+      if(g!==null){guar+=g;hasAud=true;} if(d!==null)del+=d;
+      if(ci!==null&&totalMonths){ const monthsLogged=Math.min(verifiedWeeksLogged(c),totalMonths);
+        if(monthsLogged>0){ spendToDate+=(ci/totalMonths)*monthsLogged; hasSpendToDate=true; } }
+    }
   });
+  const delCpmPeriod=(hasSpendToDate&&del)?cpm(spendToDate,del):null;
   return { inv:hasInv?inv:null, guar:hasAud?guar:null, del:del||null, hasAud,
-    propCpm:(hasInv&&guar)?cpm(inv,guar):null, delCpm:(hasInv&&del)?cpm(inv,del):null };
+    propCpm:(hasInv&&guar)?cpm(inv,guar):null,
+    delCpm: delCpmPeriod!==null?delCpmPeriod:((hasInv&&del)?cpm(inv,del):null),
+    spendToDate: hasSpendToDate?spendToDate:null, periodMatched: delCpmPeriod!==null };
 }
 /* delivered "value realised" for fixed / fulfilment components (dollar sense) */
 function compRealised(c){
@@ -532,7 +583,7 @@ function barInverse(act,exp){
 function renderBoard(){
   const ps=STATE.partnerships.filter(p=>view.filter==='all'?true:latestSnap(p).status===view.filter);
   let contracted=0,ngrExp=0,ngrAct=0,haveNgr=false,valAdd=0,invTotal=0;
-  STATE.partnerships.forEach(p=>{ const s=latestSnap(p); const m=mediaRoll(s);
+  STATE.partnerships.forEach(p=>{ const s=latestSnap(p); const m=mediaRoll(s,p);
     const inv=m.inv!==null?m.inv:(+p.contractedValue||0); contracted+=inv;
     if(n(s.commercial.ngrExp)!==null){ngrExp+=n(s.commercial.ngrExp);haveNgr=true;} if(n(s.commercial.ngrAct)!==null)ngrAct+=n(s.commercial.ngrAct);
     if(n(s.media.valueAdd)!==null)valAdd+=n(s.media.valueAdd); });
@@ -559,8 +610,7 @@ function pcard(p){
   const s=latestSnap(p); const st=s.status||'none';
   const stLabel={good:'On track',warn:'Watch',bad:'Off track',none:'Not set'}[st];
   const hasNgr=n(s.commercial.ngrExp)!==null||n(s.commercial.ngrAct)!==null;
-  const m=mediaRoll(s);
-  let metricsHtml;
+  const m=mediaRoll(s,p);
   if(hasNgr){
     const ngrP=pctDiff(s.commercial.ngrAct,s.commercial.ngrExp), actP=pctDiff(s.commercial.activesAct,s.commercial.activesExp);
     metricsHtml=`<div class="metrics">
@@ -632,7 +682,7 @@ function parseMonthKey(lbl){ const d=new Date(lbl); const t=d.getTime(); return 
 function sortMonthLabels(labels){ return labels.slice().sort((a,b)=>{ const da=parseMonthKey(a),db=parseMonthKey(b); if(da!==null&&db!==null)return da-db; return a<b?-1:(a>b?1:0); }); }
 function liveShowMonthly(comp){
   const data={}, tiktok={};
-  weeksOf(comp).filter(w=>w.status==='verified').forEach(w=>{
+  dedupedVerifiedWeeks(comp).forEach(w=>{
     const mo=w.label; if(!mo) return;
     const bucket=data[mo]||(data[mo]={yt:0,soc:0,ac:0});
     Object.entries(w.audience||{}).forEach(([plat,v])=>{
@@ -761,11 +811,12 @@ function entitlementPanel(p){
   let body='';
   comps.forEach(c=>{
     let onT=0,scored=0;
-    const verifiedThisMonth=weeksOf(c).filter(w=>w.status==='verified'&&w.label===mo);
+    const monthWeek=dedupedVerifiedWeeks(c).find(w=>w.label===mo);
     const rows=c.assets.map(e=>{
       const target=(+e.perWeek||0)*rounds;
-      const has=verifiedThisMonth.some(w=>(w.assets||{})[e.id]!==undefined&&(w.assets||{})[e.id]!==null&&(w.assets||{})[e.id]!=='');
-      const dv=has?verifiedThisMonth.reduce((a,w)=>a+(+((w.assets||{})[e.id])||0),0):null;
+      const raw=monthWeek?(monthWeek.assets||{})[e.id]:undefined;
+      const has=raw!==undefined&&raw!==null&&raw!=='';
+      const dv=has?(+raw||0):null;
       const pct=(has&&target>0)?Math.round(dv/target*100):null;
       if(has&&target>0){scored++; if(pct>=100)onT++;}
       const cls=pct===null?'':(pct>=100?'good':(pct>=85?'warn':'bad'));
@@ -776,7 +827,7 @@ function entitlementPanel(p){
         <td class="num">${has?dv:'<span style="color:var(--ink-faint)">—</span>'}</td>
         <td class="num">${status}</td></tr>`;
     }).join('');
-    const summ=scored?`${onT}/${scored} on target`:(verifiedThisMonth.length?'submitted, none scoreable':'no verified submission');
+    const summ=scored?`${onT}/${scored} on target`:(monthWeek?'submitted, none scoreable':'no verified submission');
     const summCls=scored&&onT===scored?'var(--good)':(scored?'var(--warn)':'var(--ink-faint)');
     body+=`<div style="margin-top:16px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-weight:600;font-size:13.5px">${esc(c.name)}</span><span style="font-size:12px;color:${summCls};font-weight:600">${summ}</span></div>
       <table class="dtable"><thead><tr><th>Entitlement</th><th class="num">/round</th><th class="num">Target</th><th class="num">Delivered</th><th class="num">Fulfil</th></tr></thead><tbody>${rows}</tbody></table></div>`;
@@ -801,7 +852,7 @@ Object.assign(window,{setEntMonth,setEntRounds,setAssetPerWeek});
 
 function renderDetail(){
   const p=STATE.partnerships.find(x=>x.id===view.pid);
-  const s=currentSnap(p); const m=mediaRoll(s);
+  const s=currentSnap(p); const m=mediaRoll(s,p);
   const invShown=m.inv!==null?m.inv:p.contractedValue;
 
   let html=`<div class="detail-head"><div class="dh-top">
@@ -843,11 +894,16 @@ function renderDetail(){
   const pulseLabel={good:'On track',warn:'Watch',bad:'Off track',none:'Not set'}[s.status||'none'];
   const pulseClass=s.status||'none';
   const callLabel=s.call?({renew:'Renew',evolve:'Evolve',renegotiate:'Revised terms',exit:'Exit'}[s.call]||s.call):'Not set';
-  const delivery=metricValue(s,'delivery');
+  const delivery=metricValue(p,s,'delivery');
+  const cpmColor=(m.delCpm!==null&&m.propCpm!==null)?(m.delCpm<=m.propCpm?'good':'bad'):'';
+  const cpmCell=m.delCpm!==null
+    ?`<div style="grid-column:1/-1"><span>Delivered CPM${m.periodMatched?' · spend to date vs audience to date':''}</span><b style="font-size:15px;color:var(--${cpmColor||'ink'})">$${m.delCpm.toFixed(2)}${m.propCpm!==null?` <span style="font-size:11px;font-weight:600;color:var(--ink-faint)">vs $${m.propCpm.toFixed(2)} proposed</span>`:''}</b></div>`
+    :`<div style="grid-column:1/-1"><span>Delivered CPM</span><b style="color:var(--ink-faint)">Not yet measured${m.propCpm!==null?` — $${m.propCpm.toFixed(2)} proposed`:''}</b></div>`;
   html+=`<div class="panel"><div class="panel-head"><h3>Partnership pulse</h3><span class="lil">Decision context</span></div><div class="panel-body">
     <div class="pulse-status"><span class="statusdot sd-${pulseClass}"><i></i>${pulseLabel}</span><b>${callLabel}</b></div>
     <div class="pulse-grid"><div><span>Investment</span><b>${money(invShown)}</b></div><div><span>Review point</span><b>${esc(s.label)}</b></div>
-      <div><span>Audience</span><b>${m.del!==null?aud(m.del)+' delivered':m.guar!==null?aud(m.guar)+' guaranteed':'—'}</b></div><div><span>Entitlement delivery</span><b>${delivery===null?'Not yet measured':Math.round(delivery)+'%'}</b></div></div>
+      <div><span>Audience</span><b>${m.del!==null?aud(m.del)+' delivered':m.guar!==null?aud(m.guar)+' guaranteed':'—'}</b></div><div><span>Entitlement delivery</span><b>${delivery===null?'Not yet measured':Math.round(delivery)+'%'}</b></div>
+      ${cpmCell}</div>
     <p class="pulse-note">${s.verdict?esc(s.verdict):'Add a verdict to capture the current recommendation and the evidence behind it.'}</p>
     <div class="pulse-actions"><button class="chip" onclick="setModule('executive')">Executive summary</button><button class="chip" onclick="setModule('ai')">Draft insights</button></div>
   </div></div></div>`;
@@ -855,14 +911,18 @@ function renderDetail(){
   /* media */
   html+=`<div class="panel"><div class="panel-head"><h3>Media value</h3><button class="linkbtn" onclick="editComponent(null)">＋ Show / package</button></div><div class="panel-body">`;
   if((s.media.components||[]).length){
-    s.media.components.forEach(comp=>html+=componentBlock(comp));
+    s.media.components.forEach(comp=>html+=componentBlock(comp,p));
     // roll-up
     if(m.inv!==null){
       let right;
       if(m.hasAud){ const audP=pctDiff(m.del,m.guar);
-        right=`${money(m.inv)}<small>${m.del!==null?aud(m.del)+' delivered / '+aud(m.guar)+' guar'+(audP!==null?' ('+(audP>0?'+':'')+audP+'%)':''):aud(m.guar)+' projected'} · blended CPM ${m.delCpm!==null?'$'+m.delCpm.toFixed(2):'$'+(m.propCpm?m.propCpm.toFixed(2):'—')+' proj'}</small>`;
+        right=`${money(m.inv)}<small>${m.del!==null?aud(m.del)+' delivered / '+aud(m.guar)+' guar'+(audP!==null?' ('+(audP>0?'+':'')+audP+'%)':''):aud(m.guar)+' projected'}</small>`;
       } else right=`${money(m.inv)}<small>total investment</small>`;
       html+=`<div class="media-total"><span class="mt-l">Total</span><span class="mt-r">${right}</span></div>`;
+      if(m.hasAud&&(m.delCpm!==null||m.propCpm!==null)){
+        const cpmCol=(m.delCpm!==null&&m.propCpm!==null)?(m.delCpm<=m.propCpm?'good':'bad'):'';
+        html+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:12.5px"><span style="color:var(--ink-faint)">Delivered CPM${m.periodMatched?' (spend to date vs audience to date)':''}</span><b style="font-family:'JetBrains Mono';font-size:14px;color:var(--${cpmCol||'ink'})">${m.delCpm!==null?'$'+m.delCpm.toFixed(2):'—'}${m.propCpm!==null?` <span style="font-size:11.5px;font-weight:600;color:var(--ink-faint)">vs $${m.propCpm.toFixed(2)} proposed</span>`:''}</b></div>`;
+      }
     }
   } else html+=`<p style="color:var(--ink-faint);font-size:13px;margin:0">No shows or packages added for this review point.</p>`;
   const va=n(s.media.valueAdd);
@@ -911,17 +971,21 @@ function commMetric(name,act,exp,p,fmt){
   return `<div class="comm-metric"><div class="cm-head"><span class="cm-name">${name}</span>
     <span class="cm-fig"><span class="a">${fmt(act)}</span> <span class="e">/ ${fmt(exp)} exp</span>${p!==null?`<span class="cm-delta ${p>=0?'pos':'neg'}">${p>0?'+':''}${p}%</span>`:''}</span></div>${bar(act,exp,true)}</div>`;
 }
-function componentBlock(comp){
+function componentBlock(comp,p){
   const inv=n(comp.investment);
-  const wl=weeksLogged(comp);
+  const wl=verifiedWeeksLogged(comp);
   let body='';
   if(comp.mode==='audience'){
     const g=n(comp.audienceGuaranteed),d=audDelivered(comp);
-    const audP=pctDiff(d,g); const pc=cpm(inv,g),dc=cpm(inv,d);
-    const src=wl?` <span style="color:var(--ink-faint);font-weight:400;font-size:11px">(from ${wl} week${wl>1?'s':''})</span>`:'';
+    const audP=pctDiff(d,g); const pc=cpm(inv,g);
+    const totalMonths=termMonths(p);
+    let dc=null,periodMatched=false;
+    if(totalMonths&&wl>0&&d){ dc=cpm((inv||0)/totalMonths*Math.min(wl,totalMonths),d); periodMatched=dc!==null; }
+    if(dc===null) dc=cpm(inv,d);
+    const src=wl?` <span style="color:var(--ink-faint);font-weight:400;font-size:11px">(from ${wl} month${wl>1?'s':''})</span>`:'';
     body=`<div class="aud-row"><span class="mlab">Audience</span><span class="mono">${d!==null?aud(d)+' delivered':aud(g)+' projected'}${g!==null&&d!==null?' / '+aud(g)+' guar':''}${audP!==null?` <span style="color:var(--${audP>=0?'good':'bad'});font-weight:700">(${audP>0?'+':''}${audP}%)</span>`:''}${src}</span></div>
       ${d!==null?bar(d,g):bar(g,g)}
-      <div class="cpm-line">${pc!==null?`Proposed CPM <b>$${pc.toFixed(2)}</b>`:''}${dc!==null?` → delivered <b style="color:var(--${dc<=pc?'good':'bad'})">$${dc.toFixed(2)}</b>`:''}</div>`;
+      <div class="cpm-line">${pc!==null?`Proposed CPM <b>$${pc.toFixed(2)}</b>`:''}${dc!==null?` → delivered <b style="color:var(--${dc<=pc?'good':'bad'})">$${dc.toFixed(2)}</b>${periodMatched?' <span style="color:var(--ink-faint);font-weight:400">(spend to date vs delivered to date)</span>':''}`:''}</div>`;
   } else if(comp.mode==='fixed'){
     body=`<div class="cpm-line">${comp.fixedDelivered?'<b style="color:var(--good)">Delivered</b> — full value counted':'<span style="color:var(--ink-faint)">Not yet delivered</span>'}</div>`;
   } else {
@@ -932,7 +996,7 @@ function componentBlock(comp){
   let assetStrip='';
   if((comp.assets||[]).length){
     assetStrip=`<div class="assetfulfil-strip">`+comp.assets.map(as=>{
-      const del=assetDeliveredTotal(comp,as.id); const target=(+as.perWeek||0)*wl;
+      const del=verifiedAssetDeliveredTotal(comp,as.id); const target=(+as.perWeek||0)*wl;
       const cls=wl===0?'none':(del>=target?'ok':'under');
       return `<span class="afx ${cls}" title="${esc(as.name)}: contracted ${as.perWeek}/wk">${esc(as.name)} ${del}${wl?'/'+target:''}</span>`;
     }).join('')+`</div>`;
@@ -943,10 +1007,11 @@ function componentBlock(comp){
   let log='';
   if(wl){
     log=`<details class="wklog"><summary>Weekly log — ${wl} week${wl>1?'s':''}${weeksOf(comp).some(w=>w.status!=='verified')?' · <span style="color:var(--warn)">'+weeksOf(comp).filter(w=>w.status!=='verified').length+' pending</span>':''}</summary>
-      <table><thead><tr><th>Week</th><th class="num">Audience</th><th>Status</th><th></th></tr></thead><tbody>
-      ${weeksOf(comp).map(w=>`<tr><td>${esc(w.label)}${w.note?` <span style="color:var(--ink-faint);font-size:10px">· ${esc(w.note)}</span>`:''}</td><td class="num">${aud(weekAudTotal(w))}</td>
+      <table><thead><tr><th>Week</th><th class="num">Audience</th><th>Clips</th><th>Status</th><th></th></tr></thead><tbody>
+      ${weeksOf(comp).map(w=>{ const clips=weekClips(comp,w); return `<tr><td>${esc(w.label)}${w.note?` <span style="color:var(--ink-faint);font-size:10px">· ${esc(w.note)}</span>`:''}</td><td class="num">${aud(weekAudTotal(w))}</td>
+        <td>${clips.length?`<details class="clip-toggle"><summary>${clips.length} clip${clips.length>1?'s':''}</summary><div class="clip-list">${clips.map(cl=>`<a href="${esc(cl.url)}" target="_blank" rel="noopener">▸ ${esc(cl.name)}</a>`).join('')}</div></details>`:'<span style="color:var(--ink-faint)">—</span>'}</td>
         <td><span class="wk-status wk-${w.status||'pending'}">${w.status||'pending'}</span></td>
-        <td style="text-align:right">${w.status!=='verified'?`<button class="verifybtn" onclick="verifyWeek('${comp.id}','${w.id}')">Verify</button>`:''}</td></tr>`).join('')}
+        <td style="text-align:right">${w.status!=='verified'?`<button class="verifybtn" onclick="verifyWeek('${comp.id}','${w.id}')">Verify</button>`:''}</td></tr>`; }).join('')}
       </tbody></table></details>`;
   }
   return `<div class="comp">
@@ -954,6 +1019,10 @@ function componentBlock(comp){
       <div style="display:flex;align-items:flex-start;gap:4px"><span class="comp-inv">${money(comp.investment)}<small>investment</small></span><button class="comp-editbtn" onclick="editComponent('${comp.id}')">✎</button></div></div>
     ${body}${assetStrip}${log}
   </div>`;
+}
+function weekClips(comp,w){
+  if(!w||!w.assets) return [];
+  return (comp.assets||[]).filter(as=>w.assets[as.id+'__clip']).map(as=>({name:as.name,url:w.assets[as.id+'__clip']}));
 }
 async function verifyWeek(cid,wid){ 
   if(SB){ try{ await sbSetVerified(wid); await ownerRefreshWeeks(); render(); toast('Week verified'); }catch(e){ toast('Error: '+e.message); } return; }
@@ -986,16 +1055,18 @@ function renderPartner(){
   if(!comps.length){ html+=`<div class="empty-state"><h3>No shows set up yet</h3><p>PointsBet hasn't configured any shows for this period.</p></div>`; document.getElementById('app').innerHTML=html; return; }
 
   comps.forEach(c=>{
-    const wl=weeksLogged(c);
+    const wl=distinctLabelsLogged(c);
     const total=deliveredFromWeeks(c);
+    const usedLabels=new Set(weeksOf(c).map(x=>x.label));
+    const monthsLeft=MONTH_OPTIONS.some(m=>!usedLabels.has(m));
     html+=`<div class="pshow"><div class="pshow-head">
       <span class="ps-name">${esc(c.name)}</span>
       <span class="ps-sum">${c.mode==='audience'?`<b>${total!==null?aud(total):'0'}</b>audience across ${wl} month${wl!==1?'s':''} logged`:`<b>${wl}</b>month${wl!==1?'s':''} logged`}</span>
     </div><div class="pshow-body">`;
-    if(wl){ html+=`<div class="wk-list">`+weeksOf(c).map(w=>`<div class="wk-item"><div class="wk-l"><span class="wk-status wk-${w.status||'pending'}">${w.status||'pending'}</span><span>${esc(w.label)}</span></div>
-        <div style="display:flex;align-items:center;gap:12px">${c.mode==='audience'?`<span class="wk-aud">${aud(weekAudTotal(w))}</span>`:''}${(w.status!=='verified')?`<button class="linkbtn" onclick="openWeekForm('${c.id}','${w.id}')">Edit</button>`:'<span style="font-size:11px;color:var(--ink-faint)">verified · locked</span>'}</div></div>`).join('')+`</div>`;
+    if(weeksOf(c).length){ html+=`<div class="wk-list">`+weeksOf(c).map(w=>`<div class="wk-item"><div class="wk-l"><span class="wk-status wk-${w.status||'pending'}">${w.status||'pending'}</span><span>${esc(w.label)}</span></div>
+        <div style="display:flex;align-items:center;gap:12px">${c.mode==='audience'?`<span class="wk-aud">${aud(weekAudTotal(w))}</span>`:''}<button class="linkbtn" onclick="openWeekForm('${c.id}','${w.id}')">Edit</button></div></div>`).join('')+`</div>`;
     } else html+=`<div class="wk-empty">No months logged yet — add your first month below.</div>`;
-    html+=`<button class="btn btn-primary" onclick="openWeekForm('${c.id}')">＋ Log a month</button>`;
+    html+= monthsLeft?`<button class="btn btn-primary" onclick="openWeekForm('${c.id}')">＋ Log a month</button>`:`<div class="wk-hint" style="margin:8px 0 0">Every month from Mar–Oct 2026 is logged for this show — use Edit above to correct one.</div>`;
     html+=`</div></div>`;
   });
   document.getElementById('app').innerHTML=html;
@@ -1010,18 +1081,29 @@ function openWeekForm(cid,wid){
   const assets=(c.assets||[]);
   let audFields='';
   if(c.mode==='audience'&&plats.length){
-    audFields=`<div class="wk-sub">Audience by platform</div><div class="wk-grid">`+plats.map(pl=>`<div class="wk-fld"><label><b>${esc(pl)}</b></label><input type="number" id="wa_${slug(pl)}" value="${w&&w.audience?(w.audience[pl]??''):''}" placeholder="0"></div>`).join('')+`</div>`;
+    audFields=`<div class="wk-sub">Audience by platform</div><div class="wk-hint">Total reach for the whole month, as a plain whole number — e.g. type 420000 for 420,000. No commas, decimals or text.</div><div class="wk-grid">`+plats.map(pl=>`<div class="wk-fld"><label><b>${esc(pl)}</b></label><input type="number" min="0" step="1" id="wa_${slug(pl)}" value="${w&&w.audience?(w.audience[pl]??''):''}" placeholder="0"></div>`).join('')+`</div>`;
   }
   let assetFields='';
   if(assets.length){
-    assetFields=`<div class="wk-sub">Entitlements delivered this month</div><div class="wk-grid">`+assets.map(as=>`<div class="wk-fld"><label>${esc(as.name)} <span class="tgt">· ${as.perWeek}/round</span></label><input type="number" id="wk_${as.id}" value="${w&&w.assets?(w.assets[as.id]??''):''}" placeholder="0"></div>`).join('')+`</div>`;
+    assetFields=`<div class="wk-sub">Entitlements delivered this month</div><div class="wk-hint">Enter the number of times each entitlement ran this month — a plain whole number (e.g. 4), not a percentage. Attach a short clip or screenshot as proof for any entitlement where you have one.</div><div class="wk-grid">`+assets.map(as=>{
+      const clipUrl=w&&w.assets?w.assets[as.id+'__clip']:null;
+      return `<div class="wk-fld"><label>${esc(as.name)} <span class="tgt">· ${as.perWeek}/round</span></label>
+        <input type="number" min="0" step="1" id="wk_${as.id}" value="${w&&w.assets?(w.assets[as.id]??''):''}" placeholder="0">
+        <div class="wk-clip">${clipUrl?`<a href="${esc(clipUrl)}" target="_blank" rel="noopener">▸ Current clip attached</a>`:''}<input type="file" id="wkclip_${as.id}" accept="image/*,video/*"></div>
+      </div>`;
+    }).join('')+`</div>`;
   } else if(c.mode==='fulfilment'){
-    assetFields=`<div class="wk-sub">Delivered this month</div><div class="wk-grid"><div class="wk-fld"><label>${esc(c.unit||'units')} delivered</label><input type="number" id="wk_qty" value="${w&&w.assets?(w.assets.qty??''):''}"></div></div>`;
+    assetFields=`<div class="wk-sub">Delivered this month</div><div class="wk-hint">Whole number of ${esc(c.unit||'units')} delivered this month.</div><div class="wk-grid"><div class="wk-fld"><label>${esc(c.unit||'units')} delivered</label><input type="number" min="0" step="1" id="wk_qty" value="${w&&w.assets?(w.assets.qty??''):''}"></div></div>`;
   }
+  let monthOpts;
+  if(w){ monthOpts=(w.label&&!MONTH_OPTIONS.includes(w.label))?[w.label,...MONTH_OPTIONS]:MONTH_OPTIONS; }
+  else { const usedLabels=new Set((c.weeks||[]).map(x=>x.label)); monthOpts=MONTH_OPTIONS.filter(m=>!usedLabels.has(m)); }
+  const monthSelect=monthOpts.length?`<select class="inp" id="w_label" ${w?'disabled':''}>${!w?'<option value="" disabled selected>Select month</option>':''}${monthOpts.map(m=>`<option value="${esc(m)}" ${w&&w.label===m?'selected':''}>${esc(m)}</option>`).join('')}</select>`:`<div class="wk-hint" style="margin:0">Every month from Mar–Oct 2026 already has an entry for this show. Edit an existing month above to make a correction.</div>`;
+  const reverifyNote=(w&&w.status==='verified')?`<div class="wk-hint" style="color:var(--warn);margin-top:-4px;margin-bottom:14px">This month is already verified. Saving a change here will send it back to PointsBet for re-verification before it counts again.</div>`:'';
   mount(scrim(`<div class="modal-head"><h3>${wid?'Edit month':'Log a month'} — ${esc(c.name)}</h3><button class="x" onclick="closeModal()">×</button></div>
     <div class="modal-body">
-      <div class="frow"><div class="field"><label>Month</label><input class="inp" id="w_label" value="${w?esc(w.label):''}" placeholder="e.g. Jul 2026"></div>
-        <div class="field"><label>Source note (optional)</label><input class="inp" id="w_note" value="${w?esc(w.note||''):''}" placeholder="e.g. YouTube Analytics"></div></div>
+      <div class="field" style="max-width:260px"><label>Month</label>${monthSelect}</div>
+      ${reverifyNote}
       ${audFields}${assetFields}
     </div>
     <div class="modal-foot"><div>${wid?`<button class="btn btn-danger" onclick="deleteWeek('${cid}','${wid}')">Delete month</button>`:''}</div>
@@ -1031,17 +1113,47 @@ function slug(s){ return s.replace(/[^a-zA-Z0-9]/g,'_'); }
 async function saveWeek(cid,wid){
   const s=latestSnap(STATE.partnerships.find(x=>x.id===view.partnerPid));
   const c=s.media.components.find(x=>x.id===cid);
-  const label=document.getElementById('w_label').value.trim(); if(!label){toast('Give the month a label, e.g. Jul 2026');return;}
-  const note=document.getElementById('w_note').value.trim();
+  const w=wid?(c.weeks||[]).find(x=>x.id===wid):null;
+  const label=document.getElementById('w_label').value.trim(); if(!label){toast('Select a month');return;}
+  const note=w?(w.note||''):'';
   const audience={}; (c.platforms||[]).forEach(pl=>{ const v=document.getElementById('wa_'+slug(pl)); if(v&&v.value!=='')audience[pl]=+v.value; });
   const assetsObj={};
-  if((c.assets||[]).length) c.assets.forEach(as=>{ const v=document.getElementById('wk_'+as.id); if(v&&v.value!=='')assetsObj[as.id]=+v.value; });
-  else if(c.mode==='fulfilment'){ const v=document.getElementById('wk_qty'); if(v&&v.value!=='')assetsObj.qty=+v.value; }
+  const clipUploads=[];
+  if((c.assets||[]).length){
+    c.assets.forEach(as=>{
+      const v=document.getElementById('wk_'+as.id); if(v&&v.value!=='')assetsObj[as.id]=+v.value;
+      const existingClip=w&&w.assets?w.assets[as.id+'__clip']:null;
+      const fileInput=document.getElementById('wkclip_'+as.id);
+      if(fileInput&&fileInput.files&&fileInput.files[0]) clipUploads.push({assetId:as.id,file:fileInput.files[0]});
+      else if(existingClip) assetsObj[as.id+'__clip']=existingClip;
+    });
+  } else if(c.mode==='fulfilment'){ const v=document.getElementById('wk_qty'); if(v&&v.value!=='')assetsObj.qty=+v.value; }
+
+  if(clipUploads.length){
+    if(!SB){ toast("Saved the numbers, but clips can't upload without a live connection"); clipUploads.length=0; }
+    else{
+      const btn=document.querySelector('.modal-foot .btn-primary'); if(btn){btn.disabled=true; btn.textContent='Uploading…';}
+      try{
+        for(const {assetId,file} of clipUploads){
+          const path=`${c.partnership_id||view.partnerPid}/${cid}/${slug(label)}/${assetId}-${Date.now()}-${slug(file.name)}`;
+          const {error:upErr}=await SB.storage.from('pr-clips').upload(path,file,{upsert:true});
+          if(upErr) throw upErr;
+          const {data:pub}=SB.storage.from('pr-clips').getPublicUrl(path);
+          assetsObj[assetId+'__clip']=pub.publicUrl;
+        }
+      }catch(e){ toast('Clip upload failed: '+e.message); if(btn){btn.disabled=false; btn.textContent='Submit';} return; }
+    }
+  }
+
   if(SB){
     try{
-      if(wid) await sbUpdateWeek(wid,{label,audience,assets:assetsObj,note});
+      const dupe=!wid?(c.weeks||[]).find(x=>x.label===label):null; // safety net — should already be prevented by the dropdown filter
+      const targetWid=wid||(dupe?dupe.id:null);
+      const wasVerified=(w&&w.status==='verified')||(dupe&&dupe.status==='verified');
+      if(targetWid) await sbUpdateWeek(targetWid,{label,audience,assets:assetsObj,note});
       else await sbInsertWeek({partnership_id:c.partnership_id||view.partnerPid,component_id:cid,label,audience,assets:assetsObj,note});
-      await refreshPartner(); closeModal(); toast(wid?'Month updated':'Month submitted');
+      await refreshPartner(); closeModal();
+      toast(wasVerified?'Month updated — sent back for PointsBet to re-verify':(targetWid?'Month updated':'Month submitted'));
     }catch(e){ toast('Error: '+e.message); }
     return;
   }
@@ -1086,24 +1198,78 @@ async function loadPartnerData(){
 }
 async function refreshPartner(){ await loadPartnerData(); render(); }
 
-function renderLogin(msg){
+function renderLogin(msg,mode){
+  mode=mode||'signin';
+  const isSignup=mode==='signup';
+  const submitFn=isSignup?'signUpPassword':'signInPassword';
   const el=document.getElementById('viewas'); if(el)el.innerHTML='';
   document.getElementById('app').innerHTML=`<div style="max-width:400px;margin:70px auto 0;text-align:center">
     <div class="wordmark" style="justify-content:center;color:var(--ink);margin-bottom:18px"><span class="spade"></span>Partnership Review</div>
     <div class="panel"><div class="panel-body" style="text-align:left">
-      <h3 style="font-family:'Space Grotesk';margin:0 0 6px">Sign in</h3>
-      <p style="font-size:13px;color:var(--ink-soft);margin:0 0 16px">Enter your email and we'll send you a one-time sign-in link.</p>
-      <input class="inp" id="loginEmail" type="email" placeholder="you@company.com" style="margin-bottom:10px" onkeydown="if(event.key==='Enter')sendMagicLink()">
-      <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="sendMagicLink()">Send sign-in link</button>
+      <h3 style="font-family:'Space Grotesk';margin:0 0 6px">${isSignup?'Create account':'Sign in'}</h3>
+      <p style="font-size:13px;color:var(--ink-soft);margin:0 0 16px">${isSignup?'Set an email and password for this tool. You may need to confirm your email before you can sign in.':'Enter your email and password.'}</p>
+      <input class="inp" id="loginEmail" type="email" placeholder="you@company.com" autocomplete="email" style="margin-bottom:10px">
+      <input class="inp" id="loginPassword" type="password" placeholder="Password" autocomplete="${isSignup?'new-password':'current-password'}" style="margin-bottom:10px" onkeydown="if(event.key==='Enter'){${isSignup?"document.getElementById('loginPassword2').focus()":submitFn+'()'}}">
+      ${isSignup?`<input class="inp" id="loginPassword2" type="password" placeholder="Confirm password" autocomplete="new-password" style="margin-bottom:10px" onkeydown="if(event.key==='Enter')${submitFn}()">`:''}
+      <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="${submitFn}()">${isSignup?'Create account':'Sign in'}</button>
       <div id="loginMsg" style="font-size:12.5px;color:var(--ink-soft);margin-top:12px">${msg?esc(msg):''}</div>
+      <div style="font-size:12.5px;color:var(--ink-soft);margin-top:14px">${isSignup?`Already have an account? <a href="#" onclick="event.preventDefault();renderLogin('','signin')" style="color:var(--accent)">Sign in</a>`:`New here? <a href="#" onclick="event.preventDefault();renderLogin('','signup')" style="color:var(--accent)">Create an account</a>`}</div>
+      ${!isSignup?`<div style="font-size:12px;color:var(--ink-faint);margin-top:8px"><a href="#" onclick="event.preventDefault();sendPasswordReset()" style="color:var(--ink-faint)">Forgot password?</a></div>`:''}
     </div></div></div>`;
 }
-async function sendMagicLink(){
-  const email=(document.getElementById('loginEmail').value||'').trim(); const m=document.getElementById('loginMsg');
-  if(!email){ m.textContent='Enter your email first.'; return; }
-  m.textContent='Sending…';
-  const {error}=await SB.auth.signInWithOtp({email, options:{emailRedirectTo:window.location.href.split('#')[0]}});
-  m.textContent = error ? ('Error: '+error.message) : 'Check your email for the sign-in link, then come back to this page.';
+async function signInPassword(){
+  const email=(document.getElementById('loginEmail').value||'').trim();
+  const password=document.getElementById('loginPassword').value||'';
+  const m=document.getElementById('loginMsg');
+  if(!email||!password){ m.textContent='Enter your email and password.'; return; }
+  m.textContent='Signing in…';
+  const {error}=await SB.auth.signInWithPassword({email,password});
+  if(error){ m.textContent='Error: '+error.message; return; }
+  location.reload();
+}
+async function signUpPassword(){
+  const email=(document.getElementById('loginEmail').value||'').trim();
+  const password=document.getElementById('loginPassword').value||'';
+  const password2=document.getElementById('loginPassword2').value||'';
+  const m=document.getElementById('loginMsg');
+  if(!email||!password){ m.textContent='Enter your email and password.'; return; }
+  if(password.length<8){ m.textContent='Password must be at least 8 characters.'; return; }
+  if(password!==password2){ m.textContent="Passwords don't match."; return; }
+  m.textContent='Creating account…';
+  const {data,error}=await SB.auth.signUp({email,password});
+  if(error){ m.textContent='Error: '+error.message; return; }
+  if(data.session){ location.reload(); return; }
+  m.textContent='Account created — check your email to confirm it, then sign in.';
+}
+async function sendPasswordReset(){
+  const email=(document.getElementById('loginEmail').value||'').trim();
+  const m=document.getElementById('loginMsg');
+  if(!email){ m.textContent='Enter your email above first, then click Forgot password.'; return; }
+  m.textContent='Sending reset link…';
+  const {error}=await SB.auth.resetPasswordForEmail(email,{redirectTo:window.location.href.split('#')[0]});
+  m.textContent = error ? ('Error: '+error.message) : 'Check your email for a password reset link.';
+}
+function renderSetNewPassword(){
+  const el=document.getElementById('viewas'); if(el)el.innerHTML='';
+  document.getElementById('app').innerHTML=`<div style="max-width:400px;margin:70px auto 0;text-align:center">
+    <div class="wordmark" style="justify-content:center;color:var(--ink);margin-bottom:18px"><span class="spade"></span>Partnership Review</div>
+    <div class="panel"><div class="panel-body" style="text-align:left">
+      <h3 style="font-family:'Space Grotesk';margin:0 0 6px">Set a new password</h3>
+      <input class="inp" id="newPassword" type="password" placeholder="New password" autocomplete="new-password" style="margin-bottom:10px">
+      <input class="inp" id="newPassword2" type="password" placeholder="Confirm new password" autocomplete="new-password" style="margin-bottom:10px" onkeydown="if(event.key==='Enter')updatePassword()">
+      <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="updatePassword()">Set password</button>
+      <div id="loginMsg" style="font-size:12.5px;color:var(--ink-soft);margin-top:12px"></div>
+    </div></div></div>`;
+}
+async function updatePassword(){
+  const p1=document.getElementById('newPassword').value||'', p2=document.getElementById('newPassword2').value||'';
+  const m=document.getElementById('loginMsg');
+  if(p1.length<8){ m.textContent='Password must be at least 8 characters.'; return; }
+  if(p1!==p2){ m.textContent="Passwords don't match."; return; }
+  m.textContent='Saving…';
+  const {error}=await SB.auth.updateUser({password:p1});
+  if(error){ m.textContent='Error: '+error.message; return; }
+  location.reload();
 }
 function renderNoAccess(){
   const el=document.getElementById('viewas'); if(el)el.innerHTML=`<button class="top-btn" onclick="signOut()">Sign out</button>`;
@@ -1112,7 +1278,7 @@ function renderNoAccess(){
 async function signOut(){ try{ if(SB)await SB.auth.signOut(); }catch(e){} location.hash=''; location.reload(); }
 
 async function sbInsertWeek(row){ const {error}=await SB.from('pr_week').insert({partner_email:view.email,partnership_id:row.partnership_id,component_id:row.component_id,label:row.label,audience:row.audience,assets:row.assets,note:row.note}); if(error)throw error; }
-async function sbUpdateWeek(id,row){ const {error}=await SB.from('pr_week').update({label:row.label,audience:row.audience,assets:row.assets,note:row.note}).eq('id',id); if(error)throw error; }
+async function sbUpdateWeek(id,row){ const {error}=await SB.from('pr_week').update({label:row.label,audience:row.audience,assets:row.assets,note:row.note,verified:false}).eq('id',id); if(error)throw error; }
 async function sbDeleteWeek(id){ const {error}=await SB.from('pr_week').delete().eq('id',id); if(error)throw error; }
 async function sbSetVerified(id){ const {error}=await SB.from('pr_week').update({verified:true}).eq('id',id); if(error)throw error; }
 
@@ -1153,8 +1319,8 @@ function moduleHero(kicker,title,copy,actions=''){
 function metricCard(label,value,compare='',tone=''){
   return `<div class="metric-card"><div class="label">${label}</div><div class="value ${tone}">${value}</div>${compare?`<div class="compare">${compare}</div>`:''}</div>`;
 }
-function metricValue(s,key){
-  const m=mediaRoll(s), c=s.commercial||{};
+function metricValue(p,s,key){
+  const m=mediaRoll(s,p), c=s.commercial||{};
   if(key==='media_value') return m.inv;
   if(key==='reach') return m.del!==null?m.del:m.guar;
   if(key==='cpm') return m.delCpm!==null?m.delCpm:m.propCpm;
@@ -1162,7 +1328,7 @@ function metricValue(s,key){
   if(key==='actives') return n(c.activesAct);
   if(key==='delivery'){
     const comps=(s.media.components||[]).filter(x=>(x.assets||[]).length); let target=0,delivered=0;
-    comps.forEach(x=>(x.assets||[]).forEach(a=>{target+=(+a.perWeek||0)*weeksLogged(x);delivered+=assetDeliveredTotal(x,a.id);}));
+    comps.forEach(x=>(x.assets||[]).forEach(a=>{target+=(+a.perWeek||0)*verifiedWeeksLogged(x);delivered+=verifiedAssetDeliveredTotal(x,a.id);}));
     return target?delivered/target*100:null;
   }
   return null;
@@ -1171,13 +1337,13 @@ function metricFormat(key,v){ if(v===null||v===undefined)return '—'; if(key===
 function metricDirection(key){return key==='cpm'?'lower':'higher';}
 function previousSnapshot(p,s){ const i=p.snapshots.findIndex(x=>x.id===s.id); return i>0?p.snapshots[i-1]:null; }
 function benchmarkBase(p,s,key){
-  if(view.benchmarkBasis==='previous'){ const prev=previousSnapshot(p,s); return {label:'Previous review',value:prev?metricValue(prev,key):null,sample:prev?1:0}; }
+  if(view.benchmarkBasis==='previous'){ const prev=previousSnapshot(p,s); return {label:'Previous review',value:prev?metricValue(p,prev,key):null,sample:prev?1:0}; }
   if(view.benchmarkBasis==='target'){
     const c=s.commercial||{}; const m=mediaRoll(s);
     const maps={ngr:n(c.ngrExp),actives:n(c.activesExp),reach:m.guar,cpm:m.propCpm,delivery:100,media_value:n(p.contractedValue)};
     return {label:'Plan / target',value:maps[key]??null,sample:1};
   }
-  const vals=STATE.partnerships.map(x=>metricValue(currentSnap(x),key)).filter(v=>v!==null);
+  const vals=STATE.partnerships.map(x=>metricValue(x,currentSnap(x),key)).filter(v=>v!==null);
   return {label:'Portfolio average',value:vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null,sample:vals.length};
 }
 function deltaInfo(key,current,base){
@@ -1191,14 +1357,23 @@ function renderBenchmarking(p,s){
   const basis=keys.map(k=>benchmarkBase(p,s,k)); const first=basis[0];
   const selector=`<select class="sel" style="width:auto" onchange="setBenchmarkBasis(this.value)"><option value="portfolio" ${view.benchmarkBasis==='portfolio'?'selected':''}>Portfolio average</option><option value="previous" ${view.benchmarkBasis==='previous'?'selected':''}>Previous review</option><option value="target" ${view.benchmarkBasis==='target'?'selected':''}>Plan / target</option></select>`;
   let html=moduleHero('Module 02 · metric-level comparison','Benchmarking','Compare individual metrics against a meaningful baseline. No aggregate rank or partnership score is calculated.',selector);
-  html+=`<div class="metric-strip">${keys.slice(0,4).map((k,i)=>{const cur=metricValue(s,k),b=basis[i],d=deltaInfo(k,cur,b.value);return metricCard(labels[k],metricFormat(k,cur),`${b.label}: ${metricFormat(k,b.value)} · <span class="delta ${d.cls}">${d.text}</span>`);}).join('')}</div>`;
-  html+=`<section class="panel"><div class="panel-head"><h3>Benchmark matrix</h3><span class="lil">${first.sample?`${first.sample} comparable record${first.sample===1?'':'s'}`:'No comparable records'}</span></div><div class="panel-body"><div style="overflow:auto"><table class="dtable"><thead><tr><th>Metric</th><th class="num">Current</th><th class="num">${esc(first.label)}</th><th class="num">Variance</th><th class="num">Direction</th><th>Data quality</th></tr></thead><tbody>${keys.map((k,i)=>{const cur=metricValue(s,k),b=basis[i],d=deltaInfo(k,cur,b.value);const quality=cur===null?'Missing current value':b.value===null?'No valid comparison':'Current data available';return `<tr><td><b>${labels[k]}</b></td><td class="num">${metricFormat(k,cur)}</td><td class="num">${metricFormat(k,b.value)}</td><td class="num"><span class="delta ${d.cls}">${d.text}</span></td><td class="num">${metricDirection(k)==='lower'?'Lower is better':'Higher is better'}</td><td class="muted">${quality}</td></tr>`;}).join('')}</tbody></table></div><div class="data-note">Comparison values are shown only at metric level. Values with no valid denominator or comparison are displayed as an em dash.</div></div></section>`;
-  const reach=metricValue(s,'reach'), base=benchmarkBase(p,s,'reach').value, max=Math.max(reach||0,base||0,1); const w1=Math.round((reach||0)/max*100),w2=Math.round((base||0)/max*100);
+  html+=`<div class="metric-strip">${keys.slice(0,4).map((k,i)=>{const cur=metricValue(p,s,k),b=basis[i],d=deltaInfo(k,cur,b.value);return metricCard(labels[k],metricFormat(k,cur),`${b.label}: ${metricFormat(k,b.value)} · <span class="delta ${d.cls}">${d.text}</span>`);}).join('')}</div>`;
+  html+=`<section class="panel"><div class="panel-head"><h3>Benchmark matrix</h3><span class="lil">${first.sample?`${first.sample} comparable record${first.sample===1?'':'s'}`:'No comparable records'}</span></div><div class="panel-body"><div style="overflow:auto"><table class="dtable"><thead><tr><th>Metric</th><th class="num">Current</th><th class="num">${esc(first.label)}</th><th class="num">Variance</th><th class="num">Direction</th><th>Data quality</th></tr></thead><tbody>${keys.map((k,i)=>{const cur=metricValue(p,s,k),b=basis[i],d=deltaInfo(k,cur,b.value);const quality=cur===null?'Missing current value':b.value===null?'No valid comparison':'Current data available';return `<tr><td><b>${labels[k]}</b></td><td class="num">${metricFormat(k,cur)}</td><td class="num">${metricFormat(k,b.value)}</td><td class="num"><span class="delta ${d.cls}">${d.text}</span></td><td class="num">${metricDirection(k)==='lower'?'Lower is better':'Higher is better'}</td><td class="muted">${quality}</td></tr>`;}).join('')}</tbody></table></div><div class="data-note">Comparison values are shown only at metric level. Values with no valid denominator or comparison are displayed as an em dash.</div></div></section>`;
+  const reach=metricValue(p,s,'reach'), base=benchmarkBase(p,s,'reach').value, max=Math.max(reach||0,base||0,1); const w1=Math.round((reach||0)/max*100),w2=Math.round((base||0)/max*100);
   html+=`<section class="panel"><div class="panel-head"><h3>Reach comparison</h3><span class="lil">Selected baseline</span></div><div class="panel-body"><div style="font-size:12px;color:var(--ink-soft)">Current partnership <b style="color:var(--ink)">${metricFormat('reach',reach)}</b></div><div class="stackbar"><span style="width:${w1}%;background:var(--accent)"></span></div><div style="font-size:12px;color:var(--ink-soft)">${esc(first.label)} <b style="color:var(--ink)">${metricFormat('reach',base)}</b></div><div class="stackbar"><span style="width:${w2}%;background:#AEB7C6"></span></div><div class="data-note">A deliberately simple comparison chart: it communicates one metric and one baseline, not a composite performance judgement.</div></div></section>`;
   return html;
 }
 function setBenchmarkBasis(value){view.benchmarkBasis=value;render();}
-function defaultCosts(s){ if(!Array.isArray(s.costEntries)||!s.costEntries.length){const total=mediaRoll(s).inv||0;s.costEntries=[{category:'Rights fee',amount:total,currency:'AUD',state:'Actual',note:'Derived from existing media package investment'}];}return s.costEntries; }
+function defaultCosts(s){
+  const total=mediaRoll(s).inv||0;
+  if(!Array.isArray(s.costEntries)||!s.costEntries.length){
+    s.costEntries=[{category:'Rights fee',amount:total,currency:'AUD',state:'Actual',note:'Derived from existing media package investment',auto:true}];
+  } else if(s.costEntries.length===1 && s.costEntries[0].auto){
+    /* still on the untouched auto line — keep it pinned to the live component total so it can't go stale */
+    s.costEntries[0].amount=total;
+  }
+  return s.costEntries;
+}
 function efficiencyOutputs(s){const m=mediaRoll(s),c=s.commercial||{};return {reach:m.del!==null?m.del:m.guar,impressions:null,views:null,clicks:null,signups:null,ftds:null,actives:n(c.activesAct),ngr:n(c.ngrAct)};}
 function renderEfficiency(p,s){
   const costs=defaultCosts(s), total=costs.reduce((a,x)=>a+(n(x.amount)||0),0),o=efficiencyOutputs(s);
@@ -1206,7 +1381,8 @@ function renderEfficiency(p,s){
   let html=moduleHero('Module 03 · operational finance','Commercial efficiency','See how approved investment converts into media and commercial outcomes. Status is always tied to a named metric—not a rolled-up score.',`<button class="btn btn-primary" onclick="editCosts()">Edit investment ledger</button>`);
   html+=`<div class="metric-strip">${metricCard('Total investment',money(total),'Actual costs recorded')}${metricCard('Reach',metricFormat('reach',o.reach),'Delivered or guaranteed reach')}${metricCard('Active customers',num(o.actives),'Attributable outcomes')}${metricCard('NGR',money(o.ngr),'Attributable outcomes')}</div>`;
   const colors=['#2F6BE0','#7A5AF8','#1D9A6C','#EC7B4E','#AEB7C6']; let off=0;
-  html+=`<div class="grid2"><section class="panel"><div class="panel-head"><h3>Investment breakdown</h3><span class="lil">${costs.length} cost categor${costs.length===1?'y':'ies'}</span></div><div class="panel-body"><div class="stackbar">${costs.map((x,i)=>{const w=total?((n(x.amount)||0)/total*100):0,col=colors[i%colors.length];off+=w;return `<span style="width:${w}%;background:${col}" title="${esc(x.category)}"></span>`;}).join('')}</div><div class="legend">${costs.map((x,i)=>`<span><i style="background:${colors[i%colors.length]}"></i>${esc(x.category)} ${money(x.amount)}</span>`).join('')}</div><div class="data-note">Costs preserve their category, currency and state. Partner users never see this ledger.</div></div></section><section class="panel"><div class="panel-head"><h3>Efficiency metrics</h3><span class="lil">Formula driven</span></div><div class="panel-body"><table class="dtable"><tbody>${calc.map(([l,v,type])=>`<tr><td><b>${l}</b></td><td class="num">${v===null?'—':type==='ratio'?v.toFixed(2)+'×':money(v)}</td></tr>`).join('')}</tbody></table><div class="data-note">Missing denominators show as an em dash. “NGR per dollar invested” is not labelled ROI.</div></div></section></div>`;
+  const autoLinked=costs.length===1 && costs[0].auto;
+  html+=`<div class="grid2"><section class="panel"><div class="panel-head"><h3>Investment breakdown</h3><span class="lil">${costs.length} cost categor${costs.length===1?'y':'ies'}</span></div><div class="panel-body"><div class="stackbar">${costs.map((x,i)=>{const w=total?((n(x.amount)||0)/total*100):0,col=colors[i%colors.length];off+=w;return `<span style="width:${w}%;background:${col}" title="${esc(x.category)}"></span>`;}).join('')}</div><div class="legend">${costs.map((x,i)=>`<span><i style="background:${colors[i%colors.length]}"></i>${esc(x.category)} ${money(x.amount)}</span>`).join('')}</div><div class="data-note">${autoLinked?'Auto-synced to the media package investment total — edit the ledger to break this link and set costs manually.':'Manually set — no longer auto-synced to media package investment.'} Partner users never see this ledger.</div></div></section><section class="panel"><div class="panel-head"><h3>Efficiency metrics</h3><span class="lil">Formula driven</span></div><div class="panel-body"><table class="dtable"><tbody>${calc.map(([l,v,type])=>`<tr><td><b>${l}</b></td><td class="num">${v===null?'—':type==='ratio'?v.toFixed(2)+'×':money(v)}</td></tr>`).join('')}</tbody></table><div class="data-note">Missing denominators show as an em dash. “NGR per dollar invested” is not labelled ROI.</div></div></section></div>`;
   const funnel=[['Reach',o.reach],['Clicks',o.clicks],['Sign-ups',o.signups],['FTDs',o.ftds],['Active',o.actives]];
   html+=`<section class="panel"><div class="panel-head"><h3>Commercial funnel</h3><span class="lil">Available data only</span></div><div class="panel-body"><div class="funnel">${funnel.map(([l,v])=>`<div class="funnel-step"><div class="fnum">${l==='Reach'?aud(v):num(v)}</div><div class="flab">${l}</div></div>`).join('')}</div><div class="data-note">The funnel intentionally leaves unavailable stages blank; it does not estimate conversion or invent attribution.</div></div></section>`;
   return html;
@@ -1216,13 +1392,13 @@ function costRow(x,i){return `<div class="frow" style="margin-bottom:10px"><div 
 function addCostRow(){document.getElementById('costRows').insertAdjacentHTML('beforeend',costRow({category:'Other approved costs',amount:''},0));}
 async function saveCosts(){const fields=[...document.querySelectorAll('[data-cost]')],rows=[];for(let i=0;i<fields.length;i+=2){const category=fields[i].value.trim(),amount=n(fields[i+1].value);if(category&&amount!==null)rows.push({category,amount,currency:'AUD',state:'Actual',note:''});}curSnap().costEntries=rows;await persist();closeModal();render();toast('Investment ledger saved');}
 function executiveFacts(s){const a=s.assessment||blankAssess(), m=mediaRoll(s), c=s.commercial||{};const highlights=[...(a.winning||[])],risks=[...(a.falling||[])],opps=[...(a.evolution||[])];if(!highlights.length&&m.del!==null&&m.guar!==null&&m.del>=m.guar)highlights.push(`Audience delivery is ${Math.round((m.del-m.guar)/m.guar*100)}% above guarantee.`);if(!risks.length&&m.del===null)risks.push('Delivered audience has not been recorded for this review point.');if(!opps.length)opps.push('Confirm the next review priorities with the partnership owner.');return {highlights:highlights.slice(0,5),risks:risks.slice(0,5),opps:opps.slice(0,5),m,c};}
-function renderExecutive(p,s){const f=executiveFacts(s),action=s.call||'not set',label={'renew':'Renew','evolve':'Renew with revised terms','renegotiate':'Renew with revised terms','exit':'Exit','not set':'Not set'}[action]||'Not set';const status={good:'Performing above expectations',warn:'Mixed performance',bad:'Requires commercial review'}[s.status]||'Insufficient data';const metrics=[['Investment',money(mediaRoll(s).inv)],['Reach',metricFormat('reach',metricValue(s,'reach'))],['NGR',money(n(s.commercial.ngrAct))],['Delivery',metricFormat('delivery',metricValue(s,'delivery'))]];
+function renderExecutive(p,s){const f=executiveFacts(s),action=s.call||'not set',label={'renew':'Renew','evolve':'Renew with revised terms','renegotiate':'Renew with revised terms','exit':'Exit','not set':'Not set'}[action]||'Not set';const status={good:'Performing above expectations',warn:'Mixed performance',bad:'Requires commercial review'}[s.status]||'Insufficient data';const m=mediaRoll(s,p);const metrics=[['Investment',money(m.inv)],['Reach',metricFormat('reach',metricValue(p,s,'reach'))],['Delivered CPM',m.delCpm!==null?'$'+m.delCpm.toFixed(2)+(m.propCpm!==null?' vs $'+m.propCpm.toFixed(2)+' proposed':''):'—'],['NGR',money(n(s.commercial.ngrAct))],['Delivery',metricFormat('delivery',metricValue(p,s,'delivery'))]];
  let html=moduleHero('Module 04 · board-ready view','Executive summary','A concise, printable decision surface. It presents named evidence and a recommended action—never an overall partnership score.',`<button class="btn btn-ghost" onclick="window.print()">Print / save PDF</button>`);
- html+=`<div class="metric-strip">${metrics.map(x=>metricCard(x[0],x[1],`As at ${fmtDate(s.date)}`)).join('')}</div><div class="summary-grid"><div><section class="panel"><div class="panel-head"><h3>Decision brief</h3><span class="lil">${status}</span></div><div class="panel-body"><h4 style="margin:0 0 8px;font-size:12px;text-transform:uppercase;color:var(--good)">Key achievements</h4><ul class="summary-list">${f.highlights.map(x=>`<li>✓ ${esc(x)}<span class="evidence">Source: assessment or verified delivery</span></li>`).join('')}</ul><h4 style="margin:18px 0 8px;font-size:12px;text-transform:uppercase;color:var(--bad)">Risks</h4><ul class="summary-list">${f.risks.map(x=>`<li>⚠ ${esc(x)}<span class="evidence">Owner: partnership lead</span></li>`).join('')}</ul><h4 style="margin:18px 0 8px;font-size:12px;text-transform:uppercase;color:var(--accent)">Opportunities</h4><ul class="summary-list">${f.opps.map(x=>`<li>• ${esc(x)}</li>`).join('')}</ul></div></section></div><aside><div class="decision-card"><div style="font-size:11px;text-transform:uppercase;font-weight:700;letter-spacing:.06em">Recommended action</div><div class="decision">${label}</div><div style="font-size:12.5px;color:var(--ink-soft)">${s.verdict?esc(s.verdict):'Add a verdict to document the decision rationale.'}</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px">${CALLS.map(x=>`<button class="chip ${s.call===x?'on':''}" onclick="setCall('${x}')">${x==='renegotiate'?'Revised terms':x[0].toUpperCase()+x.slice(1)}</button>`).join('')}</div></div><section class="panel" style="margin-top:18px"><div class="panel-head"><h3>Timeline</h3></div><div class="panel-body"><div class="timeline"><div>Next review<small>${fmtDate(s.date)} · partnership owner</small></div><div>Negotiation window<small>Confirm with commercial lead</small></div><div>Contract expiry<small>${fmtDate(p.termEnd) || 'Not recorded'}</small></div><div>Activation planning<small>Before next review period</small></div></div></div></section></aside></div>`;return html;}
+ html+=`<div class="metric-strip" style="grid-template-columns:repeat(5,1fr)">${metrics.map(x=>metricCard(x[0],x[1],x[0]==='Delivered CPM'?(m.periodMatched?'Spend to date vs audience to date':'As at '+fmtDate(s.date)):`As at ${fmtDate(s.date)}`)).join('')}</div><div class="summary-grid"><div><section class="panel"><div class="panel-head"><h3>Decision brief</h3><span class="lil">${status}</span></div><div class="panel-body"><h4 style="margin:0 0 8px;font-size:12px;text-transform:uppercase;color:var(--good)">Key achievements</h4><ul class="summary-list">${f.highlights.map(x=>`<li>✓ ${esc(x)}<span class="evidence">Source: assessment or verified delivery</span></li>`).join('')}</ul><h4 style="margin:18px 0 8px;font-size:12px;text-transform:uppercase;color:var(--bad)">Risks</h4><ul class="summary-list">${f.risks.map(x=>`<li>⚠ ${esc(x)}<span class="evidence">Owner: partnership lead</span></li>`).join('')}</ul><h4 style="margin:18px 0 8px;font-size:12px;text-transform:uppercase;color:var(--accent)">Opportunities</h4><ul class="summary-list">${f.opps.map(x=>`<li>• ${esc(x)}</li>`).join('')}</ul></div></section></div><aside><div class="decision-card"><div style="font-size:11px;text-transform:uppercase;font-weight:700;letter-spacing:.06em">Recommended action</div><div class="decision">${label}</div><div style="font-size:12.5px;color:var(--ink-soft)">${s.verdict?esc(s.verdict):'Add a verdict to document the decision rationale.'}</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px">${CALLS.map(x=>`<button class="chip ${s.call===x?'on':''}" onclick="setCall('${x}')">${x==='renegotiate'?'Revised terms':x[0].toUpperCase()+x.slice(1)}</button>`).join('')}</div></div><section class="panel" style="margin-top:18px"><div class="panel-head"><h3>Timeline</h3></div><div class="panel-body"><div class="timeline"><div>Next review<small>${fmtDate(s.date)} · partnership owner</small></div><div>Negotiation window<small>Confirm with commercial lead</small></div><div>Contract expiry<small>${fmtDate(p.termEnd) || 'Not recorded'}</small></div><div>Activation planning<small>Before next review period</small></div></div></div></section></aside></div>`;return html;}
 function renderAIInsights(p,s){const f=executiveFacts(s),m=f.m,c=f.c;const change=m.del!==null&&m.guar!==null?`Audience delivery is ${Math.round((m.del-m.guar)/m.guar*100)}% against the current guarantee.`:'Audience delivery is not yet complete enough to compare with the guarantee.';const commercial=n(c.ngrAct)!==null?`Attributable NGR is ${money(c.ngrAct)}${n(c.ngrExp)!==null?` against ${money(c.ngrExp)} expected`:''}.`:'No attributable NGR has been recorded in this review point.';let html=moduleHero('Module 05 · reviewer-assisted drafting','AI partnership insights','Evidence-grounded drafts to help reviewers prepare a summary, risks and negotiation points. Review and edit before sharing.',`<button class="btn btn-primary" onclick="editAssessment()">Review source evidence</button>`);html+=`<section class="panel"><div class="panel-head"><h3>Draft executive summary</h3><span class="lil">Human review required</span></div><div class="panel-body"><div class="insight">${esc(p.name)} is currently marked ${s.status==='good'?'on track':s.status==='warn'?'for review':'with insufficient or mixed evidence'}. ${change} ${commercial} The current recommended action is ${s.call?esc(s.call):'not set'}.</div><div class="grid2"><div><h4 style="margin:0 0 8px">Strengths</h4><ul class="summary-list">${f.highlights.map(x=>`<li>✓ ${esc(x)}</li>`).join('')}</ul><h4 style="margin:18px 0 8px">Risks to validate</h4><ul class="summary-list">${f.risks.map(x=>`<li>⚠ ${esc(x)}</li>`).join('')}</ul></div><div><h4 style="margin:0 0 8px">Opportunities</h4><ul class="summary-list">${f.opps.map(x=>`<li>• ${esc(x)}</li>`).join('')}</ul><h4 style="margin:18px 0 8px">Negotiation prompts</h4><ul class="summary-list"><li>Confirm inventory and delivery commitments for the next period.</li><li>Use the metric-level benchmark view to identify the specific terms to improve.</li><li>Replace unused assets with measurable digital or content inventory where appropriate.</li></ul></div></div><div class="ai-note">Grounding: this draft uses only the selected snapshot’s commercial results, media delivery, assessment and verdict. It does not infer missing values or send anything automatically.</div></div></section>`;return html;}
 
 /* ============================================================ ACTIONS (continued) ============================================================ */
-Object.assign(window,{sendMagicLink,signOut,editPartnerAccess,publishPartner});
+Object.assign(window,{signInPassword,signUpPassword,sendPasswordReset,updatePassword,signOut,editPartnerAccess,publishPartner});
 function go(s){ view.screen=s; view.sid=null; view.module='overview'; render(); }
 function openDetail(pid){ view.screen='detail'; view.pid=pid; view.sid=null; view.module='overview'; render(); }
 function setFilter(f){ view.filter=f; render(); }
@@ -1380,8 +1556,12 @@ Object.assign(window,{editPartnership,go,openDetail,setFilter,pickSnap,setStatus
 (async function boot(){
   if(SB){
     try{
+      SB.auth.onAuthStateChange((event,sess)=>{
+        if(event==='PASSWORD_RECOVERY'){ renderSetNewPassword(); return; }
+        if(sess && document.getElementById('loginEmail')){ location.reload(); }
+      });
       const {data:{session}}=await SB.auth.getSession();
-      if(!session){ SB.auth.onAuthStateChange((_e,sess)=>{ if(sess) location.reload(); }); renderLogin(); return; }
+      if(!session){ renderLogin(); return; }
       view.email=session.user.email;
       // owner?
       const {data:owner}=await SB.from('pr_owner').select('email').eq('email',view.email).maybeSingle();
