@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Partnership Review System</title>
+<title>Partnership Review Dashboard — Menu Fix v2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -580,7 +580,7 @@
    ============================================================ */
 const SUPABASE_URL = 'https://uboferpfurlnntryhrqv.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVib2ZlcnBmdXJsbm50cnlocnF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyNDQwMjcsImV4cCI6MjA5OTgyMDAyN30.86bSZHjKPibpdCDfFZrv2BDDkbq51QSc61Y-NaP3wq4'; /* anon public key */
-const PREVIEW_MODE = new URLSearchParams(location.search).get('preview') === '1';
+const PREVIEW_MODE = true; // Standalone version: opens directly with local Fanatics data.
 const USE_SB = !PREVIEW_MODE && !!SUPABASE_ANON_KEY && SUPABASE_ANON_KEY !== 'PASTE_YOUR_ANON_KEY_HERE';
 let SB = null;
 if(USE_SB){ try{ SB = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); }catch(e){ console.error('Supabase init failed',e); } }
