@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Partnership Review Dashboard — YTD Performance Linked</title>
+<title>Partnership Review Dashboard — Live Pulse &amp; Partner History</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -249,6 +249,15 @@
   .wk-item .wk-aud{font-family:'JetBrains Mono';font-weight:600}
   .wk-status{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 8px;border-radius:5px}
   .wk-pending{background:var(--warn-bg);color:var(--warn)} .wk-verified{background:var(--good-bg);color:var(--good)}
+  .wk-baseline{background:#F3F4F6;color:var(--ink-soft)}
+  .wk-item.is-baseline{background:#FAFAFB;color:var(--ink-soft)}
+  .wk-source{font-size:10.5px;color:var(--ink-faint)}
+  .wk-breakdown{position:relative}
+  .wk-breakdown summary{list-style:none;cursor:pointer;color:var(--ink-soft);font-size:11.5px;font-weight:600}
+  .wk-breakdown summary::-webkit-details-marker{display:none}
+  .wk-breakdown[open] .wk-breakdown-data{display:flex}
+  .wk-breakdown-data{display:none;position:absolute;right:0;top:24px;z-index:8;min-width:260px;gap:12px;background:var(--ink);color:#fff;border-radius:8px;padding:10px 12px;box-shadow:var(--shadow-lg);font-size:11px;white-space:nowrap}
+  .wk-breakdown-data b{font-family:'JetBrains Mono';display:block;margin-top:2px}
   .wk-fulfil{font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:5px;margin-left:8px}
   .wk-fulfil-ok{background:var(--good-bg);color:var(--good)} .wk-fulfil-mid{background:var(--warn-bg);color:var(--warn)} .wk-fulfil-low{background:var(--bad-bg);color:var(--bad)}
   .wk-empty{font-size:13px;color:var(--ink-faint);font-style:italic;margin-bottom:12px}
@@ -304,6 +313,7 @@
   .summary-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:18px}.summary-list{margin:0;padding:0;list-style:none}.summary-list li{padding:10px 0;border-bottom:1px solid var(--line-soft);font-size:13px}.summary-list li:last-child{border-bottom:0}.summary-list .evidence{display:block;color:var(--ink-faint);font-size:11.5px;margin-top:3px}.decision-card{border-radius:var(--radius);padding:18px;border:1px solid var(--accent);background:var(--accent-soft)}.decision-card .decision{font-family:'Space Grotesk';font-size:24px;font-weight:700;color:var(--accent);margin:3px 0 7px}.timeline{border-left:2px solid var(--line);margin:4px 0 0 6px;padding-left:15px}.timeline div{position:relative;padding:0 0 14px;font-size:12.5px}.timeline div:before{content:'';position:absolute;left:-20px;top:4px;width:8px;height:8px;border-radius:50%;background:var(--accent)}.timeline small{color:var(--ink-faint);display:block;margin-top:2px}
   .insight{border-left:3px solid var(--accent);padding:13px 15px;background:#F7F8FA;border-radius:0 9px 9px 0;margin-bottom:14px;font-size:13.5px;line-height:1.55}.ai-note{font-size:11.5px;color:var(--ink-faint);margin-top:10px}.data-note{font-size:11.5px;color:var(--ink-faint);margin-top:12px;padding-top:11px;border-top:1px solid var(--line-soft)}
   .overview-layout{display:grid;grid-template-columns:minmax(310px,.78fr) minmax(0,1.22fr);gap:18px;align-items:start}.overview-rail{display:flex;flex-direction:column;gap:18px}.overview-rail .panel{margin-bottom:0}.pulse-status{display:flex;align-items:center;gap:8px;margin-bottom:14px}.pulse-status b{font-family:'Space Grotesk';font-size:17px}.pulse-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:9px;overflow:hidden}.pulse-grid div{background:var(--card);padding:11px}.pulse-grid span{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint);font-weight:700}.pulse-grid b{display:block;margin-top:3px;font-size:12.5px;color:var(--ink)}.pulse-note{font-size:12.5px;color:var(--ink-soft);line-height:1.5;margin:14px 0 0}.pulse-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}
+  .pulse-evidence{margin:11px 0 0;padding:10px 0 0 16px;border-top:1px solid var(--line-soft);color:var(--ink-soft);font-size:11.5px;line-height:1.45}.pulse-evidence li{margin:4px 0}.pulse-fresh{font-size:10.5px;color:var(--ink-faint);margin-top:10px}
   @media(max-width:860px){.metric-strip{grid-template-columns:1fr 1fr}.summary-grid,.overview-layout{grid-template-columns:1fr}}@media(max-width:520px){.metric-strip{grid-template-columns:1fr}.module-hero{padding:18px}.dtable{font-size:11.5px}.dtable th,.dtable td{padding:8px 6px}}
   @media print{header.top,.module-nav,.linkbtn,.btn,.filters,#modalMount,#toastMount{display:none!important}body{background:#fff}main{max-width:none;padding:0}.panel,.metric-card{box-shadow:none}.module-hero{background:#fff;color:var(--ink);border:1px solid var(--line)}.module-hero p,.module-hero .eyebrow{color:var(--ink-soft)}}
   @media(max-width:720px){
@@ -1321,6 +1331,45 @@ async function setAssetPerWeek(cid,id,v){
 }
 Object.assign(window,{setEntMonth,setEntRounds,setAssetPerWeek});
 
+function currentPulse(p,s){
+  const m=mediaRoll(s,p);
+  const audienceComps=(s.media.components||[]).filter(c=>c.mode==='audience');
+  const missing=audienceComps.filter(c=>deliveryMonthsLogged(c,p)===0).map(c=>c.name);
+  const pending=(s.media.components||[]).reduce((sum,c)=>sum+weeksOf(c).filter(w=>w.status!=='verified').length,0);
+  let assetActual=0,assetTarget=0,assetRows=0;
+  (s.media.components||[]).forEach(c=>{
+    const verified=verifiedWeeksLogged(c);
+    if(!verified)return;
+    (c.assets||[]).forEach(as=>{
+      const target=(+as.perWeek||0)*verified;
+      if(target>0){ assetTarget+=target; assetActual+=verifiedAssetDeliveredTotal(c,as.id); assetRows++; }
+    });
+  });
+  const assetPct=assetTarget?Math.round(assetActual/assetTarget*100):null;
+  const cpmDelta=(m.delCpm!==null&&m.propCpm)?Math.round((m.delCpm-m.propCpm)/m.propCpm*100):null;
+  let score=0;
+  if(cpmDelta!==null) score+=cpmDelta<=0?2:(cpmDelta<=10?0:-2);
+  if(assetPct!==null) score+=assetPct>=90?1:(assetPct>=75?0:-2);
+  if(missing.length) score-=Math.min(2,missing.length);
+  if(pending) score-=1;
+  if(m.del===null) score-=2;
+  const status=score>=2?'good':score>=0?'warn':'bad';
+  const label={good:'On track',warn:'Watch',bad:'Off track'}[status];
+  const call=status==='good'?'Maintain and optimise':status==='warn'?'Resolve current gaps':'Intervention required';
+  const evidence=[];
+  if(m.delCpm!==null&&m.propCpm!==null) evidence.push(`Delivered CPM YTD is $${m.delCpm.toFixed(2)}, ${Math.abs(cpmDelta)}% ${cpmDelta<=0?'better':'worse'} than the proposed $${m.propCpm.toFixed(2)}.`);
+  else evidence.push('There is not enough verified delivery to calculate a dependable CPM YTD.');
+  if(assetPct!==null) evidence.push(`Logged asset fulfilment is ${assetPct}% across ${assetRows} measured asset${assetRows!==1?'s':''}.`);
+  else evidence.push('No verified asset delivery is available for assessment yet.');
+  if(missing.length) evidence.push(`No verified views/listens have been received for ${missing.join(', ')}.`);
+  if(pending) evidence.push(`${pending} monthly submission${pending!==1?'s are':' is'} awaiting verification and excluded from current results.`);
+  let summary;
+  if(status==='good') summary='Current delivery is efficient and the verified asset record is supporting the partnership case. Maintain the plan while looking for incremental optimisation.';
+  else if(status==='warn') summary='The partnership is showing positive evidence, but the current record is incomplete. Resolve the identified reporting or delivery gaps before confirming the partnership is fully on track.';
+  else summary='Current delivery evidence does not support an on-track assessment. Address efficiency, asset delivery and missing reporting before further investment decisions.';
+  return {status,label,call,summary,evidence,assetPct,pending,missing,m};
+}
+
 function renderDetail(){
   const p=STATE.partnerships.find(x=>x.id===view.pid);
   const s=currentSnap(p); const m=mediaRoll(s,p);
@@ -1351,20 +1400,22 @@ function renderDetail(){
 
   /* The left rail carries decision context. Revenue attribution (NGR/actives/turnover) is
      intentionally not tracked at partnership level — value is read through reach and CPM. */
-  const pulseLabel={good:'On track',warn:'Watch',bad:'Off track',none:'Not set'}[s.status||'none'];
-  const pulseClass=s.status||'none';
-  const callLabel=s.call?({renew:'Renew',evolve:'Evolve',renegotiate:'Revised terms',exit:'Exit'}[s.call]||s.call):'Not set';
-  const delivery=metricValue(p,s,'delivery');
+  const pulse=currentPulse(p,s);
+  const pulseLabel=pulse.label;
+  const pulseClass=pulse.status;
+  const callLabel=pulse.call;
   const cpmColor=(m.delCpm!==null&&m.propCpm!==null)?(m.delCpm<=m.propCpm?'good':'bad'):'';
   const cpmCell=m.delCpm!==null
     ?`<div style="grid-column:1/-1"><span>Delivered CPM YTD${m.periodMatched?' · investment YTD ÷ views/listens YTD':''}</span><b style="font-size:15px;color:var(--${cpmColor||'ink'})">$${m.delCpm.toFixed(2)}${m.propCpm!==null?` <span style="font-size:11px;font-weight:600;color:var(--ink-faint)">vs $${m.propCpm.toFixed(2)} proposed</span>`:''}</b></div>`
     :`<div style="grid-column:1/-1"><span>Delivered CPM YTD</span><b style="color:var(--ink-faint)">Not yet measured${m.propCpm!==null?` — $${m.propCpm.toFixed(2)} proposed`:''}</b></div>`;
-  html+=`<div class="panel"><div class="panel-head"><h3>Partnership pulse</h3><span class="lil">Decision context</span></div><div class="panel-body">
+  html+=`<div class="panel"><div class="panel-head"><h3>Current pulse</h3><span class="lil">Live YTD review</span></div><div class="panel-body">
     <div class="pulse-status"><span class="statusdot sd-${pulseClass}"><i></i>${pulseLabel}</span><b>${callLabel}</b></div>
-    <div class="pulse-grid"><div><span>Investment</span><b>${money(invShown)}</b></div><div><span>Review point</span><b>${esc(s.label)}</b></div>
-      <div><span>Views/listens YTD</span><b>${m.del!==null?aud(m.del)+' delivered':m.guar!==null?aud(m.guar)+' guaranteed':'—'}</b></div><div><span>Entitlement delivery</span><b>${delivery===null?'Not yet measured':Math.round(delivery)+'%'}</b></div>
+    <div class="pulse-grid"><div><span>Total investment</span><b>${money(invShown)}</b></div><div><span>Investment YTD</span><b>${m.spendToDate!==null?money(m.spendToDate):'—'}</b></div>
+      <div><span>Views/listens YTD</span><b>${m.del!==null?aud(m.del)+' delivered':m.guar!==null?aud(m.guar)+' guaranteed':'—'}</b></div><div><span>Asset fulfilment</span><b>${pulse.assetPct!==null?pulse.assetPct+'%':'Not yet measured'}</b></div>
       ${cpmCell}</div>
-    <p class="pulse-note">${s.verdict?esc(s.verdict):'Add a verdict to capture the current recommendation and the evidence behind it.'}</p>
+    <p class="pulse-note">${esc(pulse.summary)}</p>
+    <ul class="pulse-evidence">${pulse.evidence.map(item=>`<li>${esc(item)}</li>`).join('')}</ul>
+    <div class="pulse-fresh">Recalculated from verified monthly performance and asset records. Pending submissions are excluded.</div>
     <div class="pulse-actions"><button class="chip" onclick="setModule('executive')">Executive summary</button></div>
   </div></div></div>`;
 
@@ -1495,6 +1546,30 @@ function lever(key,label,d){
 }
 
 /* ============================================================ PARTNER PORTAL ============================================================ */
+function importedMonthLabel(mo,p){
+  const y=p&&p.termStart?new Date(p.termStart+'T00:00').getFullYear():new Date().getFullYear();
+  return `${mo} ${y}`;
+}
+function importedHistory(c,p){
+  const staticM=MONTHLY[p.name], key=staticShowKey(staticM,c.name);
+  const sh=key?staticM.shows[key]:null;
+  if(!staticM||!sh)return [];
+  const baselineIndex=sh.baselineUntil?staticM.months.indexOf(sh.baselineUntil):-1;
+  return staticM.months.filter(mo=>sh.data[mo]).map(mo=>{
+    const d=sh.data[mo], i=staticM.months.indexOf(mo);
+    return {kind:'imported',id:`imported_${slug(c.name)}_${mo}`,label:importedMonthLabel(mo,p),
+      total:Object.values(d).reduce((a,v)=>a+(+v||0),0),data:d,baseline:baselineIndex>=0&&i<=baselineIndex};
+  });
+}
+function importedPartnershipLabels(p){
+  const staticM=MONTHLY[p.name];
+  return new Set(staticM?staticM.months.map(mo=>importedMonthLabel(mo,p)):[]);
+}
+function nextPartnerReportMonth(c,p){
+  const unavailable=importedPartnershipLabels(p);
+  weeksOf(c).forEach(w=>unavailable.add(w.label));
+  return monthOptionsFor(p).find(m=>!unavailable.has(m))||null;
+}
 function renderPartner(){
   const p=STATE.partnerships.find(x=>x.id===view.partnerPid)||STATE.partnerships[0];
   const s=latestSnap(p);
@@ -1505,22 +1580,29 @@ function renderPartner(){
   let html=`<div class="pbanner">
     <div class="pb-eyebrow">${eyebrow}</div>
     <h1>${title}</h1>
-    <p>Each month, log the audience by platform and the entitlements delivered, for every show. PointsBet reviews and verifies each submission.</p>
-    <div class="pb-note"><i></i>Submissions land as “pending” until PointsBet verifies them.</div>
+    <p>Review verified delivery to date, then submit the next month's views/listens and entitlements for each show.</p>
+    <div class="pb-note"><i></i>Imported history is read-only. New submissions remain pending until PointsBet verifies them.</div>
   </div>`;
 
   if(!comps.length){ html+=`<div class="empty-state"><h3>No shows set up yet</h3><p>PointsBet hasn't configured any shows for this period.</p></div>`; document.getElementById('app').innerHTML=html; return; }
 
   comps.forEach(c=>{
-    const wl=distinctLabelsLogged(c);
-    const total=deliveredFromWeeks(c);
-    const usedLabels=new Set(weeksOf(c).map(x=>x.label));
-    const monthsLeft=monthOptionsFor(p).some(m=>!usedLabels.has(m));
+    const imported=importedHistory(c,p);
+    const live=weeksOf(c).map(w=>({kind:'live',...w,total:weekAudTotal(w)}));
+    const rows=[...imported,...live];
+    const delivered=performanceDelivery(c,p);
+    const pending=live.filter(w=>w.status!=='verified').length;
+    const nextMonth=nextPartnerReportMonth(c,p);
     html+=`<div class="pshow"><div class="pshow-head">
       <span class="ps-name">${esc(c.name)}</span>
-      <span class="ps-sum">${c.mode==='audience'?`<b>${total!==null?aud(total):'0'}</b>audience across ${wl} month${wl!==1?'s':''} logged`:`<b>${wl}</b>month${wl!==1?'s':''} logged`}</span>
+      <span class="ps-sum">${c.mode==='audience'?`<b>${delivered.total!==null?aud(delivered.total):'—'}</b>views/listens YTD · ${delivered.months} verified month${delivered.months!==1?'s':''}${pending?` · ${pending} pending`:''}`:`<b>${live.length}</b>month${live.length!==1?'s':''} submitted`}</span>
     </div><div class="pshow-body">`;
-    if(weeksOf(c).length){ html+=`<div class="wk-list">`+weeksOf(c).map(w=>{
+    if(rows.length){ html+=`<div class="wk-list">`+rows.map(w=>{
+        if(w.kind==='imported'){
+          const breakdown=[['YouTube',w.data.yt],['Social',w.data.soc],['Acast',w.data.ac]].filter(([,v])=>v!==undefined);
+          return `<div class="wk-item ${w.baseline?'is-baseline':''}"><div class="wk-l"><span class="wk-status ${w.baseline?'wk-baseline':'wk-verified'}">${w.baseline?'baseline':'verified'}</span><span>${esc(w.label)}</span><span class="wk-source">${w.baseline?'Pre-partnership · excluded from YTD':'Imported report · read-only'}</span></div>
+            <div style="display:flex;align-items:center;gap:14px"><span class="wk-aud">${aud(w.total)}</span><details class="wk-breakdown"><summary>View breakdown</summary><div class="wk-breakdown-data">${breakdown.map(([label,v])=>`<span>${label}<b>${aud(v)}</b></span>`).join('')}</div></details></div></div>`;
+        }
         // partner-visible fulfilment feedback: only once verified, and only entitlement counts vs contracted — never CPM/$/target audience
         let fulfil='';
         if(w.status==='verified' && (c.assets||[]).length){
@@ -1531,8 +1613,8 @@ function renderPartner(){
         return `<div class="wk-item"><div class="wk-l"><span class="wk-status wk-${w.status||'pending'}">${w.status||'pending'}</span><span>${esc(w.label)}</span>${fulfil}</div>
         <div style="display:flex;align-items:center;gap:12px">${c.mode==='audience'?`<span class="wk-aud">${aud(weekAudTotal(w))}</span>`:''}<button class="linkbtn" onclick="openWeekForm('${c.id}','${w.id}')">Edit</button></div></div>`;
       }).join('')+`</div>`;
-    } else html+=`<div class="wk-empty">No months logged yet — add your first month below.</div>`;
-    html+= monthsLeft?`<button class="btn btn-primary" onclick="openWeekForm('${c.id}')">＋ Log a month</button>`:`<div class="wk-hint" style="margin:8px 0 0">Every month in this show's term is already logged — use Edit above to correct one.</div>`;
+    } else html+=`<div class="wk-empty">No delivery received yet${nextMonth?` — ${esc(nextMonth)} reporting is due`:''}.</div>`;
+    html+= nextMonth?`<button class="btn btn-primary" onclick="openWeekForm('${c.id}')">＋ Log ${esc(nextMonth)}</button>`:`<div class="wk-hint" style="margin:8px 0 0">Every reporting month is already recorded. Use Edit on a submitted month to send a correction.</div>`;
     html+=`</div></div>`;
   });
   document.getElementById('app').innerHTML=html;
@@ -1564,7 +1646,11 @@ function openWeekForm(cid,wid){
   }
   let monthOpts; const baseOpts=monthOptionsFor(p);
   if(w){ monthOpts=(w.label&&!baseOpts.includes(w.label))?[w.label,...baseOpts]:baseOpts; }
-  else { const usedLabels=new Set((c.weeks||[]).map(x=>x.label)); monthOpts=baseOpts.filter(m=>!usedLabels.has(m)); }
+  else {
+    const usedLabels=importedPartnershipLabels(p);
+    (c.weeks||[]).forEach(x=>usedLabels.add(x.label));
+    monthOpts=baseOpts.filter(m=>!usedLabels.has(m));
+  }
   const monthSelect=monthOpts.length?`<select class="inp" id="w_label" ${w?'disabled':''}>${!w?'<option value="" disabled selected>Select month</option>':''}${monthOpts.map(m=>`<option value="${esc(m)}" ${w&&w.label===m?'selected':''}>${esc(m)}</option>`).join('')}</select>`:`<div class="wk-hint" style="margin:0">Every month in this show's term already has an entry. Edit an existing month above to make a correction.</div>`;
   const reverifyNote=(w&&w.status==='verified')?`<div class="wk-hint" style="color:var(--warn);margin-top:-4px;margin-bottom:14px">This month is already verified. Saving a change here will send it back to PointsBet for re-verification before it counts again.</div>`:'';
   mount(scrim(`<div class="modal-head"><h3>${wid?'Edit month':'Log a month'} — ${esc(c.name)}</h3><button class="x" onclick="closeModal()">×</button></div>
