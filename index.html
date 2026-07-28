@@ -11,14 +11,14 @@
   :root{
     --ink:#16181D; --ink-soft:#5A616E; --ink-faint:#8A909C;
     --bg:#ECEEF1; --card:#FFFFFF; --line:#E1E4E9; --line-soft:#EDEFF2;
-    --brand:#E4002B; --accent:#2F6BE0; --accent-soft:#EAF0FC;
+    --brand:#E4002B; --accent:#1F3A5F; --accent-soft:#EAEEF4;
     --good:#10876B; --good-bg:#E4F3EE;
     --warn:#C98A00; --warn-bg:#FAF1DC;
-    --bad:#D23B47;  --bad-bg:#FBE7E9;
+    --bad:#E4632B;  --bad-bg:#FCEDE4;
     --track:#EDEFF2;
     --radius:14px; --radius-sm:9px;
-    --shadow:0 1px 2px rgba(20,24,31,.05),0 8px 24px -12px rgba(20,24,31,.12);
-    --shadow-lg:0 12px 40px -12px rgba(20,24,31,.28);
+    --shadow:0 1px 2px rgba(20,24,31,.04);
+    --shadow-lg:0 12px 40px -16px rgba(20,24,31,.22);
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
@@ -42,6 +42,19 @@
   main{max-width:1180px;margin:0 auto;padding:26px 22px 90px}
 
   .port{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin-bottom:8px}
+  .att-banner{border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px;background:var(--card)}
+  .att-banner.att-clear{border-color:var(--good-bg)}
+  .att-head{font-family:'Space Grotesk';font-size:14px;font-weight:600;margin-bottom:10px}
+  .att-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:7px 0;border-top:1px solid var(--line-soft);cursor:pointer}
+  .att-row:hover .att-name{color:var(--accent)}
+  .att-name{font-size:13.5px;font-weight:600}
+  .att-bits{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+  .att-pill{font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px}
+  .att-pending{background:var(--warn-bg);color:var(--warn)}
+  .att-overdue{background:var(--bad-bg);color:var(--bad)}
+  .att-off{background:var(--bad-bg);color:var(--bad)}
+  .att-clear-line{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--ink-soft);padding:2px 2px 14px}
+  .att-clear-dot{width:8px;height:8px;border-radius:50%;background:var(--good);flex:none}
   .port .cell{background:var(--card);padding:16px 18px}
   .port .k{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint);font-weight:600}
   .port .v{font-family:'Space Grotesk';font-weight:700;font-size:24px;margin-top:5px;letter-spacing:-.02em}
@@ -148,7 +161,7 @@
   .comp-ent summary::-webkit-details-marker{display:none}
   .ent-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
   .ent-chip{font-size:11px;background:var(--line-soft);color:var(--ink-soft);padding:3px 8px;border-radius:5px}
-  .comp-editbtn{opacity:0;color:var(--ink-faint);font-size:13px;padding:2px 7px;border-radius:5px}
+  .comp-editbtn{opacity:0;color:var(--accent);font-size:12px;font-weight:600;padding:2px 7px;border-radius:5px}
   .comp:hover .comp-editbtn{opacity:1}
   .comp-editbtn:hover{background:var(--line-soft);color:var(--ink)}
   .media-total{display:flex;justify-content:space-between;align-items:center;border-top:2px solid var(--line);margin-top:4px;padding-top:12px;font-size:13px}
@@ -192,7 +205,7 @@
   .frow3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
 
   .btn{display:inline-flex;align-items:center;gap:7px;font-weight:600;font-size:13px;padding:9px 15px;border-radius:9px;transition:.12s}
-  .btn-primary{background:var(--accent);color:#fff} .btn-primary:hover{background:#2559c4}
+  .btn-primary{background:var(--accent);color:#fff} .btn-primary:hover{background:#152943}
   .btn-ghost{background:var(--card);border:1px solid var(--line);color:var(--ink)} .btn-ghost:hover{border-color:var(--ink-soft)}
   .btn-danger{color:var(--bad)} .btn-danger:hover{background:var(--bad-bg)}
 
@@ -236,6 +249,8 @@
   .wk-item .wk-aud{font-family:'JetBrains Mono';font-weight:600}
   .wk-status{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 8px;border-radius:5px}
   .wk-pending{background:var(--warn-bg);color:var(--warn)} .wk-verified{background:var(--good-bg);color:var(--good)}
+  .wk-fulfil{font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:5px;margin-left:8px}
+  .wk-fulfil-ok{background:var(--good-bg);color:var(--good)} .wk-fulfil-mid{background:var(--warn-bg);color:var(--warn)} .wk-fulfil-low{background:var(--bad-bg);color:var(--bad)}
   .wk-empty{font-size:13px;color:var(--ink-faint);font-style:italic;margin-bottom:12px}
 
   .wkform{background:#fafbfc;border:1px solid var(--line);border-radius:var(--radius-sm);padding:16px}
@@ -287,13 +302,225 @@
   .stackbar{height:12px;border-radius:6px;overflow:hidden;background:var(--track);display:flex;margin:12px 0}.stackbar span{height:100%}.legend{display:flex;gap:13px;flex-wrap:wrap;font-size:11.5px;color:var(--ink-soft)}.legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px}
   .funnel{display:flex;align-items:stretch;gap:5px;overflow-x:auto;padding:4px 0}.funnel-step{min-width:112px;flex:1;background:var(--accent-soft);border-radius:8px;padding:11px}.funnel-step:nth-child(2){background:#e9f0fb}.funnel-step:nth-child(3){background:#edf5f2}.funnel-step:nth-child(4){background:#f8f0e4}.funnel-step .fnum{font-family:'Space Grotesk';font-size:19px;font-weight:700}.funnel-step .flab{font-size:10.5px;color:var(--ink-soft);text-transform:uppercase;font-weight:700;letter-spacing:.04em}
   .summary-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:18px}.summary-list{margin:0;padding:0;list-style:none}.summary-list li{padding:10px 0;border-bottom:1px solid var(--line-soft);font-size:13px}.summary-list li:last-child{border-bottom:0}.summary-list .evidence{display:block;color:var(--ink-faint);font-size:11.5px;margin-top:3px}.decision-card{border-radius:var(--radius);padding:18px;border:1px solid var(--accent);background:var(--accent-soft)}.decision-card .decision{font-family:'Space Grotesk';font-size:24px;font-weight:700;color:var(--accent);margin:3px 0 7px}.timeline{border-left:2px solid var(--line);margin:4px 0 0 6px;padding-left:15px}.timeline div{position:relative;padding:0 0 14px;font-size:12.5px}.timeline div:before{content:'';position:absolute;left:-20px;top:4px;width:8px;height:8px;border-radius:50%;background:var(--accent)}.timeline small{color:var(--ink-faint);display:block;margin-top:2px}
-  .insight{border-left:3px solid var(--accent);padding:13px 15px;background:#f8faff;border-radius:0 9px 9px 0;margin-bottom:14px;font-size:13.5px;line-height:1.55}.ai-note{font-size:11.5px;color:var(--ink-faint);margin-top:10px}.data-note{font-size:11.5px;color:var(--ink-faint);margin-top:12px;padding-top:11px;border-top:1px solid var(--line-soft)}
+  .insight{border-left:3px solid var(--accent);padding:13px 15px;background:#F7F8FA;border-radius:0 9px 9px 0;margin-bottom:14px;font-size:13.5px;line-height:1.55}.ai-note{font-size:11.5px;color:var(--ink-faint);margin-top:10px}.data-note{font-size:11.5px;color:var(--ink-faint);margin-top:12px;padding-top:11px;border-top:1px solid var(--line-soft)}
   .overview-layout{display:grid;grid-template-columns:minmax(310px,.78fr) minmax(0,1.22fr);gap:18px;align-items:start}.overview-rail{display:flex;flex-direction:column;gap:18px}.overview-rail .panel{margin-bottom:0}.pulse-status{display:flex;align-items:center;gap:8px;margin-bottom:14px}.pulse-status b{font-family:'Space Grotesk';font-size:17px}.pulse-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:9px;overflow:hidden}.pulse-grid div{background:var(--card);padding:11px}.pulse-grid span{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint);font-weight:700}.pulse-grid b{display:block;margin-top:3px;font-size:12.5px;color:var(--ink)}.pulse-note{font-size:12.5px;color:var(--ink-soft);line-height:1.5;margin:14px 0 0}.pulse-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}
   @media(max-width:860px){.metric-strip{grid-template-columns:1fr 1fr}.summary-grid,.overview-layout{grid-template-columns:1fr}}@media(max-width:520px){.metric-strip{grid-template-columns:1fr}.module-hero{padding:18px}.dtable{font-size:11.5px}.dtable th,.dtable td{padding:8px 6px}}
   @media print{header.top,.module-nav,.linkbtn,.btn,.filters,#modalMount,#toastMount{display:none!important}body{background:#fff}main{max-width:none;padding:0}.panel,.metric-card{box-shadow:none}.module-hero{background:#fff;color:var(--ink);border:1px solid var(--line)}.module-hero p,.module-hero .eyebrow{color:var(--ink-soft)}}
+  @media(max-width:720px){
+    main{padding:18px 14px 70px}
+    .metric-strip{grid-template-columns:1fr 1fr!important;gap:8px}
+    .att-row{flex-direction:column;align-items:flex-start;gap:6px}
+    .att-bits{justify-content:flex-start}
+    .pulse-grid{grid-template-columns:1fr}
+    .detail-head .dh-top{flex-direction:column;gap:10px}
+    .dtable{font-size:11.5px}.dtable th,.dtable td{padding:7px 6px}
+    .section-row{flex-wrap:wrap;gap:10px}
+  }
+  @media(max-width:420px){
+    .metric-strip{grid-template-columns:1fr!important}
+    .port{grid-template-columns:1fr}
+  }
+
+  /* ============================================================
+     EXECUTIVE DASHBOARD SYSTEM
+     A restrained BI shell layered over the existing application.
+     ============================================================ */
+  :root{
+    --ink:#111318;
+    --ink-soft:#667085;
+    --ink-faint:#8B95A5;
+    --bg:#F5F6F8;
+    --card:#FFFFFF;
+    --line:#E3E7EC;
+    --line-soft:#EEF0F3;
+    --brand:#E31B23;
+    --accent:#E31B23;
+    --accent-soft:#FDEBEC;
+    --good:#356B4C;
+    --good-bg:#EAF3ED;
+    --warn:#93610A;
+    --warn-bg:#FFF3DA;
+    --bad:#B4232C;
+    --bad-bg:#FDE9EA;
+    --track:#EEF0F3;
+    --radius:12px;
+    --radius-sm:8px;
+    --shadow:0 1px 2px rgba(16,24,40,.035),0 8px 22px rgba(16,24,40,.035);
+    --shadow-lg:0 18px 48px -18px rgba(16,24,40,.28);
+    --nav:#111827;
+    --nav-soft:#202B3D;
+  }
+  body{background:var(--bg);font-size:13px}
+  .app-shell{display:grid;grid-template-columns:248px minmax(0,1fr);min-height:100vh}
+  .shell-nav{position:sticky;top:0;height:100vh;background:var(--nav);color:#fff;padding:28px 18px 22px;display:flex;flex-direction:column;z-index:50;overflow-y:auto}
+  .shell-brand{display:flex;align-items:center;gap:11px;padding:0 11px 31px;font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;letter-spacing:-.02em}
+  .shell-mark{width:29px;height:29px;border-radius:8px;background:var(--brand);display:grid;place-items:center;color:#fff;font-family:'Space Grotesk';font-weight:700}
+  .shell-kicker{margin:0 11px 9px;color:#77859B;font-size:9px;font-weight:700;letter-spacing:.13em;text-transform:uppercase}
+  .shell-nav-list{display:grid;gap:4px}
+  .shell-nav-btn{position:relative;display:flex;align-items:center;gap:11px;width:100%;padding:11px 12px;border-radius:8px;color:#AEB8C8;text-align:left;font-size:12.5px;font-weight:600;transition:background .16s,color .16s,transform .16s}
+  .shell-nav-btn:hover{background:#1B2536;color:#fff;transform:translateX(1px)}
+  .shell-nav-btn.on{background:var(--nav-soft);color:#fff}
+  .shell-nav-btn.on:before{content:'';position:absolute;left:-18px;top:10px;width:3px;height:22px;border-radius:0 3px 3px 0;background:var(--brand)}
+  .shell-nav-btn svg{width:17px;height:17px;flex:none}
+  .shell-nav-spacer{flex:1}
+  .shell-partner{margin:24px 10px 0;padding-top:18px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px}
+  .shell-partner-logo{width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.13);background:#202B3D;display:grid;place-items:center;font-weight:700;font-size:11px}
+  .shell-partner strong{display:block;font-size:11.5px}.shell-partner small{display:block;color:#77859B;font-size:9.5px;margin-top:2px}
+  .shell-main{min-width:0}
+
+  header.top{position:sticky;top:0;height:68px;padding:0 38px;background:rgba(245,246,248,.92);color:var(--ink);border-bottom:1px solid var(--line);backdrop-filter:blur(12px);z-index:40}
+  header.top .wordmark{display:none}
+  .top .spacer{display:none}
+  #crumb{margin-right:auto}
+  .crumb{color:var(--ink-faint);font-size:11.5px}.crumb b{color:var(--ink);font-weight:700}.crumb button{color:var(--ink-soft)}
+  .crumb button:hover{color:var(--brand);text-decoration:none}
+  .top-btn{color:var(--ink-soft);font-size:11.5px;font-weight:650;padding:7px 10px;border:1px solid transparent}
+  .top-btn:hover{background:#fff;color:var(--ink);border-color:var(--line)}
+  .viewas .email{color:var(--ink-soft)}
+  .vtoggle{background:#E9EBEF;border-radius:7px}
+  .vtoggle button{color:var(--ink-soft);font-size:11px;padding:5px 10px}
+  .vtoggle button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(16,24,40,.08)}
+
+  main{max-width:1390px;margin:0 auto;padding:34px 38px 90px}
+  .port{border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:16px}
+  .port .cell{padding:22px 22px 20px}
+  .port .k,.metric-card .label{font-size:9.5px;font-weight:750;letter-spacing:.08em}
+  .port .v{font-family:'JetBrains Mono',monospace;font-size:29px;font-weight:700;letter-spacing:-.05em;margin-top:10px}
+  .port .sub{font-size:10.5px;margin-top:7px}
+  .att-banner{border-radius:10px;box-shadow:none;padding:13px 16px}
+  .att-head{font-family:'Inter';font-size:12.5px}
+  .section-row{margin:31px 1px 14px}
+  .section-row h2{font-size:19px;font-weight:700;letter-spacing:-.035em}
+  .chip{font-size:11px;border-radius:7px;padding:6px 10px}
+  .chip.on{background:var(--ink);border-color:var(--ink)}
+  .board{gap:18px}
+  .pcard{padding:22px 22px 18px;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .pcard:hover{transform:translateY(-1px);box-shadow:0 10px 28px rgba(16,24,40,.07)}
+  .pcard .statusline{width:3px}
+  .pcard .name{font-size:18px}.pcard .cp{font-size:11px}
+  .statusdot,.wk-status,.att-pill{border-radius:999px;font-size:9px;letter-spacing:.055em}
+  .cat{background:transparent;color:var(--brand);padding:0;font-size:9px;letter-spacing:.09em}
+  .metrics{margin-top:17px;gap:16px 24px}
+  .metric .mlab{font-size:9.5px}.metric .mval{font-size:11.5px}
+  .bar{height:5px}
+  .callbadge{border-radius:999px;font-size:9px;padding:4px 9px}
+
+  .detail-head{border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;box-shadow:none;padding:5px 0 25px;margin-bottom:17px}
+  .dh-name{font-size:34px;letter-spacing:-.045em}
+  .dh-cp{font-size:11.5px;margin-top:7px}.dh-term{font-size:10.5px}
+  select.sel,input.inp,textarea.inp{border-radius:7px;font-size:12px}
+  input.inp:focus,textarea.inp:focus,select.sel:focus{outline:3px solid rgba(227,27,35,.13);border-color:var(--brand)}
+  .module-nav{gap:22px;padding:0;margin:0 0 20px;border-bottom:1px solid var(--line)}
+  .module-nav button{padding:10px 1px 12px;border-radius:0;font-size:11.5px}
+  .module-nav button:hover{background:transparent;color:var(--ink)}
+  .module-nav button.on{position:relative;background:transparent;color:var(--ink)}
+  .module-nav button.on:after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--brand)}
+
+  .panel,.metric-card{border-radius:var(--radius);box-shadow:var(--shadow)}
+  .panel-head{padding:17px 20px}
+  .panel-head h3{font-family:'Inter';font-size:13px;font-weight:700;letter-spacing:-.01em}
+  .panel-head .lil{font-size:9px}
+  .panel-body{padding:20px}
+  .linkbtn{color:var(--ink);font-size:10.5px}
+  .linkbtn:hover{background:transparent;color:var(--brand)}
+  .btn{border-radius:7px;font-size:11.5px;padding:9px 14px}
+  .btn-primary{background:var(--brand)}
+  .btn-primary:hover{background:#BA131A}
+  .btn-ghost{background:#fff}
+  .overview-layout{grid-template-columns:minmax(300px,.7fr) minmax(0,1.3fr);gap:18px}
+  .pulse-status b{font-family:'Inter';font-size:15px}
+  .pulse-grid{border-radius:8px}
+  .pulse-grid span{font-size:8.5px}.pulse-grid b{font-family:'JetBrains Mono';font-size:11.5px}
+  .comp{border-radius:8px;background:#FCFCFD;padding:16px;margin-bottom:10px}
+  .comp-name{font-size:13px}.comp-inv{font-size:13px}
+  .quads{border-radius:8px}
+  .quad,.lever{background:#FCFCFD}
+  .verdict-panel{border-top:2px solid var(--brand)}
+  .vp-opt{border-radius:7px;font-size:11px}
+
+  .module-hero{position:relative;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:var(--radius);padding:24px 25px;box-shadow:var(--shadow);overflow:hidden}
+  .module-hero:before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--brand)}
+  .module-hero .eyebrow{color:var(--brand)}
+  .module-hero h2{font-size:25px}.module-hero p{color:var(--ink-soft)}
+  .metric-strip{gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+  .metric-card{border:0;border-radius:0;box-shadow:none;padding:19px 20px}
+  .metric-card .value{font-family:'JetBrains Mono';font-size:26px;letter-spacing:-.05em;margin-top:9px}
+  .dtable th{font-size:9px;background:#FAFAFB;padding:10px 12px}.dtable td{padding:12px}
+  .decision-card{border-color:var(--line);border-left:3px solid var(--brand);background:#FCFCFD}
+  .decision-card .decision{color:var(--ink)}
+  .insight{border-left-color:var(--brand);background:#FAFAFB}
+
+  .pbanner{position:relative;background:transparent;color:var(--ink);border:0;border-bottom:1px solid var(--line);border-radius:0;padding:4px 0 26px;box-shadow:none}
+  .pbanner .pb-eyebrow{color:var(--brand);font-size:9px;font-weight:750}
+  .pbanner h1{font-size:34px;letter-spacing:-.045em;margin:7px 0}
+  .pbanner p{color:var(--ink-soft)}
+  .pbanner .pb-note{color:var(--ink-soft)}.pbanner .pb-note i{background:var(--warn)}
+  .pshow{border-radius:var(--radius);box-shadow:var(--shadow)}
+  .pshow-head{padding:18px 20px}.pshow-head .ps-name{font-size:15px}
+  .wk-item{border-radius:7px;background:#FCFCFD}
+  .wkform{background:#FAFAFB;border-radius:8px}
+  .scrim{background:rgba(17,24,39,.55);backdrop-filter:blur(5px)}
+  .modal{border-radius:14px}.modal-head h3{font-family:'Inter';font-weight:700}
+  .toast{background:var(--nav);border-radius:8px}
+
+  @media(max-width:980px){
+    .app-shell{grid-template-columns:210px minmax(0,1fr)}
+    .shell-nav{padding-left:16px;padding-right:16px}
+    header.top{padding:0 26px}
+    main{padding-left:26px;padding-right:26px}
+  }
+  @media(max-width:760px){
+    .app-shell{display:block}
+    .shell-nav{position:relative;width:100%;height:auto;padding:16px 14px}
+    .shell-brand{padding:0 4px 14px}.shell-kicker,.shell-partner,.shell-nav-spacer{display:none}
+    .shell-nav-list{display:flex;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+    .shell-nav-list::-webkit-scrollbar{display:none}
+    .shell-nav-btn{width:auto;white-space:nowrap;padding:8px 10px;font-size:11px}
+    .shell-nav-btn.on:before{display:none}
+    .shell-nav-btn svg{display:none}
+    header.top{position:relative;height:auto;min-height:54px;padding:10px 15px;flex-wrap:wrap}
+    #crumb{width:100%;order:3}
+    main{padding:24px 15px 70px}
+    .dh-name,.pbanner h1{font-size:28px}
+    .board{grid-template-columns:1fr}
+    .overview-layout{grid-template-columns:1fr}
+  }
+  @media print{
+    .app-shell{display:block}
+    .shell-nav{display:none!important}
+    .shell-main{display:block}
+  }
 </style>
 </head>
 <body>
+<div class="app-shell">
+<aside class="shell-nav" aria-label="Primary navigation">
+  <div class="shell-brand"><span class="shell-mark">P</span><span>Partnership Review</span></div>
+  <p class="shell-kicker">Workspace</p>
+  <nav class="shell-nav-list">
+    <button class="shell-nav-btn on" id="shellPortfolio" onclick="shellGoPortfolio()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 13h6V4H4v9Zm0 7h6v-4H4v4Zm10 0h6v-9h-6v9Zm0-16v4h6V4h-6Z"/></svg>Portfolio
+    </button>
+    <button class="shell-nav-btn" id="shellOverview" onclick="shellGoModule('overview')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19V9m5 10V5m6 14v-7m5 7V8"/></svg>Partnership overview
+    </button>
+    <button class="shell-nav-btn" id="shellEfficiency" onclick="shellGoModule('efficiency')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m3 17 6-6 4 4 8-9"/><path d="M15 6h6v6"/></svg>Media efficiency
+    </button>
+    <button class="shell-nav-btn" id="shellExecutive" onclick="shellGoModule('executive')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 13h8M8 17h6"/></svg>Executive summary
+    </button>
+    <button class="shell-nav-btn" id="shellPartner" onclick="shellGoPartner()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2m7-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm13 10v-2a4 4 0 0 0-3-3.87"/></svg>Partner portal
+    </button>
+    <button class="shell-nav-btn" id="shellData" onclick="dataMenu()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>Data &amp; export
+    </button>
+  </nav>
+  <div class="shell-nav-spacer"></div>
+  <div class="shell-partner"><span class="shell-partner-logo">F</span><span><strong>Fanatics TV</strong><small>Media partner · Active</small></span></div>
+</aside>
+<div class="shell-main">
 <header class="top">
   <div class="wordmark"><span class="spade"></span>Partnership Review <small>PBA Media</small></div>
   <div class="spacer"></div>
@@ -304,6 +531,8 @@
 <main id="app"></main>
 <div id="modalMount"></div>
 <div id="toastMount"></div>
+</div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -323,7 +552,8 @@
    ============================================================ */
 const SUPABASE_URL = 'https://uboferpfurlnntryhrqv.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVib2ZlcnBmdXJsbm50cnlocnF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyNDQwMjcsImV4cCI6MjA5OTgyMDAyN30.86bSZHjKPibpdCDfFZrv2BDDkbq51QSc61Y-NaP3wq4'; /* anon public key */
-const USE_SB = !!SUPABASE_ANON_KEY && SUPABASE_ANON_KEY !== 'PASTE_YOUR_ANON_KEY_HERE';
+const PREVIEW_MODE = true; // Standalone version: opens directly with local Fanatics data.
+const USE_SB = !PREVIEW_MODE && !!SUPABASE_ANON_KEY && SUPABASE_ANON_KEY !== 'PASTE_YOUR_ANON_KEY_HERE';
 let SB = null;
 if(USE_SB){ try{ SB = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); }catch(e){ console.error('Supabase init failed',e); } }
 
@@ -332,11 +562,17 @@ function stripWeeks(doc){ const d=JSON.parse(JSON.stringify(doc)); (d.partnershi
 const db={
   async load(){
     if(SB){ try{ const {data,error}=await SB.from('pr_doc').select('doc').eq('id','main').maybeSingle(); if(error)throw error; return data?data.doc:null; }catch(e){ console.error('doc load',e); return null; } }
-    try{const r=await window.storage.get(KEY);return r?JSON.parse(r.value):null;}catch(e){return null;}
+    try{
+      if(window.storage){ const r=await window.storage.get(KEY); return r?JSON.parse(r.value):null; }
+      const r=localStorage.getItem(KEY); return r?JSON.parse(r):null;
+    }catch(e){return null;}
   },
   async save(doc){
     if(SB){ try{ const {error}=await SB.from('pr_doc').upsert({id:'main',doc:stripWeeks(doc),updated_at:new Date().toISOString()}); if(error)throw error; }catch(e){ console.error('doc save',e); } return; }
-    try{await window.storage.set(KEY,JSON.stringify(doc));}catch(e){console.error(e);}
+    try{
+      if(window.storage) await window.storage.set(KEY,JSON.stringify(doc));
+      else localStorage.setItem(KEY,JSON.stringify(doc));
+    }catch(e){console.error(e);}
   }
 };
 
@@ -344,7 +580,21 @@ let STATE=null;
 let view={screen:'board',pid:null,sid:null,filter:'all',mode:'internal',partnerPid:null,role:null,email:null,module:'overview',benchmarkBasis:'portfolio'};
 const CATEGORIES=['Racing','AFL','NRL','US Sports','Soccer','Other'];
 const CALLS=['renew','evolve','renegotiate','exit'];
-const MONTH_OPTIONS=['Mar 2026','Apr 2026','May 2026','Jun 2026','Jul 2026','Aug 2026','Sep 2026','Oct 2026'];
+const MONTH_NAMES=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+/* Generates the month-picker list from a partnership's own term dates (Mar 2026 – Oct 2026 style
+   labels), so each partner only ever sees months that actually fall within their contract term —
+   instead of one hardcoded range that only happened to fit FanaticsTV. Falls back to a generic
+   12-month-from-now window if term dates aren't set, so the form never has a truly empty picker. */
+function monthOptionsFor(p){
+  const fallback=(()=>{ const now=new Date(),opts=[]; for(let i=0;i<12;i++){ const d=new Date(now.getFullYear(),now.getMonth()+i,1); opts.push(MONTH_NAMES[d.getMonth()]+' '+d.getFullYear()); } return opts; })();
+  if(!p||!p.termStart||!p.termEnd) return fallback;
+  const start=new Date(p.termStart+'T00:00'), end=new Date(p.termEnd+'T00:00');
+  if(isNaN(start)||isNaN(end)||end<start) return fallback;
+  const opts=[]; let y=start.getFullYear(), m=start.getMonth();
+  const endY=end.getFullYear(), endM=end.getMonth();
+  while(y<endY || (y===endY && m<=endM)){ opts.push(MONTH_NAMES[m]+' '+y); m++; if(m>11){m=0;y++;} }
+  return opts.length?opts:fallback;
+}
 const LEVERS=[['growth','Growth'],['audience','Audience'],['channels','Channels & coverage'],['compliance','Compliance']];
 const uid=()=>Math.random().toString(36).slice(2,9);
 
@@ -557,8 +807,37 @@ function renderViewAs(){
 }
 function setMode(m){ view.mode=m; if(m==='partner'&&!view.partnerPid){ const f=STATE.partnerships.find(p=>(latestSnap(p).media.components||[]).some(c=>c.mode==='audience')); view.partnerPid=f?f.id:STATE.partnerships[0].id; } render(); }
 
+function shellActive(id){
+  document.querySelectorAll('.shell-nav-btn').forEach(b=>b.classList.toggle('on',b.id===id));
+}
+function syncShellNav(){
+  const internalOnly=['shellPortfolio','shellOverview','shellEfficiency','shellExecutive','shellData'];
+  if(view.role==='partner') internalOnly.forEach(id=>{ const el=document.getElementById(id); if(el)el.style.display='none'; });
+  let active='shellPortfolio';
+  if(view.mode==='partner') active='shellPartner';
+  else if(view.screen==='detail') active=view.module==='efficiency'?'shellEfficiency':view.module==='executive'?'shellExecutive':'shellOverview';
+  shellActive(active);
+}
+function shellDefaultPartnership(){
+  return (STATE.partnerships||[]).find(p=>p.name==='FanaticsTV')||(STATE.partnerships||[])[0];
+}
+function shellGoPortfolio(){
+  if(view.role==='partner')return;
+  view.mode='internal';
+  go('board');
+}
+function shellGoModule(module){
+  if(view.role==='partner')return;
+  const p=(view.pid&&STATE.partnerships.find(x=>x.id===view.pid))||shellDefaultPartnership();
+  if(!p)return;
+  view.mode='internal'; view.screen='detail'; view.pid=p.id; view.sid=null; view.module=module;
+  render();
+}
+function shellGoPartner(){ setMode('partner'); }
+
 function render(){
   renderViewAs();
+  syncShellNav();
   const crumb=document.getElementById('crumb');
   if(view.mode==='partner'){ crumb.innerHTML=''; renderPartner(); return; }
   if(view.screen==='board'){ crumb.innerHTML=''; renderBoard(); }
@@ -580,24 +859,56 @@ function barInverse(act,exp){
   return `<div class="bar"><div class="fill ${cls}" style="width:${Math.min(a/max*100,100)}%"></div>${e!==null?`<div class="tick" style="left:${Math.min(e/max*100,100)}%"></div>`:''}</div>`;
 }
 
+function currentMonthLabel(){ const d=new Date(); return MONTH_NAMES[d.getMonth()]+' '+d.getFullYear(); }
+function partnershipAttention(p){
+  // returns {pending:n, overdue:[showNames], offTrack:bool} for the latest snapshot
+  const s=latestSnap(p); const comps=(s.media.components||[]).filter(c=>c.mode==='audience');
+  const nowLabel=currentMonthLabel(); const inTerm=monthOptionsFor(p).includes(nowLabel);
+  let pending=0; const overdue=[];
+  comps.forEach(c=>{
+    (weeksOf(c)||[]).forEach(w=>{ if((w.status||'pending')!=='verified') pending++; });
+    if(inTerm){ const logged=new Set(weeksOf(c).map(w=>w.label)); if(!logged.has(nowLabel)) overdue.push(c.name); }
+  });
+  return {pending,overdue,offTrack:s.status==='bad'};
+}
 function renderBoard(){
   const ps=STATE.partnerships.filter(p=>view.filter==='all'?true:latestSnap(p).status===view.filter);
-  let contracted=0,ngrExp=0,ngrAct=0,haveNgr=false,valAdd=0,invTotal=0;
+  let contracted=0,valAdd=0;
+  let blendInv=0,blendDel=0,haveBlend=false;
+  const attentionRows=[];
   STATE.partnerships.forEach(p=>{ const s=latestSnap(p); const m=mediaRoll(s,p);
     const inv=m.inv!==null?m.inv:(+p.contractedValue||0); contracted+=inv;
-    if(n(s.commercial.ngrExp)!==null){ngrExp+=n(s.commercial.ngrExp);haveNgr=true;} if(n(s.commercial.ngrAct)!==null)ngrAct+=n(s.commercial.ngrAct);
-    if(n(s.media.valueAdd)!==null)valAdd+=n(s.media.valueAdd); });
-  const ngrPct=haveNgr&&ngrExp?Math.round((ngrAct-ngrExp)/ngrExp*100):null;
+    if(m.inv!==null&&m.del){ blendInv+=m.spendToDate!==null?m.spendToDate:m.inv; blendDel+=m.del; haveBlend=true; }
+    if(n(s.media.valueAdd)!==null)valAdd+=n(s.media.valueAdd);
+    const a=partnershipAttention(p); if(a.pending||a.overdue.length||a.offTrack) attentionRows.push({p,a});
+  });
+  const blendedCpm=haveBlend&&blendDel?blendInv/(blendDel/1000):null;
 
-  let html=`<div class="port">
+  let html='';
+  // #3/#6 — needs-attention landing banner
+  if(attentionRows.length){
+    const items=attentionRows.map(({p,a})=>{
+      const bits=[];
+      if(a.pending) bits.push(`<span class="att-pill att-pending">${a.pending} pending verification${a.pending>1?'s':''}</span>`);
+      if(a.overdue.length) bits.push(`<span class="att-pill att-overdue">${a.overdue.length} show${a.overdue.length>1?'s':''} not logged this month</span>`);
+      if(a.offTrack) bits.push(`<span class="att-pill att-off">Marked off track</span>`);
+      return `<div class="att-row" onclick="openDetail('${p.id}')"><span class="att-name">${esc(p.name)}</span><span class="att-bits">${bits.join('')}</span></div>`;
+    }).join('');
+    html+=`<div class="att-banner"><div class="att-head">Needs attention</div>${items}</div>`;
+  } else {
+    html+=`<div class="att-clear-line"><span class="att-clear-dot"></span>All clear — nothing pending verification, no shows overdue this month, nothing off track.</div>`;
+  }
+
+  html+=`<div class="port">
     <div class="cell"><div class="k">Partnerships</div><div class="v">${STATE.partnerships.length}</div><div class="sub">across the portfolio</div></div>
     <div class="cell"><div class="k">Investment</div><div class="v">${money(contracted)}</div><div class="sub">current committed spend</div></div>
-    <div class="cell"><div class="k">NGR vs expected</div><div class="v ${ngrPct===null?'':(ngrPct>=0?'pos':'neg')}">${ngrPct===null?'—':(ngrPct>0?'+':'')+ngrPct+'%'}</div><div class="sub">${haveNgr?money(ngrAct)+' of '+money(ngrExp):'where attributable'}</div></div>
+    <div class="cell"><div class="k">Blended delivered CPM</div><div class="v">${blendedCpm!==null?'$'+blendedCpm.toFixed(2):'—'}</div><div class="sub">spend vs audience, all partnerships</div></div>
     <div class="cell"><div class="k">Value-add delivered</div><div class="v pos">${valAdd?money(valAdd):'—'}</div><div class="sub">bonus / working media uplift</div></div>
   </div>`;
 
   html+=`<div class="section-row"><h2>Partnerships</h2><div class="filters">
     ${['all','good','warn','bad'].map(f=>`<button class="chip ${view.filter===f?'on':''}" onclick="setFilter('${f}')">${f==='all'?'All':`<span class="dot" style="background:var(--${f==='good'?'good':f==='warn'?'warn':'bad'})"></span>${f==='good'?'On track':f==='warn'?'Watch':'Off track'}`}</button>`).join('')}
+    <button class="chip" onclick="printPortfolio()">Print portfolio</button>
   </div></div>`;
   if(ps.length===0&&view.filter!=='all') html+=`<div class="empty-state"><h3>Nothing in this status</h3><p>No partnerships are marked ${view.filter==='good'?'on track':view.filter==='warn'?'watch':'off track'}.</p></div>`;
   html+=`<div class="board">`;
@@ -606,25 +917,47 @@ function renderBoard(){
   document.getElementById('app').innerHTML=html;
 }
 
+function printPortfolio(){
+  const rows=STATE.partnerships.map(p=>{ const s=latestSnap(p); const m=mediaRoll(s,p);
+    const stLabel={good:'On track',warn:'Watch',bad:'Off track',none:'Not set'}[s.status||'none'];
+    const call=s.call?({renew:'Renew',evolve:'Evolve',renegotiate:'Revised terms',exit:'Exit'}[s.call]||s.call):'—';
+    return `<tr>
+      <td><b>${esc(p.name)}</b><br><span style="color:#666;font-size:11px">${esc(p.counterparty||'')}</span></td>
+      <td>${stLabel}</td>
+      <td>${money(m.inv)}</td>
+      <td>${m.del!==null?aud(m.del):(m.guar!==null?aud(m.guar)+' guar':'—')}</td>
+      <td>${m.delCpm!==null?'$'+m.delCpm.toFixed(2):'—'}</td>
+      <td>${m.propCpm!==null?'$'+m.propCpm.toFixed(2):'—'}</td>
+      <td>${call}</td>
+      <td style="font-size:11px">${s.verdict?esc(s.verdict):'—'}</td>
+    </tr>`;
+  }).join('');
+  const w=window.open('','_blank');
+  if(!w){ toast('Allow pop-ups to print the portfolio'); return; }
+  w.document.write(`<!doctype html><html><head><title>Partnership Portfolio — ${new Date().toLocaleDateString('en-AU')}</title>
+    <style>body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#1a1a1a;padding:32px;max-width:1000px;margin:0 auto}
+    h1{font-size:22px;margin:0 0 4px} .sub{color:#666;font-size:13px;margin-bottom:22px}
+    table{width:100%;border-collapse:collapse;font-size:12.5px} th{text-align:left;background:#f4f5f7;padding:8px 10px;font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:#555}
+    td{padding:9px 10px;border-top:1px solid #e4e6ea;vertical-align:top}
+    .note{margin-top:20px;font-size:11px;color:#888}</style></head>
+    <body><h1>Partnership portfolio</h1><div class="sub">PointsBet media partnerships · ${new Date().toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'})}</div>
+    <table><thead><tr><th>Partnership</th><th>Status</th><th>Investment</th><th>Audience</th><th>Del. CPM</th><th>Prop. CPM</th><th>Call</th><th>Verdict</th></tr></thead><tbody>${rows}</tbody></table>
+    <div class="note">Delivered CPM = spend to date &divide; audience to date. Value read on reach and CPM; revenue is not attributed at partnership level.</div>
+    </body></html>`);
+  w.document.close();
+  setTimeout(()=>{ w.focus(); w.print(); }, 300);
+}
+Object.assign(window,{printPortfolio});
 function pcard(p){
   const s=latestSnap(p); const st=s.status||'none';
   const stLabel={good:'On track',warn:'Watch',bad:'Off track',none:'Not set'}[st];
-  const hasNgr=n(s.commercial.ngrExp)!==null||n(s.commercial.ngrAct)!==null;
   const m=mediaRoll(s,p);
-  if(hasNgr){
-    const ngrP=pctDiff(s.commercial.ngrAct,s.commercial.ngrExp), actP=pctDiff(s.commercial.activesAct,s.commercial.activesExp);
-    metricsHtml=`<div class="metrics">
-      <div class="metric"><div class="ml"><span class="mlab">NGR</span><span class="mval">${money(s.commercial.ngrAct)}${ngrP!==null?`<span class="pct ${ngrP>=0?'pos':'neg'}">${ngrP>0?'+':''}${ngrP}%</span>`:''}</span></div>${bar(s.commercial.ngrAct,s.commercial.ngrExp)}</div>
-      <div class="metric"><div class="ml"><span class="mlab">Actives</span><span class="mval">${num(s.commercial.activesAct)}${actP!==null?`<span class="pct ${actP>=0?'pos':'neg'}">${actP>0?'+':''}${actP}%</span>`:''}</span></div>${bar(s.commercial.activesAct,s.commercial.activesExp)}</div>
-    </div>`;
-  } else {
-    const audP=pctDiff(m.del,m.guar);
-    const cpmDelivered=m.delCpm, cpmProp=m.propCpm;
-    metricsHtml=`<div class="metrics">
+  const audP=pctDiff(m.del,m.guar);
+  const cpmDelivered=m.delCpm, cpmProp=m.propCpm;
+  const metricsHtml=`<div class="metrics">
       <div class="metric"><div class="ml"><span class="mlab">Audience</span><span class="mval">${m.del!==null?aud(m.del):(m.guar!==null?aud(m.guar)+' guar':'—')}${audP!==null?`<span class="pct ${audP>=0?'pos':'neg'}">${audP>0?'+':''}${audP}%</span>`:''}</span></div>${m.del!==null?bar(m.del,m.guar):bar(m.guar,m.guar)}</div>
       <div class="metric"><div class="ml"><span class="mlab">CPM</span><span class="mval">${cpmDelivered!==null?'$'+cpmDelivered.toFixed(2):(cpmProp!==null?'$'+cpmProp.toFixed(2)+' proj':'—')}${cpmDelivered!==null&&cpmProp!==null?`<span class="pct ${cpmDelivered<=cpmProp?'pos':'neg'}">${cpmDelivered<=cpmProp?'▼':'▲'}</span>`:''}</span></div>${cpmDelivered!==null?barInverse(cpmDelivered,cpmProp):bar(0,1)}</div>
     </div>`;
-  }
   const va=n(s.media.valueAdd);
   const overDel=(m.hasAud&&m.del!==null&&m.guar!==null&&m.del>m.guar)?(m.del-m.guar):null;
   return `<div class="pcard ${st}" onclick="openDetail('${p.id}')">
@@ -723,7 +1056,7 @@ function monthlyGraphPanel(p){
   const metric=view.graphMetric||'total';
   const METRICS=[['total','Total'],['yt','YouTube'],['soc','Social (FB+IG)'],['ac','Acast']];
   const val=d=> !d?null:(metric==='total'?(d.yt+d.soc+d.ac):d[metric]);
-  const palette=['#2F6BE0','#7A5AF8','#EC7B4E','#1D9A6C'];
+  const palette=['#E31B23','#1F3A5F','#C38318','#356B4C'];
   const colors={}; showNames.forEach((s,i)=>colors[s]=palette[i%palette.length]);
   if(!view.graphShows) view.graphShows=['Kenty Blitz'];
   const active=showNames.filter(s=>view.graphShows.includes(s));
@@ -868,29 +1201,18 @@ function renderDetail(){
     ${s.context?`<div style="margin-top:12px;font-size:12.5px;color:var(--ink-soft);border-top:1px solid var(--line-soft);padding-top:11px">${esc(s.context)}</div>`:''}
   </div>`;
 
-  const modules=[['overview','Overview'],['benchmarking','Benchmarking'],['efficiency','Commercial efficiency'],['executive','Executive summary'],['ai','AI insights']];
+  const modules=[['overview','Overview'],['efficiency','Media efficiency'],['executive','Executive summary']];
   html+=`<nav class="module-nav" aria-label="Partnership review modules">${modules.map(([id,label])=>`<button class="${view.module===id?'on':''}" onclick="setModule('${id}')">${label}</button>`).join('')}</nav>`;
+  if(view.module==='benchmarking'||view.module==='ai') view.module='executive';
   if(view.module!=='overview'){
-    html+=view.module==='benchmarking'?renderBenchmarking(p,s):view.module==='efficiency'?renderEfficiency(p,s):view.module==='executive'?renderExecutive(p,s):renderAIInsights(p,s);
+    html+=view.module==='efficiency'?renderEfficiency(p,s):renderExecutive(p,s);
     document.getElementById('app').innerHTML=html; return;
   }
 
   html+=`<div class="overview-layout"><div class="overview-rail">`;
 
-  /* commercial */
-  const c=s.commercial;
-  const hasComm=n(c.ngrExp)!==null||n(c.ngrAct)!==null||n(c.activesExp)!==null||n(c.activesAct)!==null;
-  html+=`<div class="panel"><div class="panel-head"><h3>Commercial return</h3><button class="linkbtn" onclick="editCommercial()">Edit</button></div><div class="panel-body">`;
-  if(hasComm){
-    html+=commMetric('Net Gaming Revenue',c.ngrAct,c.ngrExp,pctDiff(c.ngrAct,c.ngrExp),money);
-    html+=commMetric('Actives',c.activesAct,c.activesExp,pctDiff(c.activesAct,c.activesExp),num);
-    if(n(c.turnoverExp)!==null||n(c.turnoverAct)!==null) html+=commMetric('Turnover',c.turnoverAct,c.turnoverExp,pctDiff(c.turnoverAct,c.turnoverExp),money);
-  } else {
-    html+=`<p style="color:var(--ink-faint);font-size:13px;margin:0">No directly attributable NGR for this partnership — success is carried by media and the assessment. <a href="#" onclick="editCommercial();return false" style="color:var(--accent)">Add commercial results →</a></p>`;
-  }
-  html+=`</div></div>`;
-
-  /* The left rail deliberately carries decision context so it remains useful when commercial attribution is unavailable. */
+  /* The left rail carries decision context. Revenue attribution (NGR/actives/turnover) is
+     intentionally not tracked at partnership level — value is read through reach and CPM. */
   const pulseLabel={good:'On track',warn:'Watch',bad:'Off track',none:'Not set'}[s.status||'none'];
   const pulseClass=s.status||'none';
   const callLabel=s.call?({renew:'Renew',evolve:'Evolve',renegotiate:'Revised terms',exit:'Exit'}[s.call]||s.call):'Not set';
@@ -905,7 +1227,7 @@ function renderDetail(){
       <div><span>Audience</span><b>${m.del!==null?aud(m.del)+' delivered':m.guar!==null?aud(m.guar)+' guaranteed':'—'}</b></div><div><span>Entitlement delivery</span><b>${delivery===null?'Not yet measured':Math.round(delivery)+'%'}</b></div>
       ${cpmCell}</div>
     <p class="pulse-note">${s.verdict?esc(s.verdict):'Add a verdict to capture the current recommendation and the evidence behind it.'}</p>
-    <div class="pulse-actions"><button class="chip" onclick="setModule('executive')">Executive summary</button><button class="chip" onclick="setModule('ai')">Draft insights</button></div>
+    <div class="pulse-actions"><button class="chip" onclick="setModule('executive')">Executive summary</button></div>
   </div></div></div>`;
 
   /* media */
@@ -967,10 +1289,6 @@ function renderDetail(){
   document.getElementById('app').innerHTML=html;
 }
 
-function commMetric(name,act,exp,p,fmt){
-  return `<div class="comm-metric"><div class="cm-head"><span class="cm-name">${name}</span>
-    <span class="cm-fig"><span class="a">${fmt(act)}</span> <span class="e">/ ${fmt(exp)} exp</span>${p!==null?`<span class="cm-delta ${p>=0?'pos':'neg'}">${p>0?'+':''}${p}%</span>`:''}</span></div>${bar(act,exp,true)}</div>`;
-}
 function componentBlock(comp,p){
   const inv=n(comp.investment);
   const wl=verifiedWeeksLogged(comp);
@@ -1009,14 +1327,14 @@ function componentBlock(comp,p){
     log=`<details class="wklog"><summary>Weekly log — ${wl} week${wl>1?'s':''}${weeksOf(comp).some(w=>w.status!=='verified')?' · <span style="color:var(--warn)">'+weeksOf(comp).filter(w=>w.status!=='verified').length+' pending</span>':''}</summary>
       <table><thead><tr><th>Week</th><th class="num">Audience</th><th>Clips</th><th>Status</th><th></th></tr></thead><tbody>
       ${weeksOf(comp).map(w=>{ const clips=weekClips(comp,w); return `<tr><td>${esc(w.label)}${w.note?` <span style="color:var(--ink-faint);font-size:10px">· ${esc(w.note)}</span>`:''}</td><td class="num">${aud(weekAudTotal(w))}</td>
-        <td>${clips.length?`<details class="clip-toggle"><summary>${clips.length} clip${clips.length>1?'s':''}</summary><div class="clip-list">${clips.map(cl=>`<a href="${esc(cl.url)}" target="_blank" rel="noopener">▸ ${esc(cl.name)}</a>`).join('')}</div></details>`:'<span style="color:var(--ink-faint)">—</span>'}</td>
+        <td>${clips.length?`<details class="clip-toggle"><summary>${clips.length} clip${clips.length>1?'s':''}</summary><div class="clip-list">${clips.map(cl=>`<a href="${esc(cl.url)}" target="_blank" rel="noopener">${esc(cl.name)}</a>`).join('')}</div></details>`:'<span style="color:var(--ink-faint)">—</span>'}</td>
         <td><span class="wk-status wk-${w.status||'pending'}">${w.status||'pending'}</span></td>
         <td style="text-align:right">${w.status!=='verified'?`<button class="verifybtn" onclick="verifyWeek('${comp.id}','${w.id}')">Verify</button>`:''}</td></tr>`; }).join('')}
       </tbody></table></details>`;
   }
   return `<div class="comp">
     <div class="comp-head"><div><span class="comp-name">${esc(comp.name)}</span><span class="comp-mode">${comp.mode}</span></div>
-      <div style="display:flex;align-items:flex-start;gap:4px"><span class="comp-inv">${money(comp.investment)}<small>investment</small></span><button class="comp-editbtn" onclick="editComponent('${comp.id}')">✎</button></div></div>
+      <div style="display:flex;align-items:flex-start;gap:4px"><span class="comp-inv">${money(comp.investment)}<small>investment</small></span><button class="comp-editbtn" onclick="editComponent('${comp.id}')">Edit</button></div></div>
     ${body}${assetStrip}${log}
   </div>`;
 }
@@ -1058,15 +1376,24 @@ function renderPartner(){
     const wl=distinctLabelsLogged(c);
     const total=deliveredFromWeeks(c);
     const usedLabels=new Set(weeksOf(c).map(x=>x.label));
-    const monthsLeft=MONTH_OPTIONS.some(m=>!usedLabels.has(m));
+    const monthsLeft=monthOptionsFor(p).some(m=>!usedLabels.has(m));
     html+=`<div class="pshow"><div class="pshow-head">
       <span class="ps-name">${esc(c.name)}</span>
       <span class="ps-sum">${c.mode==='audience'?`<b>${total!==null?aud(total):'0'}</b>audience across ${wl} month${wl!==1?'s':''} logged`:`<b>${wl}</b>month${wl!==1?'s':''} logged`}</span>
     </div><div class="pshow-body">`;
-    if(weeksOf(c).length){ html+=`<div class="wk-list">`+weeksOf(c).map(w=>`<div class="wk-item"><div class="wk-l"><span class="wk-status wk-${w.status||'pending'}">${w.status||'pending'}</span><span>${esc(w.label)}</span></div>
-        <div style="display:flex;align-items:center;gap:12px">${c.mode==='audience'?`<span class="wk-aud">${aud(weekAudTotal(w))}</span>`:''}<button class="linkbtn" onclick="openWeekForm('${c.id}','${w.id}')">Edit</button></div></div>`).join('')+`</div>`;
+    if(weeksOf(c).length){ html+=`<div class="wk-list">`+weeksOf(c).map(w=>{
+        // partner-visible fulfilment feedback: only once verified, and only entitlement counts vs contracted — never CPM/$/target audience
+        let fulfil='';
+        if(w.status==='verified' && (c.assets||[]).length){
+          let onT=0,scored=0;
+          (c.assets||[]).forEach(as=>{ const raw=(w.assets||{})[as.id]; if(raw!==undefined&&raw!==null&&raw!==''){ scored++; if((+raw||0) >= (+as.perWeek||0)) onT++; } });
+          if(scored){ const pc=Math.round(onT/scored*100); fulfil=`<span class="wk-fulfil wk-fulfil-${pc>=100?'ok':pc>=70?'mid':'low'}" title="${onT} of ${scored} entitlements met their per-round target">${pc}% on target</span>`; }
+        }
+        return `<div class="wk-item"><div class="wk-l"><span class="wk-status wk-${w.status||'pending'}">${w.status||'pending'}</span><span>${esc(w.label)}</span>${fulfil}</div>
+        <div style="display:flex;align-items:center;gap:12px">${c.mode==='audience'?`<span class="wk-aud">${aud(weekAudTotal(w))}</span>`:''}<button class="linkbtn" onclick="openWeekForm('${c.id}','${w.id}')">Edit</button></div></div>`;
+      }).join('')+`</div>`;
     } else html+=`<div class="wk-empty">No months logged yet — add your first month below.</div>`;
-    html+= monthsLeft?`<button class="btn btn-primary" onclick="openWeekForm('${c.id}')">＋ Log a month</button>`:`<div class="wk-hint" style="margin:8px 0 0">Every month from Mar–Oct 2026 is logged for this show — use Edit above to correct one.</div>`;
+    html+= monthsLeft?`<button class="btn btn-primary" onclick="openWeekForm('${c.id}')">＋ Log a month</button>`:`<div class="wk-hint" style="margin:8px 0 0">Every month in this show's term is already logged — use Edit above to correct one.</div>`;
     html+=`</div></div>`;
   });
   document.getElementById('app').innerHTML=html;
@@ -1074,7 +1401,8 @@ function renderPartner(){
 function setPartner(pid){ view.partnerPid=pid; render(); }
 
 function openWeekForm(cid,wid){
-  const s=latestSnap(STATE.partnerships.find(x=>x.id===view.partnerPid));
+  const p=STATE.partnerships.find(x=>x.id===view.partnerPid);
+  const s=latestSnap(p);
   const c=s.media.components.find(x=>x.id===cid);
   const w=wid?(c.weeks||[]).find(x=>x.id===wid):null;
   const plats=(c.platforms||[]);
@@ -1089,16 +1417,16 @@ function openWeekForm(cid,wid){
       const clipUrl=w&&w.assets?w.assets[as.id+'__clip']:null;
       return `<div class="wk-fld"><label>${esc(as.name)} <span class="tgt">· ${as.perWeek}/round</span></label>
         <input type="number" min="0" step="1" id="wk_${as.id}" value="${w&&w.assets?(w.assets[as.id]??''):''}" placeholder="0">
-        <div class="wk-clip">${clipUrl?`<a href="${esc(clipUrl)}" target="_blank" rel="noopener">▸ Current clip attached</a>`:''}<input type="file" id="wkclip_${as.id}" accept="image/*,video/*"></div>
+        <div class="wk-clip">${clipUrl?`<a href="${esc(clipUrl)}" target="_blank" rel="noopener">Current clip attached</a>`:''}<input type="file" id="wkclip_${as.id}" accept="image/*,video/*"></div>
       </div>`;
     }).join('')+`</div>`;
   } else if(c.mode==='fulfilment'){
     assetFields=`<div class="wk-sub">Delivered this month</div><div class="wk-hint">Whole number of ${esc(c.unit||'units')} delivered this month.</div><div class="wk-grid"><div class="wk-fld"><label>${esc(c.unit||'units')} delivered</label><input type="number" min="0" step="1" id="wk_qty" value="${w&&w.assets?(w.assets.qty??''):''}"></div></div>`;
   }
-  let monthOpts;
-  if(w){ monthOpts=(w.label&&!MONTH_OPTIONS.includes(w.label))?[w.label,...MONTH_OPTIONS]:MONTH_OPTIONS; }
-  else { const usedLabels=new Set((c.weeks||[]).map(x=>x.label)); monthOpts=MONTH_OPTIONS.filter(m=>!usedLabels.has(m)); }
-  const monthSelect=monthOpts.length?`<select class="inp" id="w_label" ${w?'disabled':''}>${!w?'<option value="" disabled selected>Select month</option>':''}${monthOpts.map(m=>`<option value="${esc(m)}" ${w&&w.label===m?'selected':''}>${esc(m)}</option>`).join('')}</select>`:`<div class="wk-hint" style="margin:0">Every month from Mar–Oct 2026 already has an entry for this show. Edit an existing month above to make a correction.</div>`;
+  let monthOpts; const baseOpts=monthOptionsFor(p);
+  if(w){ monthOpts=(w.label&&!baseOpts.includes(w.label))?[w.label,...baseOpts]:baseOpts; }
+  else { const usedLabels=new Set((c.weeks||[]).map(x=>x.label)); monthOpts=baseOpts.filter(m=>!usedLabels.has(m)); }
+  const monthSelect=monthOpts.length?`<select class="inp" id="w_label" ${w?'disabled':''}>${!w?'<option value="" disabled selected>Select month</option>':''}${monthOpts.map(m=>`<option value="${esc(m)}" ${w&&w.label===m?'selected':''}>${esc(m)}</option>`).join('')}</select>`:`<div class="wk-hint" style="margin:0">Every month in this show's term already has an entry. Edit an existing month above to make a correction.</div>`;
   const reverifyNote=(w&&w.status==='verified')?`<div class="wk-hint" style="color:var(--warn);margin-top:-4px;margin-bottom:14px">This month is already verified. Saving a change here will send it back to PointsBet for re-verification before it counts again.</div>`:'';
   mount(scrim(`<div class="modal-head"><h3>${wid?'Edit month':'Log a month'} — ${esc(c.name)}</h3><button class="x" onclick="closeModal()">×</button></div>
     <div class="modal-body">
@@ -1175,7 +1503,7 @@ async function deleteWeek(cid,wid){
 
 /* ============================================================ SUPABASE AUTH + SYNC ============================================================ */
 async function sbLoadWeeks(){ try{ const {data,error}=await SB.from('pr_week').select('*'); if(error)throw error; return data||[]; }catch(e){ console.error(e); return []; } }
-function weekRowToObj(r){ return {id:r.id,label:r.label,audience:r.audience||{},assets:r.assets||{},note:r.note||'',status:r.verified?'verified':'pending',submittedAt:(r.submitted_at||'').slice(0,10)}; }
+function weekRowToObj(r){ return {id:r.id,label:r.label,audience:r.audience||{},assets:r.assets||{},note:r.note||'',status:r.verified?'verified':'pending',submittedAt:(r.submitted_at||'').slice(0,10),partnerEmail:r.partner_email||''}; }
 function hydrateWeeks(rows){ const byKey={}; rows.forEach(r=>{ const k=r.partnership_id+'|'+r.component_id; (byKey[k]=byKey[k]||[]).push(weekRowToObj(r)); });
   (STATE.partnerships||[]).forEach(p=>(p.snapshots||[]).forEach(s=>((s.media&&s.media.components)||[]).forEach(c=>{ c.weeks=byKey[p.id+'|'+c.id]||[]; }))); }
 async function ownerRefreshWeeks(){ if(!SB)return; hydrateWeeks(await sbLoadWeeks()); }
@@ -1351,51 +1679,67 @@ function deltaInfo(key,current,base){
   const pct=(current-base)/Math.abs(base)*100, favourable=metricDirection(key)==='lower'?pct<=0:pct>=0;
   return {text:`${pct>0?'+':''}${Math.round(pct)}%`,cls:favourable?'good':'bad',pct};
 }
-function renderBenchmarking(p,s){
-  const keys=['media_value','reach','cpm','ngr','actives','delivery'];
-  const labels={media_value:'Investment',reach:'Reach',cpm:'CPM',ngr:'Net gaming revenue',actives:'Active customers',delivery:'Entitlement delivery'};
-  const basis=keys.map(k=>benchmarkBase(p,s,k)); const first=basis[0];
-  const selector=`<select class="sel" style="width:auto" onchange="setBenchmarkBasis(this.value)"><option value="portfolio" ${view.benchmarkBasis==='portfolio'?'selected':''}>Portfolio average</option><option value="previous" ${view.benchmarkBasis==='previous'?'selected':''}>Previous review</option><option value="target" ${view.benchmarkBasis==='target'?'selected':''}>Plan / target</option></select>`;
-  let html=moduleHero('Module 02 · metric-level comparison','Benchmarking','Compare individual metrics against a meaningful baseline. No aggregate rank or partnership score is calculated.',selector);
-  html+=`<div class="metric-strip">${keys.slice(0,4).map((k,i)=>{const cur=metricValue(p,s,k),b=basis[i],d=deltaInfo(k,cur,b.value);return metricCard(labels[k],metricFormat(k,cur),`${b.label}: ${metricFormat(k,b.value)} · <span class="delta ${d.cls}">${d.text}</span>`);}).join('')}</div>`;
-  html+=`<section class="panel"><div class="panel-head"><h3>Benchmark matrix</h3><span class="lil">${first.sample?`${first.sample} comparable record${first.sample===1?'':'s'}`:'No comparable records'}</span></div><div class="panel-body"><div style="overflow:auto"><table class="dtable"><thead><tr><th>Metric</th><th class="num">Current</th><th class="num">${esc(first.label)}</th><th class="num">Variance</th><th class="num">Direction</th><th>Data quality</th></tr></thead><tbody>${keys.map((k,i)=>{const cur=metricValue(p,s,k),b=basis[i],d=deltaInfo(k,cur,b.value);const quality=cur===null?'Missing current value':b.value===null?'No valid comparison':'Current data available';return `<tr><td><b>${labels[k]}</b></td><td class="num">${metricFormat(k,cur)}</td><td class="num">${metricFormat(k,b.value)}</td><td class="num"><span class="delta ${d.cls}">${d.text}</span></td><td class="num">${metricDirection(k)==='lower'?'Lower is better':'Higher is better'}</td><td class="muted">${quality}</td></tr>`;}).join('')}</tbody></table></div><div class="data-note">Comparison values are shown only at metric level. Values with no valid denominator or comparison are displayed as an em dash.</div></div></section>`;
-  const reach=metricValue(p,s,'reach'), base=benchmarkBase(p,s,'reach').value, max=Math.max(reach||0,base||0,1); const w1=Math.round((reach||0)/max*100),w2=Math.round((base||0)/max*100);
-  html+=`<section class="panel"><div class="panel-head"><h3>Reach comparison</h3><span class="lil">Selected baseline</span></div><div class="panel-body"><div style="font-size:12px;color:var(--ink-soft)">Current partnership <b style="color:var(--ink)">${metricFormat('reach',reach)}</b></div><div class="stackbar"><span style="width:${w1}%;background:var(--accent)"></span></div><div style="font-size:12px;color:var(--ink-soft)">${esc(first.label)} <b style="color:var(--ink)">${metricFormat('reach',base)}</b></div><div class="stackbar"><span style="width:${w2}%;background:#AEB7C6"></span></div><div class="data-note">A deliberately simple comparison chart: it communicates one metric and one baseline, not a composite performance judgement.</div></div></section>`;
-  return html;
-}
 function setBenchmarkBasis(value){view.benchmarkBasis=value;render();}
-function defaultCosts(s){
-  const total=mediaRoll(s).inv||0;
-  if(!Array.isArray(s.costEntries)||!s.costEntries.length){
-    s.costEntries=[{category:'Rights fee',amount:total,currency:'AUD',state:'Actual',note:'Derived from existing media package investment',auto:true}];
-  } else if(s.costEntries.length===1 && s.costEntries[0].auto){
-    /* still on the untouched auto line — keep it pinned to the live component total so it can't go stale */
-    s.costEntries[0].amount=total;
-  }
-  return s.costEntries;
-}
-function efficiencyOutputs(s){const m=mediaRoll(s),c=s.commercial||{};return {reach:m.del!==null?m.del:m.guar,impressions:null,views:null,clicks:null,signups:null,ftds:null,actives:n(c.activesAct),ngr:n(c.ngrAct)};}
 function renderEfficiency(p,s){
-  const costs=defaultCosts(s), total=costs.reduce((a,x)=>a+(n(x.amount)||0),0),o=efficiencyOutputs(s);
-  const calc=[['Cost per reach',o.reach?total/o.reach:null,'currency'],['CPM',o.impressions?total/o.impressions*1000:null,'currency'],['Cost per active customer',o.actives?total/o.actives:null,'currency'],['NGR per dollar invested',total&&o.ngr!==null?o.ngr/total:null,'ratio']];
-  let html=moduleHero('Module 03 · operational finance','Commercial efficiency','See how approved investment converts into media and commercial outcomes. Status is always tied to a named metric—not a rolled-up score.',`<button class="btn btn-primary" onclick="editCosts()">Edit investment ledger</button>`);
-  html+=`<div class="metric-strip">${metricCard('Total investment',money(total),'Actual costs recorded')}${metricCard('Reach',metricFormat('reach',o.reach),'Delivered or guaranteed reach')}${metricCard('Active customers',num(o.actives),'Attributable outcomes')}${metricCard('NGR',money(o.ngr),'Attributable outcomes')}</div>`;
-  const colors=['#2F6BE0','#7A5AF8','#1D9A6C','#EC7B4E','#AEB7C6']; let off=0;
-  const autoLinked=costs.length===1 && costs[0].auto;
-  html+=`<div class="grid2"><section class="panel"><div class="panel-head"><h3>Investment breakdown</h3><span class="lil">${costs.length} cost categor${costs.length===1?'y':'ies'}</span></div><div class="panel-body"><div class="stackbar">${costs.map((x,i)=>{const w=total?((n(x.amount)||0)/total*100):0,col=colors[i%colors.length];off+=w;return `<span style="width:${w}%;background:${col}" title="${esc(x.category)}"></span>`;}).join('')}</div><div class="legend">${costs.map((x,i)=>`<span><i style="background:${colors[i%colors.length]}"></i>${esc(x.category)} ${money(x.amount)}</span>`).join('')}</div><div class="data-note">${autoLinked?'Auto-synced to the media package investment total — edit the ledger to break this link and set costs manually.':'Manually set — no longer auto-synced to media package investment.'} Partner users never see this ledger.</div></div></section><section class="panel"><div class="panel-head"><h3>Efficiency metrics</h3><span class="lil">Formula driven</span></div><div class="panel-body"><table class="dtable"><tbody>${calc.map(([l,v,type])=>`<tr><td><b>${l}</b></td><td class="num">${v===null?'—':type==='ratio'?v.toFixed(2)+'×':money(v)}</td></tr>`).join('')}</tbody></table><div class="data-note">Missing denominators show as an em dash. “NGR per dollar invested” is not labelled ROI.</div></div></section></div>`;
-  const funnel=[['Reach',o.reach],['Clicks',o.clicks],['Sign-ups',o.signups],['FTDs',o.ftds],['Active',o.actives]];
-  html+=`<section class="panel"><div class="panel-head"><h3>Commercial funnel</h3><span class="lil">Available data only</span></div><div class="panel-body"><div class="funnel">${funnel.map(([l,v])=>`<div class="funnel-step"><div class="fnum">${l==='Reach'?aud(v):num(v)}</div><div class="flab">${l}</div></div>`).join('')}</div><div class="data-note">The funnel intentionally leaves unavailable stages blank; it does not estimate conversion or invent attribution.</div></div></section>`;
+  const m=mediaRoll(s,p);
+  const comps=(s.media.components||[]).filter(c=>c.mode==='audience');
+  let html=moduleHero('Media efficiency','Media efficiency','How the money spent on this partnership converts into audience, per show and blended. Investment is set per show and is the single source of truth for every CPM.',`<button class="btn btn-primary" onclick="editComponent(null)">＋ Show / package</button>`);
+  html+=`<div class="metric-strip">${metricCard('Total investment',money(m.inv),'Sum of per-show costs')}${metricCard('Reach',metricFormat('reach',m.del!==null?m.del:m.guar),m.del!==null?'Delivered to date':'Guaranteed')}${metricCard('Blended delivered CPM',m.delCpm!==null?'$'+m.delCpm.toFixed(2):'—',m.periodMatched?'Spend to date vs audience to date':'Across all shows')}${metricCard('Proposed CPM',m.propCpm!==null?'$'+m.propCpm.toFixed(2):'—','At guaranteed audience')}</div>`;
+  // per-show CPM table
+  html+=`<section class="panel"><div class="panel-head"><h3>CPM by show</h3><span class="lil">Investment ÷ audience, per show</span></div><div class="panel-body"><table class="dtable"><thead><tr><th>Show</th><th class="num">Investment</th><th class="num">Delivered audience</th><th class="num">Delivered CPM</th><th class="num">Proposed CPM</th></tr></thead><tbody>`;
+  if(comps.length){
+    const totalMonths=termMonths(p);
+    comps.forEach(c=>{
+      const inv=n(c.investment),g=n(c.audienceGuaranteed),d=audDelivered(c),wl=verifiedWeeksLogged(c);
+      const pc=cpm(inv,g);
+      let dc=null; if(totalMonths&&wl>0&&d){ dc=cpm((inv||0)/totalMonths*Math.min(wl,totalMonths),d); } if(dc===null) dc=cpm(inv,d);
+      const dcCls=(dc!==null&&pc!==null)?(dc<=pc?'good':'bad'):'';
+      html+=`<tr><td><b>${esc(c.name)}</b></td><td class="num">${inv!==null?money(inv):'—'}</td><td class="num">${d!==null?aud(d):(g!==null?aud(g)+' guar':'—')}</td><td class="num"><b style="color:var(--${dcCls||'ink'})">${dc!==null?'$'+dc.toFixed(2):'—'}</b></td><td class="num">${pc!==null?'$'+pc.toFixed(2):'—'}</td></tr>`;
+    });
+    html+=`<tr style="border-top:2px solid var(--line)"><td><b>Partnership (blended)</b></td><td class="num"><b>${money(m.inv)}</b></td><td class="num"><b>${m.del!==null?aud(m.del):(m.guar!==null?aud(m.guar)+' guar':'—')}</b></td><td class="num"><b>${m.delCpm!==null?'$'+m.delCpm.toFixed(2):'—'}</b></td><td class="num"><b>${m.propCpm!==null?'$'+m.propCpm.toFixed(2):'—'}</b></td></tr>`;
+  } else {
+    html+=`<tr><td colspan="5" style="color:var(--ink-faint)">No audience shows on this partnership yet.</td></tr>`;
+  }
+  html+=`</tbody></table><div class="data-note">Delivered CPM prorates each show's investment across the contract term and compares spend-to-date against audience-to-date. Set a show's investment via Edit on the Overview tab — that figure is the only place cost lives.</div></div></section>`;
   return html;
 }
-function editCosts(){const s=curSnap(),costs=defaultCosts(s);mount(scrim(`<div class="modal-head"><h3>Investment ledger</h3><button class="x" onclick="closeModal()">×</button></div><div class="modal-body"><p style="margin-top:0;color:var(--ink-soft);font-size:13px">Keep costs internal. Each line is included in total investment.</p><div id="costRows">${costs.map((x,i)=>costRow(x,i)).join('')}</div><button class="linkbtn" onclick="addCostRow()">＋ Add cost category</button></div><div class="modal-foot"><div></div><div style="display:flex;gap:8px"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveCosts()">Save ledger</button></div></div>`,true));}
-function costRow(x,i){return `<div class="frow" style="margin-bottom:10px"><div class="field" style="margin:0"><label>Category</label><input class="inp" data-cost="category" value="${esc(x.category||'')}"></div><div class="field" style="margin:0"><label>Amount (AUD)</label><input class="inp" data-cost="amount" type="number" min="0" value="${n(x.amount)??''}"></div></div>`;}
-function addCostRow(){document.getElementById('costRows').insertAdjacentHTML('beforeend',costRow({category:'Other approved costs',amount:''},0));}
-async function saveCosts(){const fields=[...document.querySelectorAll('[data-cost]')],rows=[];for(let i=0;i<fields.length;i+=2){const category=fields[i].value.trim(),amount=n(fields[i+1].value);if(category&&amount!==null)rows.push({category,amount,currency:'AUD',state:'Actual',note:''});}curSnap().costEntries=rows;await persist();closeModal();render();toast('Investment ledger saved');}
-function executiveFacts(s){const a=s.assessment||blankAssess(), m=mediaRoll(s), c=s.commercial||{};const highlights=[...(a.winning||[])],risks=[...(a.falling||[])],opps=[...(a.evolution||[])];if(!highlights.length&&m.del!==null&&m.guar!==null&&m.del>=m.guar)highlights.push(`Audience delivery is ${Math.round((m.del-m.guar)/m.guar*100)}% above guarantee.`);if(!risks.length&&m.del===null)risks.push('Delivered audience has not been recorded for this review point.');if(!opps.length)opps.push('Confirm the next review priorities with the partnership owner.');return {highlights:highlights.slice(0,5),risks:risks.slice(0,5),opps:opps.slice(0,5),m,c};}
-function renderExecutive(p,s){const f=executiveFacts(s),action=s.call||'not set',label={'renew':'Renew','evolve':'Renew with revised terms','renegotiate':'Renew with revised terms','exit':'Exit','not set':'Not set'}[action]||'Not set';const status={good:'Performing above expectations',warn:'Mixed performance',bad:'Requires commercial review'}[s.status]||'Insufficient data';const m=mediaRoll(s,p);const metrics=[['Investment',money(m.inv)],['Reach',metricFormat('reach',metricValue(p,s,'reach'))],['Delivered CPM',m.delCpm!==null?'$'+m.delCpm.toFixed(2)+(m.propCpm!==null?' vs $'+m.propCpm.toFixed(2)+' proposed':''):'—'],['NGR',money(n(s.commercial.ngrAct))],['Delivery',metricFormat('delivery',metricValue(p,s,'delivery'))]];
- let html=moduleHero('Module 04 · board-ready view','Executive summary','A concise, printable decision surface. It presents named evidence and a recommended action—never an overall partnership score.',`<button class="btn btn-ghost" onclick="window.print()">Print / save PDF</button>`);
- html+=`<div class="metric-strip" style="grid-template-columns:repeat(5,1fr)">${metrics.map(x=>metricCard(x[0],x[1],x[0]==='Delivered CPM'?(m.periodMatched?'Spend to date vs audience to date':'As at '+fmtDate(s.date)):`As at ${fmtDate(s.date)}`)).join('')}</div><div class="summary-grid"><div><section class="panel"><div class="panel-head"><h3>Decision brief</h3><span class="lil">${status}</span></div><div class="panel-body"><h4 style="margin:0 0 8px;font-size:12px;text-transform:uppercase;color:var(--good)">Key achievements</h4><ul class="summary-list">${f.highlights.map(x=>`<li>✓ ${esc(x)}<span class="evidence">Source: assessment or verified delivery</span></li>`).join('')}</ul><h4 style="margin:18px 0 8px;font-size:12px;text-transform:uppercase;color:var(--bad)">Risks</h4><ul class="summary-list">${f.risks.map(x=>`<li>⚠ ${esc(x)}<span class="evidence">Owner: partnership lead</span></li>`).join('')}</ul><h4 style="margin:18px 0 8px;font-size:12px;text-transform:uppercase;color:var(--accent)">Opportunities</h4><ul class="summary-list">${f.opps.map(x=>`<li>• ${esc(x)}</li>`).join('')}</ul></div></section></div><aside><div class="decision-card"><div style="font-size:11px;text-transform:uppercase;font-weight:700;letter-spacing:.06em">Recommended action</div><div class="decision">${label}</div><div style="font-size:12.5px;color:var(--ink-soft)">${s.verdict?esc(s.verdict):'Add a verdict to document the decision rationale.'}</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px">${CALLS.map(x=>`<button class="chip ${s.call===x?'on':''}" onclick="setCall('${x}')">${x==='renegotiate'?'Revised terms':x[0].toUpperCase()+x.slice(1)}</button>`).join('')}</div></div><section class="panel" style="margin-top:18px"><div class="panel-head"><h3>Timeline</h3></div><div class="panel-body"><div class="timeline"><div>Next review<small>${fmtDate(s.date)} · partnership owner</small></div><div>Negotiation window<small>Confirm with commercial lead</small></div><div>Contract expiry<small>${fmtDate(p.termEnd) || 'Not recorded'}</small></div><div>Activation planning<small>Before next review period</small></div></div></div></section></aside></div>`;return html;}
-function renderAIInsights(p,s){const f=executiveFacts(s),m=f.m,c=f.c;const change=m.del!==null&&m.guar!==null?`Audience delivery is ${Math.round((m.del-m.guar)/m.guar*100)}% against the current guarantee.`:'Audience delivery is not yet complete enough to compare with the guarantee.';const commercial=n(c.ngrAct)!==null?`Attributable NGR is ${money(c.ngrAct)}${n(c.ngrExp)!==null?` against ${money(c.ngrExp)} expected`:''}.`:'No attributable NGR has been recorded in this review point.';let html=moduleHero('Module 05 · reviewer-assisted drafting','AI partnership insights','Evidence-grounded drafts to help reviewers prepare a summary, risks and negotiation points. Review and edit before sharing.',`<button class="btn btn-primary" onclick="editAssessment()">Review source evidence</button>`);html+=`<section class="panel"><div class="panel-head"><h3>Draft executive summary</h3><span class="lil">Human review required</span></div><div class="panel-body"><div class="insight">${esc(p.name)} is currently marked ${s.status==='good'?'on track':s.status==='warn'?'for review':'with insufficient or mixed evidence'}. ${change} ${commercial} The current recommended action is ${s.call?esc(s.call):'not set'}.</div><div class="grid2"><div><h4 style="margin:0 0 8px">Strengths</h4><ul class="summary-list">${f.highlights.map(x=>`<li>✓ ${esc(x)}</li>`).join('')}</ul><h4 style="margin:18px 0 8px">Risks to validate</h4><ul class="summary-list">${f.risks.map(x=>`<li>⚠ ${esc(x)}</li>`).join('')}</ul></div><div><h4 style="margin:0 0 8px">Opportunities</h4><ul class="summary-list">${f.opps.map(x=>`<li>• ${esc(x)}</li>`).join('')}</ul><h4 style="margin:18px 0 8px">Negotiation prompts</h4><ul class="summary-list"><li>Confirm inventory and delivery commitments for the next period.</li><li>Use the metric-level benchmark view to identify the specific terms to improve.</li><li>Replace unused assets with measurable digital or content inventory where appropriate.</li></ul></div></div><div class="ai-note">Grounding: this draft uses only the selected snapshot’s commercial results, media delivery, assessment and verdict. It does not infer missing values or send anything automatically.</div></div></section>`;return html;}
+function executiveFacts(s){
+  const a=s.assessment||blankAssess();
+  const clean=items=>(items||[]).map(x=>(x||'').trim()).filter(Boolean);
+  const highlights=[...clean(a.winning),...clean(a.deliverables)];
+  const risks=clean(a.falling);
+  const opps=clean(a.evolution);
+  return {
+    highlights:highlights.length?highlights.slice(0,6):['No verified achievements have been recorded for this review point.'],
+    risks:risks.length?risks.slice(0,5):['No material risks have been recorded for this review point.'],
+    opps:opps.length?opps.slice(0,5):['No next-step opportunities have been recorded for this review point.']
+  };
+}
+function renderExecutive(p,s){
+  const f=executiveFacts(s),action=s.call||'not set',label={'renew':'Renew','evolve':'Renew with revised terms','renegotiate':'Renew with revised terms','exit':'Exit','not set':'Not set'}[action]||'Not set';
+  const status={good:'Performing above expectations',warn:'Mixed performance',bad:'Requires review'}[s.status]||'Insufficient data';
+  const m=mediaRoll(s,p);
+  const metrics=[
+    ['Investment',money(m.inv)],
+    ['Reach',metricFormat('reach',metricValue(p,s,'reach'))],
+    ['Delivered CPM',m.delCpm!==null?'$'+m.delCpm.toFixed(2):'—'],
+    ['Entitlement delivery',metricFormat('delivery',metricValue(p,s,'delivery'))]
+  ];
+  // benchmark row (folded in from the old Benchmarking module) — CPM & reach vs portfolio / previous / target
+  const benchKeys=['reach','cpm','delivery'];
+  const benchLabels={reach:'Reach',cpm:'Delivered CPM',delivery:'Entitlement delivery'};
+  const basis=benchKeys.map(k=>benchmarkBase(p,s,k)); const first=basis[0];
+  const draftChange=m.del!==null&&m.guar!==null?`Audience delivery is ${Math.round((m.del-m.guar)/m.guar*100)}% against the guarantee`:'Audience delivery is not yet complete enough to compare with the guarantee';
+  const draftCpm=m.delCpm!==null?`, at a delivered CPM of $${m.delCpm.toFixed(2)}${m.propCpm!==null?` versus $${m.propCpm.toFixed(2)} proposed`:''}`:'';
+  let html=moduleHero('Board-ready view','Executive summary','A concise, printable decision surface — named evidence, a recommended action, and how this partnership compares. Never an overall partnership score.',`<button class="btn btn-ghost" onclick="window.print()">Print / save PDF</button>`);
+  html+=`<div class="metric-strip">${metrics.map(x=>metricCard(x[0],x[1],x[0]==='Delivered CPM'&&m.periodMatched?'Spend to date vs audience to date':`As at ${fmtDate(s.date)}`)).join('')}</div>`;
+  // draft summary (absorbed from AI insights)
+  html+=`<section class="panel"><div class="panel-head"><h3>Draft summary</h3><span class="lil">Edit before sharing</span></div><div class="panel-body"><div class="insight">${esc(p.name)} is currently marked ${s.status==='good'?'on track':s.status==='warn'?'for review':'with insufficient or mixed evidence'}. ${draftChange}${draftCpm}. The current recommended action is ${s.call?esc(s.call):'not set'}.</div><div class="data-note">Built only from this review point's delivery data, assessment and verdict — nothing is inferred or sent anywhere.</div></div></section>`;
+  html+=`<div class="summary-grid"><div><section class="panel"><div class="panel-head"><h3>Decision brief</h3><span class="lil">${status}</span></div><div class="panel-body"><h4 style="margin:0 0 8px;font-size:12px;text-transform:uppercase;color:var(--good)">Key achievements</h4><ul class="summary-list">${f.highlights.map(x=>`<li>✓ ${esc(x)}<span class="evidence">Source: assessment or verified delivery</span></li>`).join('')}</ul><h4 style="margin:18px 0 8px;font-size:12px;text-transform:uppercase;color:var(--bad)">Risks</h4><ul class="summary-list">${f.risks.map(x=>`<li>⚠ ${esc(x)}<span class="evidence">Owner: partnership lead</span></li>`).join('')}</ul><h4 style="margin:18px 0 8px;font-size:12px;text-transform:uppercase;color:var(--accent)">Opportunities</h4><ul class="summary-list">${f.opps.map(x=>`<li>• ${esc(x)}</li>`).join('')}</ul></div></section>
+    <section class="panel" style="margin-top:18px"><div class="panel-head"><h3>How it compares</h3><div class="filters"><select class="sel" style="width:auto" onchange="setBenchmarkBasis(this.value)"><option value="portfolio" ${view.benchmarkBasis==='portfolio'?'selected':''}>Portfolio average</option><option value="previous" ${view.benchmarkBasis==='previous'?'selected':''}>Previous review</option><option value="target" ${view.benchmarkBasis==='target'?'selected':''}>Plan / target</option></select></div></div><div class="panel-body"><table class="dtable"><thead><tr><th>Metric</th><th class="num">Current</th><th class="num">${esc(first.label)}</th><th class="num">Variance</th></tr></thead><tbody>${benchKeys.map((k,i)=>{const cur=metricValue(p,s,k),b=basis[i],d=deltaInfo(k,cur,b.value);return `<tr><td><b>${benchLabels[k]}</b></td><td class="num">${metricFormat(k,cur)}</td><td class="num">${metricFormat(k,b.value)}</td><td class="num"><span class="delta ${d.cls}">${d.text}</span></td></tr>`;}).join('')}</tbody></table><div class="data-note">Metric-level comparison only — no composite rank. ${first.sample?`${first.sample} comparable record${first.sample===1?'':'s'}.`:'No comparable records yet.'}</div></div></section></div>
+    <aside><div class="decision-card"><div style="font-size:11px;text-transform:uppercase;font-weight:700;letter-spacing:.06em">Recommended action</div><div class="decision">${label}</div><div style="font-size:12.5px;color:var(--ink-soft)">${s.verdict?esc(s.verdict):'Add a verdict to document the decision rationale.'}</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px">${CALLS.map(x=>`<button class="chip ${s.call===x?'on':''}" onclick="setCall('${x}')">${x==='renegotiate'?'Revised terms':x[0].toUpperCase()+x.slice(1)}</button>`).join('')}</div></div><section class="panel" style="margin-top:18px"><div class="panel-head"><h3>Timeline</h3></div><div class="panel-body"><div class="timeline"><div>Next review<small>${fmtDate(s.date)} · partnership owner</small></div><div>Contract expiry<small>${fmtDate(p.termEnd) || 'Not recorded'}</small></div></div></div></section></aside></div>`;
+  return html;
+}
 
 /* ============================================================ ACTIONS (continued) ============================================================ */
 Object.assign(window,{signInPassword,signUpPassword,sendPasswordReset,updatePassword,signOut,editPartnerAccess,publishPartner});
@@ -1432,7 +1776,17 @@ async function savePartnership(pid){
   else { const np={id:uid(),...data,snapshots:[blankSnap('Initial review')]}; STATE.partnerships.push(np); view.screen='detail'; view.pid=np.id; view.sid=null; }
   await persist(); closeModal(); render(); toast('Saved');
 }
-async function deletePartnership(pid){ if(!confirm('Delete this partnership and all its review points?'))return; STATE.partnerships=STATE.partnerships.filter(x=>x.id!==pid); await persist(); closeModal(); go('board'); toast('Deleted'); }
+async function deletePartnership(pid){
+  if(!confirm('Delete this partnership and all its review points? This also permanently removes any partner-submitted monthly data and partner access for this partnership — this cannot be undone.'))return;
+  if(SB){
+    try{
+      await SB.from('pr_week').delete().eq('partnership_id',pid);
+      await SB.from('pr_partner_show').delete().eq('partnership_id',pid);
+    }catch(e){ toast('Warning: could not fully clean up related data — '+e.message); }
+  }
+  STATE.partnerships=STATE.partnerships.filter(x=>x.id!==pid);
+  await persist(); closeModal(); go('board'); toast('Deleted');
+}
 
 function addSnapshot(){
   mount(scrim(`<div class="modal-head"><h3>New review point</h3><button class="x" onclick="closeModal()">×</button></div>
@@ -1455,16 +1809,6 @@ async function saveSnapshot(){
 }
 async function deleteSnapshot(){ const p=STATE.partnerships.find(x=>x.id===view.pid); if(p.snapshots.length<=1){toast('Keep at least one review point');return;} if(!confirm('Delete this review point?'))return; const s=currentSnap(p); p.snapshots=p.snapshots.filter(x=>x.id!==s.id); view.sid=null; await persist(); render(); toast('Deleted'); }
 
-function editCommercial(){
-  const c=curSnap().commercial;
-  const row=(label,key)=>`<div class="field"><label>${label}</label><div class="frow"><input class="inp" id="c_${key}Exp" type="number" placeholder="Expected" value="${c[key+'Exp']}"><input class="inp" id="c_${key}Act" type="number" placeholder="Actual" value="${c[key+'Act']}"></div></div>`;
-  mount(scrim(`<div class="modal-head"><h3>Commercial return</h3><button class="x" onclick="closeModal()">×</button></div>
-    <div class="modal-body"><p style="font-size:13px;color:var(--ink-soft);margin-top:0">Expected vs actual. NGR and Actives are the headline pair; Turnover optional. Leave blank for media partnerships with no attributable NGR.</p>
-      ${row('NGR','ngr')}${row('Actives','actives')}${row('Turnover (optional)','turnover')}</div>
-    <div class="modal-foot"><div></div><div style="display:flex;gap:8px"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveCommercial()">Save</button></div></div>`));
-}
-async function saveCommercial(){ const c=curSnap().commercial; ['ngr','actives','turnover'].forEach(k=>{c[k+'Exp']=document.getElementById('c_'+k+'Exp').value;c[k+'Act']=document.getElementById('c_'+k+'Act').value;}); await persist(); closeModal(); render(); toast('Commercial results saved'); }
-
 function editValueAdd(){
   const s=curSnap();
   mount(scrim(`<div class="modal-head"><h3>Value-add</h3><button class="x" onclick="closeModal()">×</button></div>
@@ -1479,7 +1823,7 @@ function editComponent(cid){
   mount(scrim(`<div class="modal-head"><h3>${cid?'Edit show / package':'Add show / package'}</h3><button class="x" onclick="closeModal()">×</button></div>
     <div class="modal-body">
       <div class="field"><label>Name</label><input class="inp" id="k_name" value="${esc(c.name)}" placeholder="e.g. Rugby League Insider (RLI)"></div>
-      <div class="frow"><div class="field"><label>Investment (AUD)</label><input class="inp" id="k_inv" type="number" value="${c.investment}"></div>
+      <div class="frow"><div class="field"><label>Investment for this show (AUD)</label><input class="inp" id="k_inv" type="number" value="${c.investment}" placeholder="e.g. 250000"><div class="hint" style="margin-top:5px">The single source of truth for this show's cost — every CPM is calculated from it. No separate ledger.</div></div>
         <div class="field"><label>How is value measured?</label><select class="sel" id="k_mode" onchange="compModeFields(this.value)">
           <option value="audience" ${c.mode==='audience'?'selected':''}>Audience — guaranteed vs delivered, CPM</option>
           <option value="fulfilment" ${c.mode==='fulfilment'?'selected':''}>Fulfilment — delivered vs contracted qty</option>
@@ -1547,11 +1891,36 @@ function dataMenu(){
     <div class="modal-foot"><div></div><button class="btn btn-primary" onclick="closeModal()">Done</button></div>`));
 }
 function exportData(){ const b=new Blob([JSON.stringify(STATE,null,2)],{type:'application/json'}); const u=URL.createObjectURL(b); const a=document.createElement('a'); a.href=u; a.download='partnership-review-backup.json'; a.click(); URL.revokeObjectURL(u); toast('Exported'); }
-function importData(input){ const f=input.files[0]; if(!f)return; const r=new FileReader(); r.onload=async()=>{try{STATE=JSON.parse(r.result);await persist();closeModal();go('board');toast('Imported');}catch(e){toast('Could not read that file');}}; r.readAsText(f); }
+function importData(input){
+  const f=input.files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=async()=>{
+    try{
+      const parsed=JSON.parse(r.result);
+      const weekRows=[];
+      (parsed.partnerships||[]).forEach(p=>(p.snapshots||[]).forEach(sn=>((sn.media&&sn.media.components)||[]).forEach(c=>{
+        (c.weeks||[]).forEach(w=>{
+          weekRows.push({ id:w.id, partnership_id:p.id, component_id:c.id, partner_email:w.partnerEmail||'',
+            label:w.label, audience:w.audience||{}, assets:w.assets||{}, note:w.note||'',
+            verified:w.status==='verified', submitted_at:w.submittedAt||new Date().toISOString().slice(0,10) });
+        });
+      })));
+      STATE=parsed;
+      await persist();
+      if(SB && weekRows.length){
+        try{ const {error}=await SB.from('pr_week').upsert(weekRows); if(error)throw error; await ownerRefreshWeeks(); }
+        catch(e){ closeModal(); go('board'); render(); toast('Imported the review data, but monthly submissions failed to restore: '+e.message); return; }
+      }
+      closeModal(); go('board');
+      toast(weekRows.length?`Imported — restored ${weekRows.length} monthly submission${weekRows.length!==1?'s':''}`:'Imported');
+    }catch(e){ toast('Could not read that file'); }
+  };
+  r.readAsText(f);
+}
 async function resetData(){ if(!confirm('Reset to seeded data? Current entries will be lost.'))return; STATE=seed(); await persist(); closeModal(); go('board'); toast('Reset'); }
 
 document.getElementById('btnData').onclick=dataMenu;
-Object.assign(window,{editPartnership,go,openDetail,setFilter,pickSnap,setStatus,setCall,saveVerdict,savePartnership,deletePartnership,addSnapshot,saveSnapshot,deleteSnapshot,editCommercial,saveCommercial,editValueAdd,saveValueAdd,editComponent,compModeFields,saveComponent,delComponent,editAssessment,saveAssessment,exportData,importData,resetData,closeModal,setMode,setPartner,openWeekForm,saveWeek,deleteWeek,verifyWeek,setModule,setBenchmarkBasis,editCosts,addCostRow,saveCosts});
+Object.assign(window,{editPartnership,go,openDetail,setFilter,pickSnap,setStatus,setCall,saveVerdict,savePartnership,deletePartnership,addSnapshot,saveSnapshot,deleteSnapshot,editValueAdd,saveValueAdd,editComponent,compModeFields,saveComponent,delComponent,editAssessment,saveAssessment,exportData,importData,resetData,closeModal,setMode,setPartner,openWeekForm,saveWeek,deleteWeek,verifyWeek,setModule,setBenchmarkBasis,shellGoPortfolio,shellGoModule,shellGoPartner});
 
 (async function boot(){
   if(SB){
