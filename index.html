@@ -352,7 +352,7 @@
   }
   body{background:var(--bg);font-size:13px}
   .app-shell{display:grid;grid-template-columns:248px minmax(0,1fr);min-height:100vh}
-  .shell-nav{position:sticky;top:0;height:100vh;background:var(--nav);color:#fff;padding:28px 18px 22px;display:flex;flex-direction:column;z-index:50;overflow-y:auto}
+  .shell-nav{position:sticky;top:0;height:100vh;background:var(--nav);color:#fff;padding:28px 18px 22px;display:flex;flex-direction:column;z-index:50;overflow:visible}
   .shell-brand{display:flex;align-items:center;gap:11px;padding:0 11px 31px;font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;letter-spacing:-.02em}
   .shell-mark{width:29px;height:29px;border-radius:8px;background:var(--brand);display:grid;place-items:center;color:#fff;font-family:'Space Grotesk';font-weight:700}
   .shell-kicker{margin:0 11px 9px;color:#77859B;font-size:9px;font-weight:700;letter-spacing:.13em;text-transform:uppercase}
@@ -382,7 +382,7 @@
   .shell-partner{margin:24px 10px 0;padding-top:18px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px}
   .shell-partner-logo{width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.13);background:#202B3D;display:grid;place-items:center;font-weight:700;font-size:11px}
   .shell-partner strong{display:block;font-size:11.5px}.shell-partner small{display:block;color:#77859B;font-size:9.5px;margin-top:2px}
-  .shell-main{min-width:0}
+  .shell-main{position:relative;z-index:1;min-width:0}
 
   header.top{position:sticky;top:0;height:68px;padding:0 38px;background:rgba(245,246,248,.92);color:var(--ink);border-bottom:1px solid var(--line);backdrop-filter:blur(12px);z-index:40}
   header.top .wordmark{display:none}
