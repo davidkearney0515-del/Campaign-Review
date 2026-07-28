@@ -1825,19 +1825,20 @@ function renderEfficiency(p,s){
   let html=moduleHero('Media efficiency','Media efficiency','How the money spent on this partnership converts into audience, per show and blended. Investment is set per show and is the single source of truth for every CPM.',`<button class="btn btn-primary" onclick="editComponent(null)">＋ Show / package</button>`);
   html+=`<div class="metric-strip">${metricCard('Total investment',money(m.inv),'Sum of per-show costs')}${metricCard('Views/listens YTD',metricFormat('reach',m.del!==null?m.del:m.guar),m.del!==null?'From monthly performance':'Guaranteed')}${metricCard('Blended delivered CPM YTD',m.delCpm!==null?'$'+m.delCpm.toFixed(2):'—',m.periodMatched?'Investment YTD ÷ views/listens YTD':'Across all shows')}${metricCard('Proposed CPM',m.propCpm!==null?'$'+m.propCpm.toFixed(2):'—','At guaranteed delivery')}</div>`;
   // per-show CPM table
-  html+=`<section class="panel"><div class="panel-head"><h3>CPM by show</h3><span class="lil">Investment YTD ÷ views/listens YTD</span></div><div class="panel-body"><table class="dtable"><thead><tr><th>Show</th><th class="num">Investment</th><th class="num">Views/listens YTD</th><th class="num">Delivered CPM YTD</th><th class="num">Proposed CPM</th></tr></thead><tbody>`;
+  html+=`<section class="panel"><div class="panel-head"><h3>CPM by show</h3><span class="lil">Investment YTD ÷ views/listens YTD</span></div><div class="panel-body"><table class="dtable"><thead><tr><th>Show</th><th class="num">Total investment</th><th class="num">Investment YTD</th><th class="num">Views/listens YTD</th><th class="num">Delivered CPM YTD</th><th class="num">Proposed CPM</th></tr></thead><tbody>`;
   if(comps.length){
     const totalMonths=termMonths(p);
     comps.forEach(c=>{
       const inv=n(c.investment),g=n(c.audienceGuaranteed),d=audDelivered(c,p),wl=deliveryMonthsLogged(c,p);
       const pc=cpm(inv,g);
-      let dc=null; if(totalMonths&&wl>0&&d){ dc=cpm((inv||0)/totalMonths*Math.min(wl,totalMonths),d); } if(dc===null) dc=cpm(inv,d);
+      const invYtd=(totalMonths&&wl>0&&inv!==null)?inv/totalMonths*Math.min(wl,totalMonths):null;
+      let dc=cpm(invYtd,d); if(dc===null) dc=cpm(inv,d);
       const dcCls=(dc!==null&&pc!==null)?(dc<=pc?'good':'bad'):'';
-      html+=`<tr><td><b>${esc(c.name)}</b></td><td class="num">${inv!==null?money(inv):'—'}</td><td class="num">${d!==null?aud(d):(g!==null?aud(g)+' guar':'—')}</td><td class="num"><b style="color:var(--${dcCls||'ink'})">${dc!==null?'$'+dc.toFixed(2):'—'}</b></td><td class="num">${pc!==null?'$'+pc.toFixed(2):'—'}</td></tr>`;
+      html+=`<tr><td><b>${esc(c.name)}</b></td><td class="num">${inv!==null?money(inv):'—'}</td><td class="num">${invYtd!==null?money(invYtd):'—'}</td><td class="num">${d!==null?aud(d):(g!==null?aud(g)+' guar':'—')}</td><td class="num"><b style="color:var(--${dcCls||'ink'})">${dc!==null?'$'+dc.toFixed(2):'—'}</b></td><td class="num">${pc!==null?'$'+pc.toFixed(2):'—'}</td></tr>`;
     });
-    html+=`<tr style="border-top:2px solid var(--line)"><td><b>Partnership (blended)</b></td><td class="num"><b>${money(m.inv)}</b></td><td class="num"><b>${m.del!==null?aud(m.del):(m.guar!==null?aud(m.guar)+' guar':'—')}</b></td><td class="num"><b>${m.delCpm!==null?'$'+m.delCpm.toFixed(2):'—'}</b></td><td class="num"><b>${m.propCpm!==null?'$'+m.propCpm.toFixed(2):'—'}</b></td></tr>`;
+    html+=`<tr style="border-top:2px solid var(--line)"><td><b>Partnership (blended)</b></td><td class="num"><b>${money(m.inv)}</b></td><td class="num"><b>${m.spendToDate!==null?money(m.spendToDate):'—'}</b></td><td class="num"><b>${m.del!==null?aud(m.del):(m.guar!==null?aud(m.guar)+' guar':'—')}</b></td><td class="num"><b>${m.delCpm!==null?'$'+m.delCpm.toFixed(2):'—'}</b></td><td class="num"><b>${m.propCpm!==null?'$'+m.propCpm.toFixed(2):'—'}</b></td></tr>`;
   } else {
-    html+=`<tr><td colspan="5" style="color:var(--ink-faint)">No audience shows on this partnership yet.</td></tr>`;
+    html+=`<tr><td colspan="6" style="color:var(--ink-faint)">No audience shows on this partnership yet.</td></tr>`;
   }
   html+=`</tbody></table><div class="data-note">Delivered CPM YTD prorates each show's investment across the contract term and divides investment YTD by verified views/listens YTD. The monthly graph, show totals and partnership roll-up use the same performance records.</div></div></section>`;
   return html;
