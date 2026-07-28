@@ -151,6 +151,7 @@
   .comp-mode{font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-faint);background:var(--line-soft);padding:2px 6px;border-radius:4px;font-weight:600;margin-left:7px}
   .comp-inv{font-family:'JetBrains Mono';font-weight:700;font-size:14px}
   .comp-inv small{display:block;font-family:'Inter';font-weight:500;font-size:10px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.04em;text-align:right}
+  .comp-investments{display:flex;align-items:flex-start;gap:16px}.comp-investments .comp-inv{min-width:70px;text-align:right}
   .aud-row{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;margin-bottom:5px}
   .aud-row .mlab{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint);font-weight:600}
   .aud-row .mono{font-weight:500}
@@ -1427,7 +1428,7 @@ function renderDetail(){
     if(m.inv!==null){
       let right;
       if(m.hasAud){ const audP=pctDiff(m.del,m.guar);
-        right=`${money(m.inv)}<small>${m.del!==null?aud(m.del)+' views/listens YTD / '+aud(m.guar)+' guar'+(audP!==null?' ('+(audP>0?'+':'')+audP+'%)':''):aud(m.guar)+' guaranteed'}</small>`;
+        right=`${money(m.inv)}<small>Total investment${m.spendToDate!==null?' · '+money(m.spendToDate)+' investment YTD':''}<br>${m.del!==null?aud(m.del)+' views/listens YTD / '+aud(m.guar)+' guar'+(audP!==null?' ('+(audP>0?'+':'')+audP+'%)':''):aud(m.guar)+' guaranteed'}</small>`;
       } else right=`${money(m.inv)}<small>total investment</small>`;
       html+=`<div class="media-total"><span class="mt-l">Total</span><span class="mt-r">${right}</span></div>`;
       if(m.hasAud&&(m.delCpm!==null||m.propCpm!==null)){
@@ -1481,19 +1482,21 @@ function renderDetail(){
 function componentBlock(comp,p){
   const inv=n(comp.investment);
   const wl=verifiedWeeksLogged(comp);
+  const totalMonths=termMonths(p);
+  let invYtd=null,perfMonths=0;
   let body='';
   if(comp.mode==='audience'){
     const g=n(comp.audienceGuaranteed),d=audDelivered(comp,p);
-    const perfMonths=deliveryMonthsLogged(comp,p);
+    perfMonths=deliveryMonthsLogged(comp,p);
     const audP=pctDiff(d,g); const pc=cpm(inv,g);
-    const totalMonths=termMonths(p);
+    invYtd=(totalMonths&&perfMonths>0&&inv!==null)?inv/totalMonths*Math.min(perfMonths,totalMonths):null;
     let dc=null,periodMatched=false;
-    if(totalMonths&&perfMonths>0&&d){ dc=cpm((inv||0)/totalMonths*Math.min(perfMonths,totalMonths),d); periodMatched=dc!==null; }
+    if(invYtd!==null&&d){ dc=cpm(invYtd,d); periodMatched=dc!==null; }
     if(dc===null) dc=cpm(inv,d);
-    const src=perfMonths?` <span style="color:var(--ink-faint);font-weight:400;font-size:11px">(from ${perfMonths} month${perfMonths>1?'s':''})</span>`:'';
+    const src=perfMonths?` <span style="color:var(--ink-faint);font-weight:400;font-size:11px">(from ${perfMonths} verified month${perfMonths>1?'s':''} · live + imported)</span>`:'';
     body=`<div class="aud-row"><span class="mlab">Views/listens YTD</span><span class="mono">${d!==null?aud(d)+' delivered':aud(g)+' guaranteed'}${g!==null&&d!==null?' / '+aud(g)+' guar':''}${audP!==null?` <span style="color:var(--${audP>=0?'good':'bad'});font-weight:700">(${audP>0?'+':''}${audP}%)</span>`:''}${src}</span></div>
       ${d!==null?bar(d,g):bar(g,g)}
-      <div class="cpm-line">${pc!==null?`Proposed CPM <b>$${pc.toFixed(2)}</b>`:''}${dc!==null?` → YTD delivered CPM <b style="color:var(--${dc<=pc?'good':'bad'})">$${dc.toFixed(2)}</b>${periodMatched?` <span style="color:var(--ink-faint);font-weight:400">(investment YTD ÷ views/listens YTD)</span>`:''}`:''}</div>`;
+      <div class="cpm-line">${pc!==null?`Proposed CPM <b>$${pc.toFixed(2)}</b>`:''}${dc!==null?` → YTD delivered CPM <b style="color:var(--${dc<=pc?'good':'bad'})">$${dc.toFixed(2)}</b>${periodMatched?` <span style="color:var(--ink-faint);font-weight:400">(${money(invYtd)} investment YTD ÷ views/listens YTD)</span>`:''}`:''}</div>`;
   } else if(comp.mode==='fixed'){
     body=`<div class="cpm-line">${comp.fixedDelivered?'<b style="color:var(--good)">Delivered</b> — full value counted':'<span style="color:var(--ink-faint)">Not yet delivered</span>'}</div>`;
   } else {
@@ -1524,7 +1527,7 @@ function componentBlock(comp,p){
   }
   return `<div class="comp">
     <div class="comp-head"><div><span class="comp-name">${esc(comp.name)}</span><span class="comp-mode">${comp.mode}</span></div>
-      <div style="display:flex;align-items:flex-start;gap:4px"><span class="comp-inv">${money(comp.investment)}<small>investment</small></span><button class="comp-editbtn" onclick="editComponent('${comp.id}')">Edit</button></div></div>
+      <div style="display:flex;align-items:flex-start;gap:4px"><div class="comp-investments"><span class="comp-inv">${money(comp.investment)}<small>Total investment</small></span>${comp.mode==='audience'?`<span class="comp-inv">${invYtd!==null?money(invYtd):'—'}<small>Investment YTD</small></span>`:''}</div><button class="comp-editbtn" onclick="editComponent('${comp.id}')">Edit</button></div></div>
     ${body}${assetStrip}${log}
   </div>`;
 }
