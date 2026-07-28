@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Partnership Review Dashboard — Live Pulse &amp; Partner History</title>
+<title>Partnership Review Dashboard — YTD Audience Tracking</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -749,6 +749,18 @@ function mediaRoll(s,p){
     delCpm: delCpmPeriod!==null?delCpmPeriod:((hasInv&&del)?cpm(inv,del):null),
     spendToDate: hasSpendToDate?spendToDate:null, periodMatched: delCpmPeriod!==null };
 }
+function audienceTargetYtd(s,p){
+  const totalMonths=termMonths(p);
+  if(!totalMonths)return null;
+  let target=0,hasTarget=false;
+  (s.media.components||[]).filter(c=>c.mode==='audience').forEach(c=>{
+    const g=n(c.audienceGuaranteed),months=deliveryMonthsLogged(c,p),d=audDelivered(c,p);
+    if(g===null)return;
+    if(months>0){ target+=g*Math.min(months,totalMonths)/totalMonths; hasTarget=true; }
+    else if(d!==null){ target+=g; hasTarget=true; } // legacy delivered snapshots without monthly history
+  });
+  return hasTarget?target:null;
+}
 /* delivered "value realised" for fixed / fulfilment components (dollar sense) */
 function compRealised(c){
   const inv=n(c.investment)||0;
@@ -1100,10 +1112,11 @@ function pcard(p){
   const s=latestSnap(p); const st=s.status||'none';
   const stLabel={good:'On track',warn:'Watch',bad:'Off track',none:'Not set'}[st];
   const m=mediaRoll(s,p);
-  const audP=pctDiff(m.del,m.guar);
+  const ytdAudienceTarget=audienceTargetYtd(s,p);
+  const audP=pctDiff(m.del,ytdAudienceTarget);
   const cpmDelivered=m.delCpm, cpmProp=m.propCpm;
   const metricsHtml=`<div class="metrics">
-      <div class="metric"><div class="ml"><span class="mlab">Views/listens YTD</span><span class="mval">${m.del!==null?aud(m.del):(m.guar!==null?aud(m.guar)+' guar':'—')}${audP!==null?`<span class="pct ${audP>=0?'pos':'neg'}">${audP>0?'+':''}${audP}%</span>`:''}</span></div>${m.del!==null?bar(m.del,m.guar):bar(m.guar,m.guar)}</div>
+      <div class="metric"><div class="ml"><span class="mlab">Views/listens YTD</span><span class="mval">${m.del!==null?aud(m.del):ytdAudienceTarget!==null?aud(ytdAudienceTarget)+' target':'—'}${audP!==null?`<span class="pct ${audP>=0?'pos':'neg'}">${audP>0?'+':''}${audP}%</span>`:''}</span></div>${m.del!==null&&ytdAudienceTarget!==null?bar(m.del,ytdAudienceTarget):bar(null,null)}</div>
       <div class="metric"><div class="ml"><span class="mlab">CPM YTD</span><span class="mval">${cpmDelivered!==null?'$'+cpmDelivered.toFixed(2):(cpmProp!==null?'$'+cpmProp.toFixed(2)+' proj':'—')}${cpmDelivered!==null&&cpmProp!==null?`<span class="pct ${cpmDelivered<=cpmProp?'pos':'neg'}">${cpmDelivered<=cpmProp?'▼':'▲'}</span>`:''}</span></div>${cpmDelivered!==null?barInverse(cpmDelivered,cpmProp):bar(0,1)}</div>
     </div>`;
   const va=n(s.media.valueAdd);
@@ -1334,6 +1347,8 @@ Object.assign(window,{setEntMonth,setEntRounds,setAssetPerWeek});
 
 function currentPulse(p,s){
   const m=mediaRoll(s,p);
+  const ytdAudienceTarget=audienceTargetYtd(s,p);
+  const audienceDelta=pctDiff(m.del,ytdAudienceTarget);
   const audienceComps=(s.media.components||[]).filter(c=>c.mode==='audience');
   const missing=audienceComps.filter(c=>deliveryMonthsLogged(c,p)===0).map(c=>c.name);
   const pending=(s.media.components||[]).reduce((sum,c)=>sum+weeksOf(c).filter(w=>w.status!=='verified').length,0);
@@ -1350,16 +1365,18 @@ function currentPulse(p,s){
   const cpmDelta=(m.delCpm!==null&&m.propCpm)?Math.round((m.delCpm-m.propCpm)/m.propCpm*100):null;
   let score=0;
   if(cpmDelta!==null) score+=cpmDelta<=0?2:(cpmDelta<=10?0:-2);
+  if(audienceDelta!==null) score+=audienceDelta>=0?1:(audienceDelta>=-15?0:-2);
   if(assetPct!==null) score+=assetPct>=90?1:(assetPct>=75?0:-2);
   if(missing.length) score-=Math.min(2,missing.length);
   if(pending) score-=1;
   if(m.del===null) score-=2;
-  const status=score>=2?'good':score>=0?'warn':'bad';
+  const status=score>=3?'good':score>=0?'warn':'bad';
   const label={good:'On track',warn:'Watch',bad:'Off track'}[status];
   const call=status==='good'?'Maintain and optimise':status==='warn'?'Resolve current gaps':'Intervention required';
   const evidence=[];
   if(m.delCpm!==null&&m.propCpm!==null) evidence.push(`Delivered CPM YTD is $${m.delCpm.toFixed(2)}, ${Math.abs(cpmDelta)}% ${cpmDelta<=0?'better':'worse'} than the proposed $${m.propCpm.toFixed(2)}.`);
   else evidence.push('There is not enough verified delivery to calculate a dependable CPM YTD.');
+  if(m.del!==null&&ytdAudienceTarget!==null) evidence.push(`Views/listens YTD are ${aud(m.del)} versus a prorated YTD target of ${aud(ytdAudienceTarget)} (${audienceDelta>0?'+':''}${audienceDelta}%).`);
   if(assetPct!==null) evidence.push(`Logged asset fulfilment is ${assetPct}% across ${assetRows} measured asset${assetRows!==1?'s':''}.`);
   else evidence.push('No verified asset delivery is available for assessment yet.');
   if(missing.length) evidence.push(`No verified views/listens have been received for ${missing.join(', ')}.`);
@@ -1427,8 +1444,8 @@ function renderDetail(){
     // roll-up
     if(m.inv!==null){
       let right;
-      if(m.hasAud){ const audP=pctDiff(m.del,m.guar);
-        right=`${money(m.inv)}<small>Total investment${m.spendToDate!==null?' · '+money(m.spendToDate)+' investment YTD':''}<br>${m.del!==null?aud(m.del)+' views/listens YTD / '+aud(m.guar)+' guar'+(audP!==null?' ('+(audP>0?'+':'')+audP+'%)':''):aud(m.guar)+' guaranteed'}</small>`;
+      if(m.hasAud){ const ytdAudienceTarget=audienceTargetYtd(s,p),audP=pctDiff(m.del,ytdAudienceTarget);
+        right=`${money(m.inv)}<small>Total investment${m.spendToDate!==null?' · '+money(m.spendToDate)+' investment YTD':''}<br>${m.del!==null?aud(m.del)+' delivered YTD'+(ytdAudienceTarget!==null?' / '+aud(ytdAudienceTarget)+' YTD target':'')+(audP!==null?' ('+(audP>0?'+':'')+audP+'%)':''):ytdAudienceTarget!==null?aud(ytdAudienceTarget)+' YTD target':'Awaiting delivery'}${m.guar!==null?'<br>'+aud(m.guar)+' full guarantee':''}</small>`;
       } else right=`${money(m.inv)}<small>total investment</small>`;
       html+=`<div class="media-total"><span class="mt-l">Total</span><span class="mt-r">${right}</span></div>`;
       if(m.hasAud&&(m.delCpm!==null||m.propCpm!==null)){
@@ -1488,14 +1505,16 @@ function componentBlock(comp,p){
   if(comp.mode==='audience'){
     const g=n(comp.audienceGuaranteed),d=audDelivered(comp,p);
     perfMonths=deliveryMonthsLogged(comp,p);
-    const audP=pctDiff(d,g); const pc=cpm(inv,g);
+    const legacyDelivered=d!==null&&perfMonths===0;
+    const ytdTarget=(g!==null&&totalMonths&&perfMonths>0)?g*Math.min(perfMonths,totalMonths)/totalMonths:(legacyDelivered?g:null);
+    const audP=pctDiff(d,ytdTarget); const pc=cpm(inv,g);
     invYtd=(totalMonths&&perfMonths>0&&inv!==null)?inv/totalMonths*Math.min(perfMonths,totalMonths):null;
     let dc=null,periodMatched=false;
     if(invYtd!==null&&d){ dc=cpm(invYtd,d); periodMatched=dc!==null; }
     if(dc===null) dc=cpm(inv,d);
     const src=perfMonths?` <span style="color:var(--ink-faint);font-weight:400;font-size:11px">(from ${perfMonths} verified month${perfMonths>1?'s':''} · live + imported)</span>`:'';
-    body=`<div class="aud-row"><span class="mlab">Views/listens YTD</span><span class="mono">${d!==null?aud(d)+' delivered':aud(g)+' guaranteed'}${g!==null&&d!==null?' / '+aud(g)+' guar':''}${audP!==null?` <span style="color:var(--${audP>=0?'good':'bad'});font-weight:700">(${audP>0?'+':''}${audP}%)</span>`:''}${src}</span></div>
-      ${d!==null?bar(d,g):bar(g,g)}
+    body=`<div class="aud-row"><span class="mlab">Views/listens YTD</span><span class="mono">${d!==null?aud(d)+' delivered':ytdTarget!==null?aud(ytdTarget)+' YTD target':'Awaiting delivery'}${ytdTarget!==null&&d!==null?' / '+aud(ytdTarget)+' YTD target':''}${audP!==null?` <span style="color:var(--${audP>=0?'good':audP>=-15?'warn':'bad'});font-weight:700">(${audP>0?'+':''}${audP}% vs YTD)</span>`:''}${g!==null?` <span style="color:var(--ink-faint);font-weight:400;font-size:11px">· ${aud(g)} full guarantee</span>`:''}${src}</span></div>
+      ${d!==null&&ytdTarget!==null?bar(d,ytdTarget):bar(null,null)}
       <div class="cpm-line">${pc!==null?`Proposed CPM <b>$${pc.toFixed(2)}</b>`:''}${dc!==null?` → YTD delivered CPM <b style="color:var(--${dc<=pc?'good':'bad'})">$${dc.toFixed(2)}</b>${periodMatched?` <span style="color:var(--ink-faint);font-weight:400">(${money(invYtd)} investment YTD ÷ views/listens YTD)</span>`:''}`:''}</div>`;
   } else if(comp.mode==='fixed'){
     body=`<div class="cpm-line">${comp.fixedDelivered?'<b style="color:var(--good)">Delivered</b> — full value counted':'<span style="color:var(--ink-faint)">Not yet delivered</span>'}</div>`;
