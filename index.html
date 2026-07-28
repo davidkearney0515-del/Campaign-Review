@@ -362,6 +362,22 @@
   .shell-nav-btn.on{background:var(--nav-soft);color:#fff}
   .shell-nav-btn.on:before{content:'';position:absolute;left:-18px;top:10px;width:3px;height:22px;border-radius:0 3px 3px 0;background:var(--brand)}
   .shell-nav-btn svg{width:17px;height:17px;flex:none}
+  .shell-nav-btn.is-disabled{opacity:.42}
+  .shell-nav-btn.is-disabled:hover{background:transparent;color:#AEB8C8;transform:none}
+  .shell-selector-wrap{position:relative;margin:11px 0 8px;padding:12px 9px;border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08)}
+  .shell-selector-label{margin:0 2px 7px;color:#77859B;font-size:8.5px;font-weight:750;letter-spacing:.12em;text-transform:uppercase}
+  .shell-partnership-button{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;border:1px solid rgba(255,255,255,.11);border-radius:7px;background:#182235;color:#fff;text-align:left;font-size:11.5px;font-weight:700}
+  .shell-partnership-button:hover,.shell-partnership-button[aria-expanded="true"]{border-color:rgba(255,255,255,.24);background:#202B3D}
+  .shell-partnership-button .selector-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .shell-partnership-button svg{width:13px;height:13px;flex:none;transition:transform .16s}
+  .shell-partnership-button[aria-expanded="true"] svg{transform:rotate(180deg)}
+  .shell-selector-menu{position:absolute;z-index:90;left:calc(100% + 10px);top:28px;width:230px;padding:7px;border:1px solid var(--line);border-radius:10px;background:#fff;box-shadow:0 18px 48px rgba(16,24,40,.18);color:var(--ink)}
+  .shell-selector-menu[hidden]{display:none}
+  .shell-selector-option{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 11px;border-radius:7px;text-align:left;font-size:11.5px;font-weight:650}
+  .shell-selector-option:hover{background:#F4F5F7}
+  .shell-selector-option.selected{background:var(--accent-soft);color:var(--brand)}
+  .shell-selector-option small{color:var(--ink-faint);font-size:9px;font-weight:500}
+  .shell-selector-empty{padding:12px;color:var(--ink-faint);font-size:11px}
   .shell-nav-spacer{flex:1}
   .shell-partner{margin:24px 10px 0;padding-top:18px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px}
   .shell-partner-logo{width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.13);background:#202B3D;display:grid;place-items:center;font-weight:700;font-size:11px}
@@ -478,6 +494,10 @@
     .shell-nav-btn{width:auto;white-space:nowrap;padding:8px 10px;font-size:11px}
     .shell-nav-btn.on:before{display:none}
     .shell-nav-btn svg{display:none}
+    .shell-selector-wrap{position:static;flex:0 0 176px;margin:0;padding:0;border:0}
+    .shell-selector-label{display:none}
+    .shell-partnership-button{height:33px;padding:8px 9px}
+    .shell-selector-menu{position:fixed;left:14px;right:14px;top:101px;width:auto;max-height:55vh;overflow-y:auto}
     header.top{position:relative;height:auto;min-height:54px;padding:10px 15px;flex-wrap:wrap}
     #crumb{width:100%;order:3}
     main{padding:24px 15px 70px}
@@ -501,6 +521,14 @@
     <button class="shell-nav-btn on" id="shellPortfolio" onclick="shellGoPortfolio()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 13h6V4H4v9Zm0 7h6v-4H4v4Zm10 0h6v-9h-6v9Zm0-16v4h6V4h-6Z"/></svg>Portfolio
     </button>
+    <div class="shell-selector-wrap" id="shellSelectorWrap">
+      <p class="shell-selector-label">Selected partnership</p>
+      <button class="shell-partnership-button" id="shellPartnershipButton" aria-haspopup="menu" aria-expanded="false" onclick="toggleShellPartnershipMenu(event)">
+        <span class="selector-name" id="shellPartnershipName">Select partnership</span>
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m5 7.5 5 5 5-5"/></svg>
+      </button>
+      <div class="shell-selector-menu" id="shellPartnershipMenu" role="menu" hidden></div>
+    </div>
     <button class="shell-nav-btn" id="shellOverview" onclick="shellGoModule('overview')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19V9m5 10V5m6 14v-7m5 7V8"/></svg>Partnership overview
     </button>
@@ -518,7 +546,7 @@
     </button>
   </nav>
   <div class="shell-nav-spacer"></div>
-  <div class="shell-partner"><span class="shell-partner-logo">F</span><span><strong>Fanatics TV</strong><small>Media partner · Active</small></span></div>
+  <div class="shell-partner"><span class="shell-partner-logo" id="shellFooterInitial">—</span><span><strong id="shellFooterName">No partnership selected</strong><small id="shellFooterMeta">Choose from the selector above</small></span></div>
 </aside>
 <div class="shell-main">
 <header class="top">
@@ -552,7 +580,7 @@
    ============================================================ */
 const SUPABASE_URL = 'https://uboferpfurlnntryhrqv.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVib2ZlcnBmdXJsbm50cnlocnF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyNDQwMjcsImV4cCI6MjA5OTgyMDAyN30.86bSZHjKPibpdCDfFZrv2BDDkbq51QSc61Y-NaP3wq4'; /* anon public key */
-const PREVIEW_MODE = true; // Standalone version: opens directly with local Fanatics data.
+const PREVIEW_MODE = new URLSearchParams(location.search).get('preview') === '1';
 const USE_SB = !PREVIEW_MODE && !!SUPABASE_ANON_KEY && SUPABASE_ANON_KEY !== 'PASTE_YOUR_ANON_KEY_HERE';
 let SB = null;
 if(USE_SB){ try{ SB = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); }catch(e){ console.error('Supabase init failed',e); } }
@@ -810,6 +838,53 @@ function setMode(m){ view.mode=m; if(m==='partner'&&!view.partnerPid){ const f=S
 function shellActive(id){
   document.querySelectorAll('.shell-nav-btn').forEach(b=>b.classList.toggle('on',b.id===id));
 }
+let shellMenuOpen=false;
+function selectedShellPartnership(){
+  return view.pid&&(STATE.partnerships||[]).find(p=>p.id===view.pid);
+}
+function renderShellPartnershipSelector(){
+  const wrap=document.getElementById('shellSelectorWrap');
+  const button=document.getElementById('shellPartnershipButton');
+  const name=document.getElementById('shellPartnershipName');
+  const menu=document.getElementById('shellPartnershipMenu');
+  if(!wrap||!button||!name||!menu)return;
+  const partnerRole=view.role==='partner';
+  wrap.style.display=partnerRole?'none':'block';
+  const selected=selectedShellPartnership();
+  name.textContent=selected?selected.name:'Select partnership';
+  const footerName=document.getElementById('shellFooterName');
+  const footerMeta=document.getElementById('shellFooterMeta');
+  const footerInitial=document.getElementById('shellFooterInitial');
+  if(footerName)footerName.textContent=selected?selected.name:'No partnership selected';
+  if(footerMeta)footerMeta.textContent=selected?`${selected.category||'Media'} partnership · Active`:'Choose from the selector above';
+  if(footerInitial)footerInitial.textContent=selected?(selected.name||'?').slice(0,1).toUpperCase():'—';
+  button.setAttribute('aria-expanded',shellMenuOpen?'true':'false');
+  menu.hidden=!shellMenuOpen;
+  menu.innerHTML=(STATE.partnerships||[]).length
+    ?STATE.partnerships.map(p=>`<button class="shell-selector-option ${selected&&selected.id===p.id?'selected':''}" role="menuitem" onclick="selectShellPartnership('${p.id}')"><span>${esc(p.name)}</span>${selected&&selected.id===p.id?'<small>Selected</small>':''}</button>`).join('')
+    :'<div class="shell-selector-empty">No partnerships yet</div>';
+  ['shellOverview','shellEfficiency','shellExecutive','shellPartner'].forEach(id=>{
+    const el=document.getElementById(id); if(!el)return;
+    el.classList.toggle('is-disabled',!selected);
+    el.title=selected?'':"Select a partnership first";
+  });
+}
+function toggleShellPartnershipMenu(event){
+  if(event)event.stopPropagation();
+  shellMenuOpen=!shellMenuOpen;
+  renderShellPartnershipSelector();
+}
+function closeShellPartnershipMenu(){
+  if(!shellMenuOpen)return;
+  shellMenuOpen=false;
+  renderShellPartnershipSelector();
+}
+function selectShellPartnership(pid){
+  const p=(STATE.partnerships||[]).find(x=>x.id===pid); if(!p)return;
+  shellMenuOpen=false;
+  view.mode='internal'; view.screen='detail'; view.pid=p.id; view.sid=null; view.module='overview'; view.partnerPid=p.id;
+  render();
+}
 function syncShellNav(){
   const internalOnly=['shellPortfolio','shellOverview','shellEfficiency','shellExecutive','shellData'];
   if(view.role==='partner') internalOnly.forEach(id=>{ const el=document.getElementById(id); if(el)el.style.display='none'; });
@@ -817,9 +892,7 @@ function syncShellNav(){
   if(view.mode==='partner') active='shellPartner';
   else if(view.screen==='detail') active=view.module==='efficiency'?'shellEfficiency':view.module==='executive'?'shellExecutive':'shellOverview';
   shellActive(active);
-}
-function shellDefaultPartnership(){
-  return (STATE.partnerships||[]).find(p=>p.name==='FanaticsTV')||(STATE.partnerships||[])[0];
+  renderShellPartnershipSelector();
 }
 function shellGoPortfolio(){
   if(view.role==='partner')return;
@@ -828,12 +901,22 @@ function shellGoPortfolio(){
 }
 function shellGoModule(module){
   if(view.role==='partner')return;
-  const p=(view.pid&&STATE.partnerships.find(x=>x.id===view.pid))||shellDefaultPartnership();
-  if(!p)return;
+  const p=selectedShellPartnership();
+  if(!p){ shellMenuOpen=true; renderShellPartnershipSelector(); toast('Select a partnership first'); return; }
   view.mode='internal'; view.screen='detail'; view.pid=p.id; view.sid=null; view.module=module;
   render();
 }
-function shellGoPartner(){ setMode('partner'); }
+function shellGoPartner(){
+  if(view.role==='partner'){setMode('partner');return;}
+  const p=selectedShellPartnership();
+  if(!p){shellMenuOpen=true;renderShellPartnershipSelector();toast('Select a partnership first');return;}
+  view.partnerPid=p.id; setMode('partner');
+}
+document.addEventListener('click',event=>{
+  const wrap=document.getElementById('shellSelectorWrap');
+  if(shellMenuOpen&&wrap&&!wrap.contains(event.target))closeShellPartnershipMenu();
+});
+document.addEventListener('keydown',event=>{if(event.key==='Escape')closeShellPartnershipMenu();});
 
 function render(){
   renderViewAs();
@@ -1920,7 +2003,7 @@ function importData(input){
 async function resetData(){ if(!confirm('Reset to seeded data? Current entries will be lost.'))return; STATE=seed(); await persist(); closeModal(); go('board'); toast('Reset'); }
 
 document.getElementById('btnData').onclick=dataMenu;
-Object.assign(window,{editPartnership,go,openDetail,setFilter,pickSnap,setStatus,setCall,saveVerdict,savePartnership,deletePartnership,addSnapshot,saveSnapshot,deleteSnapshot,editValueAdd,saveValueAdd,editComponent,compModeFields,saveComponent,delComponent,editAssessment,saveAssessment,exportData,importData,resetData,closeModal,setMode,setPartner,openWeekForm,saveWeek,deleteWeek,verifyWeek,setModule,setBenchmarkBasis,shellGoPortfolio,shellGoModule,shellGoPartner});
+Object.assign(window,{editPartnership,go,openDetail,setFilter,pickSnap,setStatus,setCall,saveVerdict,savePartnership,deletePartnership,addSnapshot,saveSnapshot,deleteSnapshot,editValueAdd,saveValueAdd,editComponent,compModeFields,saveComponent,delComponent,editAssessment,saveAssessment,exportData,importData,resetData,closeModal,setMode,setPartner,openWeekForm,saveWeek,deleteWeek,verifyWeek,setModule,setBenchmarkBasis,shellGoPortfolio,shellGoModule,shellGoPartner,toggleShellPartnershipMenu,selectShellPartnership});
 
 (async function boot(){
   if(SB){
