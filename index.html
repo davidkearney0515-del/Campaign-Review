@@ -598,20 +598,48 @@ if(USE_SB){ try{ SB = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); }c
 
 const KEY='pba_partnership_review_v3';
 function stripWeeks(doc){ const d=JSON.parse(JSON.stringify(doc)); (d.partnerships||[]).forEach(p=>(p.snapshots||[]).forEach(s=>((s.media&&s.media.components)||[]).forEach(c=>{delete c.weeks;}))); return d; }
+/* Optimistic concurrency guard. docLoadedAt holds the updated_at of the pr_doc row as we last
+   read (or successfully wrote) it. A save only lands if the row STILL carries that timestamp —
+   so if another session (another tab, a colleague, your phone) saved in the meantime, our write
+   is refused instead of silently overwriting their work. */
+let docLoadedAt=null;
+function docConflict(){ const e=new Error('This review was updated in another session since you loaded it.'); e.isConflict=true; return e; }
+
 const db={
   async load(){
-    if(SB){ try{ const {data,error}=await SB.from('pr_doc').select('doc').eq('id','main').maybeSingle(); if(error)throw error; return data?data.doc:null; }catch(e){ console.error('doc load',e); return null; } }
+    if(SB){
+      // Deliberately NOT caught here: a failed load must surface. Returning null on error would
+      // make boot think the doc is empty and reseed — overwriting the real doc with seed data.
+      const {data,error}=await SB.from('pr_doc').select('doc,updated_at').eq('id','main').maybeSingle();
+      if(error) throw error;
+      docLoadedAt = data ? data.updated_at : null;
+      return data ? data.doc : null;
+    }
     try{
       if(window.storage){ const r=await window.storage.get(KEY); return r?JSON.parse(r.value):null; }
       const r=localStorage.getItem(KEY); return r?JSON.parse(r):null;
-    }catch(e){return null;}
+    }catch(e){ console.error('local load failed',e); return null; }
   },
   async save(doc){
-    if(SB){ try{ const {error}=await SB.from('pr_doc').upsert({id:'main',doc:stripWeeks(doc),updated_at:new Date().toISOString()}); if(error)throw error; }catch(e){ console.error('doc save',e); } return; }
-    try{
-      if(window.storage) await window.storage.set(KEY,JSON.stringify(doc));
-      else localStorage.setItem(KEY,JSON.stringify(doc));
-    }catch(e){console.error(e);}
+    if(SB){
+      const payload={id:'main',doc:stripWeeks(doc),updated_at:new Date().toISOString()};
+      if(docLoadedAt===null){
+        // First write — no row loaded yet. Insert; a duplicate-key means someone created it first.
+        const {data,error}=await SB.from('pr_doc').insert(payload).select('updated_at').maybeSingle();
+        if(error){ if(error.code==='23505') throw docConflict(); throw error; }
+        docLoadedAt = data ? data.updated_at : payload.updated_at;
+        return;
+      }
+      // Conditional update: only overwrites the exact version we loaded. Zero rows back = a newer
+      // save landed first, so we refuse rather than clobber it.
+      const {data,error}=await SB.from('pr_doc').update(payload).eq('id','main').eq('updated_at',docLoadedAt).select('updated_at');
+      if(error) throw error;
+      if(!data||!data.length) throw docConflict();
+      docLoadedAt = data[0].updated_at;
+      return;
+    }
+    if(window.storage) await window.storage.set(KEY,JSON.stringify(doc));
+    else localStorage.setItem(KEY,JSON.stringify(doc));
   }
 };
 
@@ -703,9 +731,15 @@ function formatSubmissionNote(source,comments){
   return `Source: ${(source||'').trim()}${comments&&comments.trim()?`\nComments: ${comments.trim()}`:''}`;
 }
 function storedClipPath(value){ return typeof value==='string'&&value.startsWith('storage:')?value.slice(8):null; }
+/* Only ever hand back an http(s)/blob URL. Anything else (a javascript:/data: value injected into
+   a partner-submitted asset row) collapses to '', so it can never be rendered as a live link. */
+function safeUrl(u){ u=(u||'').trim(); return (/^https?:\/\//i.test(u)||/^blob:/i.test(u))?u:''; }
 function clipHref(w,assetId){
   if(!w||!w.assets)return '';
-  return w.assets[assetId+'__clip__signed']||((w.assets[assetId+'__clip']||'').startsWith('http')?w.assets[assetId+'__clip']:'');
+  const signed=w.assets[assetId+'__clip__signed'];
+  if(signed) return safeUrl(signed);
+  const raw=w.assets[assetId+'__clip']||'';
+  return raw.startsWith('http')?safeUrl(raw):'';
 }
 async function hydrateClipUrls(){
   if(!SB||!STATE)return;
@@ -717,7 +751,8 @@ async function hydrateClipUrls(){
       if(!path)return;
       jobs.push(SB.storage.from('pr-clips').createSignedUrl(path,3600).then(({data,error})=>{
         if(!error&&data&&data.signedUrl)w.assets[as.id+'__clip__signed']=data.signedUrl;
-      }).catch(()=>{}));
+        else if(error)console.warn('clip signed-url failed for',path,error);
+      }).catch(err=>console.warn('clip signed-url error for',path,err)));
     });
   }))));
   await Promise.all(jobs);
@@ -815,9 +850,24 @@ function compRealised(c){
   return null; // audience handled via CPM/reach
 }
 
-async function persist(){ await db.save(STATE); }
-function toast(m){ const t=document.getElementById('toastMount'); t.innerHTML=`<div class="toast">${m}</div>`; setTimeout(()=>t.innerHTML='',1900); }
-function esc(s){ return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+/* A failed save must never look like a successful one. On failure we tell the truth via a toast
+   and re-throw, which aborts the caller's success path (closeModal / render / "Saved") — the modal
+   stays open so the change can be retried, and a conflict tells the user to reload first. */
+async function persist(){
+  try{
+    await db.save(STATE);
+  }catch(e){
+    if(e&&e.isConflict){
+      toast("Not saved — someone else changed this review. Reload before editing so you don't overwrite their work.",6500);
+    }else{
+      console.error('save failed',e);
+      toast('Save failed — your change did NOT save. '+((e&&e.message)?e.message:'Check your connection and try again.'),6500);
+    }
+    throw e;
+  }
+}
+function toast(m,ms){ const t=document.getElementById('toastMount'); if(!t)return; t.innerHTML='<div class="toast"></div>'; t.firstChild.textContent=m; clearTimeout(t._t); t._t=setTimeout(()=>{t.innerHTML='';},ms||1900); }
+function esc(s){ return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function fmtDate(d){ if(!d)return ''; return new Date(d+'T00:00').toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}); }
 
 /* ============================================================ SEED ============================================================ */
@@ -2110,7 +2160,7 @@ function renderNoAccess(){
   const el=document.getElementById('viewas'); if(el)el.innerHTML=`<button class="top-btn" onclick="signOut()">Sign out</button>`;
   document.getElementById('app').innerHTML=`<div class="empty-state"><h3>No access</h3><p>${esc(view.email||'')} isn't set up for this tool yet. Contact PointsBet to be added.</p></div>`;
 }
-async function signOut(){ try{ if(SB)await SB.auth.signOut(); }catch(e){} location.hash=''; location.reload(); }
+async function signOut(){ try{ if(SB)await SB.auth.signOut(); }catch(e){ console.error('sign-out failed',e); } location.hash=''; location.reload(); }
 
 async function sbInsertWeek(row){ const {error}=await SB.from('pr_week').insert({partner_email:(view.email||'').toLowerCase(),partnership_id:row.partnership_id,component_id:row.component_id,label:row.label,audience:row.audience,assets:row.assets,note:row.note}); if(error)throw error; }
 async function sbUpdateWeek(id,row){ const {error}=await SB.from('pr_week').update({label:row.label,audience:row.audience,assets:row.assets,note:row.note,verified:false}).eq('id',id).eq('partner_email',(view.email||'').toLowerCase()).eq('partnership_id',view.partnerPid); if(error)throw error; }
@@ -2411,9 +2461,9 @@ function importData(input){
   const f=input.files[0]; if(!f)return;
   const r=new FileReader();
   r.onload=async()=>{
+    let parsed,weekRows=[];
     try{
-      const parsed=JSON.parse(r.result);
-      const weekRows=[];
+      parsed=JSON.parse(r.result);
       (parsed.partnerships||[]).forEach(p=>(p.snapshots||[]).forEach(sn=>((sn.media&&sn.media.components)||[]).forEach(c=>{
         (c.weeks||[]).forEach(w=>{
           weekRows.push({ id:w.id, partnership_id:p.id, component_id:c.id, partner_email:w.partnerEmail||'',
@@ -2421,15 +2471,17 @@ function importData(input){
             verified:w.status==='verified', submitted_at:w.submittedAt||new Date().toISOString().slice(0,10) });
         });
       })));
+    }catch(e){ toast('Could not read that file'); return; }
+    try{
       STATE=parsed;
-      await persist();
+      await persist();  // if this throws, persist() has already shown the accurate save/conflict toast
       if(SB && weekRows.length){
         try{ const {error}=await SB.from('pr_week').upsert(weekRows); if(error)throw error; await ownerRefreshWeeks(); }
         catch(e){ closeModal(); go('board'); render(); toast('Imported the review data, but monthly submissions failed to restore: '+e.message); return; }
       }
       closeModal(); go('board');
       toast(weekRows.length?`Imported — restored ${weekRows.length} monthly submission${weekRows.length!==1?'s':''}`:'Imported');
-    }catch(e){ toast('Could not read that file'); }
+    }catch(e){ if(!(e&&(e.isConflict||/save/i.test(e.message||'')))) toast('Import failed: '+((e&&e.message)||'unknown error')); }
   };
   r.readAsText(f);
 }
@@ -2458,7 +2510,10 @@ Object.assign(window,{editPartnership,go,openDetail,setFilter,pickSnap,setStatus
     }catch(e){ console.error(e); renderLogin('Something went wrong connecting. Check the console.'); return; }
   }
   // local mode (no anon key yet) — works exactly as before
-  STATE=await db.load(); if(!STATE||!Array.isArray(STATE.partnerships)||STATE.partnerships.length===0){STATE=seed();await persist();} else if(ensureCorePartnerships(STATE)){await persist();} render();
+  try{ STATE=await db.load(); }catch(e){ console.error('local load failed',e); STATE=null; }
+  if(!STATE||!Array.isArray(STATE.partnerships)||STATE.partnerships.length===0){ STATE=seed(); try{await persist();}catch(e){/* toast already shown; still render so the app is usable */} }
+  else if(ensureCorePartnerships(STATE)){ try{await persist();}catch(e){/* toast already shown */} }
+  render();
 })();
 </script>
 </body>
