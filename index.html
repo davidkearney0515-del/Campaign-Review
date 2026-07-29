@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Partnership Review — Interactive Dashboard</title>
+<title>Partnership Review — World-Class Interactive Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -573,6 +573,108 @@
     *,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
   }
 
+  /* World-class progressive disclosure: decisions first, evidence on demand. */
+  .pcard{min-height:310px;display:flex;flex-direction:column;padding:22px}
+  .pcard .head{margin-bottom:10px}.pcard .name{font-size:19px}
+  .pcard .verdict{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:42px;margin:6px 0 17px;color:var(--ink-soft);font-size:13px}
+  .pcard .metrics{margin-top:auto;padding-top:14px;border-top:1px solid var(--line-soft)}
+  .pcard .cardfoot{border-top:0;padding-top:4px;margin-top:0}
+  .pcard-decision{display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+  .pcard-decision small{font-size:8.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-faint);font-weight:800}
+  .pcard-open{font-size:10.5px;color:var(--ink-soft);font-weight:700;transition:transform .18s ease,color .18s ease}
+  .pcard:hover .pcard-open{color:var(--brand);transform:translateX(3px)}
+
+  .pulse-hero{padding:18px 20px 16px;background:linear-gradient(180deg,#fff,#FCFCFD)}
+  .pulse-hero .pulse-status{margin-bottom:16px}
+  .pulse-call{font-family:'Space Grotesk';font-size:18px;letter-spacing:-.02em}
+  .pulse-compact-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .pulse-factor{border:1px solid var(--line-soft);background:#fff;border-radius:9px;padding:11px;text-align:left;min-height:69px;transition:border-color .18s ease,transform .18s ease,box-shadow .18s ease}
+  .pulse-factor:hover{border-color:#D2D7DF;transform:translateY(-1px);box-shadow:0 6px 16px rgba(16,24,40,.05)}
+  .pulse-factor:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+  .pulse-factor span{display:block;font-size:8.5px;text-transform:uppercase;letter-spacing:.065em;color:var(--ink-faint);font-weight:800}
+  .pulse-factor b{display:block;margin-top:5px;font-family:'JetBrains Mono';font-size:13px}
+  .pulse-disclosure{margin-top:14px;border-top:1px solid var(--line-soft);padding-top:12px}
+  .pulse-disclosure>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:11px;font-weight:750;color:var(--ink)}
+  .pulse-disclosure>summary::-webkit-details-marker{display:none}
+  .pulse-disclosure>summary span:last-child{color:var(--ink-faint);font-weight:600}
+  .pulse-disclosure>summary:before{content:'›';font-size:18px;color:var(--ink-faint);transition:transform .2s ease}
+  .pulse-disclosure[open]>summary:before{transform:rotate(90deg)}
+  .pulse-detail{padding-top:13px;animation:mediaReveal .2s ease both}
+  .pulse-detail .pulse-note{margin-top:0}
+  .pulse-detail .pulse-evidence{border-top:0;padding-top:0}
+
+  .media-comp{border-color:var(--line);transition:border-color .18s ease,box-shadow .18s ease}
+  .media-comp:hover{border-color:#D1D6DE;box-shadow:0 7px 20px rgba(16,24,40,.045)}
+  .media-comp>summary{position:relative;display:grid;grid-template-columns:minmax(180px,1fr) auto auto;gap:20px;padding:17px 18px 17px 44px}
+  .media-comp>summary:before{position:absolute;left:18px;top:50%;transform:translateY(-50%)}
+  .media-comp[open]>summary:before{transform:translateY(-50%) rotate(90deg)}
+  .media-title-block{display:flex;align-items:center;min-width:0;gap:7px}
+  .media-glance{display:flex;align-items:center;gap:14px}
+  .media-glance-item{min-width:86px}
+  .media-glance-item span{display:block;font-size:8px;text-transform:uppercase;letter-spacing:.065em;color:var(--ink-faint);font-weight:800}
+  .media-glance-item b{display:block;margin-top:3px;font-family:'JetBrains Mono';font-size:12px}
+  .mini-progress{--p:0;position:relative;width:42px;height:42px;border-radius:50%;background:conic-gradient(var(--good) calc(var(--p)*1%),var(--track) 0);display:grid;place-items:center;flex:none}
+  .mini-progress:before{content:'';position:absolute;inset:5px;background:#fff;border-radius:50%}
+  .mini-progress b{position:relative;font-family:'JetBrains Mono';font-size:9px}
+  .media-comp-body{padding:18px}
+  .asset-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:13px}
+  .asset-summary div{padding:10px 11px;border-radius:8px;background:#F7F8FA}
+  .asset-summary span{display:block;font-size:8px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint);font-weight:800}
+  .asset-summary b{display:block;margin-top:4px;font-family:'JetBrains Mono';font-size:13px}
+  .asset-detail-toggle{margin-top:10px}
+  .asset-detail-toggle>summary{list-style:none;cursor:pointer;font-size:10.5px;font-weight:750;color:var(--accent)}
+  .asset-detail-toggle>summary::-webkit-details-marker{display:none}
+  .asset-detail-toggle>summary:before{content:'＋';margin-right:6px;color:var(--ink-faint)}
+  .asset-detail-toggle[open]>summary:before{content:'−'}
+  .asset-detail-toggle .assetfulfil-strip{margin-top:10px}
+  /* Ranked, pace-aware delivery matrix (behind-pace assets stay visible; on-track collapse). */
+  .delivery-matrix{margin-top:13px}
+  .dm-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 3px}
+  .dm-head h4{font-family:'Inter';font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.055em;color:var(--ink-faint);margin:0}
+  .dm-summary{font-size:11.5px;font-weight:700;color:var(--ink-soft)}
+  .dm-summary .sev{color:var(--bad)} .dm-summary .ok{color:var(--good)}
+  .dm-pace{font-size:10.5px;color:var(--ink-faint);margin:0 0 10px}
+  .dm-row{display:grid;grid-template-columns:15px minmax(0,1fr) 118px 78px;align-items:center;gap:11px;padding:7px 0;border-top:1px solid var(--line-soft)}
+  .dm-row:first-of-type{border-top:0}
+  .dm-ico{width:15px;height:15px;font-size:10.5px;font-weight:800;text-align:center;line-height:15px;border-radius:50%}
+  .dm-ico.behind{color:var(--bad);background:var(--bad-bg)} .dm-ico.complete{color:var(--good);background:var(--good-bg)}
+  .dm-ico.ontrack,.dm-ico.none{color:var(--ink-faint)}
+  .dm-name{font-size:12.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .dm-row.ontrack .dm-name,.dm-row.none .dm-name{color:var(--ink-soft);font-weight:500}
+  .dm-track{position:relative;height:7px;background:var(--track);border-radius:4px;overflow:visible}
+  .dm-fill{position:absolute;left:0;top:0;bottom:0;border-radius:4px;transform-origin:left center;animation:dmGrow .5s cubic-bezier(.2,.7,.2,1) both}
+  .dm-fill.behind{background:var(--bad)} .dm-fill.ontrack{background:#9AA3B2} .dm-fill.complete{background:var(--good)} .dm-fill.none{background:transparent}
+  @keyframes dmGrow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+  .dm-pacemark{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink);border-radius:2px;opacity:.75}
+  .dm-pacemark::after{content:'';position:absolute;top:-3px;left:-2px;width:6px;height:3px;background:var(--ink);border-radius:0 0 2px 2px}
+  .dm-fig{font-family:'JetBrains Mono';font-size:11.5px;text-align:right;white-space:nowrap;color:var(--ink)}
+  .dm-fig b{font-weight:700}
+  .dm-fig .pct{color:var(--ink-faint);font-weight:500;margin-left:4px}
+  .dm-row.behind .dm-fig .pct{color:var(--bad)} .dm-row.complete .dm-fig .pct{color:var(--good)}
+  .dm-more{margin-top:2px}
+  .dm-more>summary{list-style:none;cursor:pointer;font-size:10.5px;font-weight:750;color:var(--accent);padding:9px 0 2px;border-top:1px solid var(--line-soft)}
+  .dm-more>summary::-webkit-details-marker{display:none}
+  .dm-more>summary:before{content:'＋';color:var(--ink-faint);margin-right:6px}
+  .dm-more[open]>summary:before{content:'−'}
+  .data-disclosure{margin-top:13px;border-top:1px solid var(--line-soft);padding-top:11px}
+  .data-disclosure>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:11px;font-weight:750;color:var(--accent)}
+  .data-disclosure>summary::-webkit-details-marker{display:none}
+  .data-disclosure>summary:before{content:'＋';color:var(--ink-faint);margin-right:6px}
+  .data-disclosure[open]>summary:before{content:'−'}
+  .data-disclosure-body{padding-top:12px;animation:mediaReveal .2s ease both}
+
+  .quads{background:transparent;border:0;gap:10px;overflow:visible}
+  .quad.insight-tile{border:1px solid var(--line);border-radius:9px;min-height:0;padding:0;background:#fff;overflow:hidden;transition:border-color .18s ease,box-shadow .18s ease}
+  .quad.insight-tile:hover{border-color:#D2D7DF;box-shadow:0 5px 14px rgba(16,24,40,.04)}
+  .quad.insight-tile>summary{list-style:none;cursor:pointer;padding:14px;display:grid;grid-template-columns:1fr auto;gap:7px;align-items:center}
+  .quad.insight-tile>summary::-webkit-details-marker{display:none}
+  .quad.insight-tile h4{margin:0}
+  .quad-count{font-family:'JetBrains Mono';font-size:10px;color:var(--ink-faint)}
+  .quad-preview{grid-column:1/-1;color:var(--ink-soft);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .quad.insight-tile ul{margin:0;padding:0 16px 13px 32px;animation:mediaReveal .2s ease both}
+  .lever{border-radius:8px;transition:background .18s ease}.lever:hover{background:#F7F8FA}
+  .lv-note{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
   @media(max-width:980px){
     .app-shell{grid-template-columns:210px minmax(0,1fr)}
     .shell-nav{padding-left:16px;padding-right:16px}
@@ -598,6 +700,7 @@
     .dh-name,.pbanner h1{font-size:28px}
     .board{grid-template-columns:1fr}
     .overview-layout{grid-template-columns:1fr}
+    .media-comp>summary{grid-template-columns:1fr auto}.media-glance{grid-column:1/-1;padding-left:29px}
   }
   @media print{
     .app-shell{display:block}
@@ -1333,6 +1436,7 @@ Object.assign(window,{printPortfolio});
 function pcard(p){
   const s=latestSnap(p); const st=s.status||'none';
   const stLabel={good:'On track',warn:'Watch',bad:'Off track',none:'Not set'}[st];
+  const callLabel=s.call?({renew:'Renew',evolve:'Evolve',renegotiate:'Renegotiate',exit:'Exit'}[s.call]||s.call):'Review';
   const m=mediaRoll(s,p);
   const ytdAudienceTarget=audienceTargetYtd(s,p);
   const audP=pctDiff(m.del,ytdAudienceTarget);
@@ -1343,16 +1447,16 @@ function pcard(p){
     </div>`;
   const va=n(s.media.valueAdd);
   const overDel=(m.hasAud&&m.del!==null&&m.guar!==null&&m.del>m.guar)?(m.del-m.guar):null;
-  return `<div class="pcard ${st}" onclick="openDetail('${p.id}')">
+  return `<div class="pcard ${st}" role="button" tabindex="0" aria-label="Open ${esc(p.name)} partnership review" onclick="openDetail('${p.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openDetail('${p.id}')}">
     <div class="statusline"></div>
     <div class="head"><div><h3 class="name">${esc(p.name)} ${p.example?'<span class="example-tag">Example</span>':''}</h3><div class="cp">${esc(p.counterparty||'')}</div></div>
-      <span class="statusdot sd-${st}"><i></i>${stLabel}</span></div>
-    <div class="snapmeta"><span class="cat">${esc(p.category)}</span> · ${esc(s.label)} · ${fmtDate(s.date)}</div>
+      <div class="pcard-decision"><small>Recommendation</small><span class="callbadge call-${s.call||'evolve'}">${esc(callLabel)}</span></div></div>
+    <div class="snapmeta"><span class="cat">${esc(p.category)}</span><span class="statusdot sd-${st}"><i></i>${stLabel}</span><span>${esc(s.label)} · ${fmtDate(s.date)}</span></div>
     <p class="verdict ${s.verdict?'':'empty'}">${s.verdict?esc(s.verdict):'No verdict written yet'}</p>
     ${metricsHtml}
     <div class="cardfoot">
       <span class="valadd">${va?`Value-add <b>${money(va)}</b>`:(overDel?`Audience over-delivery <b>+${aud(overDel)}</b>`:'<span style="color:var(--ink-faint)">'+(m.inv!==null?money(m.inv)+' invested':'—')+'</span>')}</span>
-      ${s.call?`<span class="callbadge call-${s.call}">${s.call}</span>`:''}
+      <span class="pcard-open">Open review →</span>
     </div>
   </div>`;
 }
@@ -1938,8 +2042,8 @@ function entitlementPanel(p){
     }).join('');
     const summ=scored?`${onT}/${scored} on target`:(monthWeek?'submitted, none scoreable':'no verified submission');
     const summCls=scored&&onT===scored?'var(--good)':(scored?'var(--warn)':'var(--ink-faint)');
-    body+=`<div style="margin-top:16px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-weight:600;font-size:13.5px">${esc(c.name)}</span><span style="font-size:12px;color:${summCls};font-weight:600">${summ}</span></div>
-      <table class="dtable"><thead><tr><th>Entitlement</th><th class="num">/round</th><th class="num">Target</th><th class="num">Delivered</th><th class="num">Fulfil</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    body+=`<details class="data-disclosure"><summary><span>${esc(c.name)}</span><span style="color:${summCls}">${summ}</span></summary><div class="data-disclosure-body">
+      <table class="dtable"><thead><tr><th>Entitlement</th><th class="num">/round</th><th class="num">Target</th><th class="num">Delivered</th><th class="num">Fulfil</th></tr></thead><tbody>${rows}</tbody></table></div></details>`;
   });
   return `<div class="panel"><div class="panel-head"><h3>Entitlement delivery</h3><div class="filters">${monthChips}</div></div><div class="panel-body">
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px">
@@ -1974,8 +2078,10 @@ function integrationYtdPanel(p){
       <div style="background:#fff;padding:14px"><span class="mlab">Contracted executions</span><b class="mono" style="display:block;font-size:22px;margin-top:4px">${num(contracted)}</b></div>
       <div style="background:#fff;padding:14px"><span class="mlab">Components measured</span><b class="mono" style="display:block;font-size:22px;margin-top:4px">${measured}/${comps.reduce((n,c)=>n+(c.assets||[]).length,0)}</b></div>
     </div>
-    <table class="dtable"><thead><tr><th>Integration</th><th class="num">Guaranteed</th><th class="num">Delivered YTD</th><th class="num">Remaining</th><th class="num">Fulfilment</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>
-    <div style="margin-top:12px;font-size:11.5px;color:var(--ink-faint)">Initial figures come from ESPN's July delivery update. Each later ESPN submission supplies the latest cumulative YTD position. Once verified, it replaces the previous position rather than being added to it. Overdelivery on one component does not offset another component's shortfall.</div>
+    <details class="data-disclosure"><summary><span>Explore integration components</span><span>${measured} of ${comps.reduce((n,c)=>n+(c.assets||[]).length,0)} measured</span></summary><div class="data-disclosure-body">
+      <table class="dtable"><thead><tr><th>Integration</th><th class="num">Guaranteed</th><th class="num">Delivered YTD</th><th class="num">Remaining</th><th class="num">Fulfilment</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>
+      <div style="margin-top:12px;font-size:11.5px;color:var(--ink-faint)">Each verified ESPN submission supplies the latest cumulative YTD position. Overdelivery on one component does not offset another component's shortfall.</div>
+    </div></details>
   </div></div>`;
 }
 function setEntMonth(m){ view.entMonth=m; render(); }
@@ -2079,15 +2185,20 @@ function renderDetail(){
   const cpmCell=m.delCpm!==null
     ?`<div style="grid-column:1/-1"><span>Delivered CPM YTD${m.periodMatched?' · investment YTD ÷ views/listens YTD':''}</span><b style="font-size:15px;color:var(--${cpmColor||'ink'})">$${m.delCpm.toFixed(2)}${m.propCpm!==null?` <span style="font-size:11px;font-weight:600;color:var(--ink-faint)">vs $${m.propCpm.toFixed(2)} proposed</span>`:''}</b></div>`
     :`<div style="grid-column:1/-1"><span>Delivered CPM YTD</span><b style="color:var(--ink-faint)">Not yet measured${m.propCpm!==null?` — $${m.propCpm.toFixed(2)} proposed`:''}</b></div>`;
-  html+=`<div class="panel"><div class="panel-head"><h3>Current pulse</h3><span class="lil">Live YTD review</span></div><div class="panel-body">
-    <div class="pulse-status"><span class="statusdot sd-${pulseClass}"><i></i>${pulseLabel}</span><b>${callLabel}</b></div>
-    <div class="pulse-grid"><div><span>Total investment</span><b>${money(invShown)}</b></div><div><span>Investment YTD</span><b>${m.spendToDate!==null?money(m.spendToDate):'—'}</b></div>
-      <div><span>Views/listens YTD</span><b>${m.del!==null?aud(m.del)+' delivered':m.guar!==null?aud(m.guar)+' guaranteed':'—'}</b></div><div><span>Asset fulfilment</span><b>${pulse.assetPct!==null?pulse.assetPct+'%':'Not yet measured'}</b></div>
-      ${cpmCell}</div>
-    <p class="pulse-note">${esc(pulse.summary)}</p>
-    <ul class="pulse-evidence">${pulse.evidence.map(item=>`<li>${esc(item)}</li>`).join('')}</ul>
-    <div class="pulse-fresh">Recalculated from verified monthly performance and asset records. Pending submissions are excluded.</div>
-    <div class="pulse-actions"><button class="chip" onclick="setModule('executive')">Executive summary</button></div>
+  html+=`<div class="panel"><div class="panel-head"><h3>Current pulse</h3><span class="lil">Live YTD review</span></div><div class="pulse-hero">
+    <div class="pulse-status"><span class="statusdot sd-${pulseClass}"><i></i>${pulseLabel}</span><b class="pulse-call">${callLabel}</b></div>
+    <div class="pulse-compact-grid">
+      <button type="button" class="pulse-factor" onclick="openPulseEvidence(this)" aria-label="Explain investment YTD"><span>Investment YTD</span><b>${m.spendToDate!==null?money(m.spendToDate):'—'}</b></button>
+      <button type="button" class="pulse-factor" onclick="openPulseEvidence(this)" aria-label="Explain views or listens YTD"><span>Views/listens YTD</span><b>${m.del!==null?aud(m.del):m.guar!==null?aud(m.guar)+' guar':'—'}</b></button>
+      <button type="button" class="pulse-factor" onclick="openPulseEvidence(this)" aria-label="Explain asset fulfilment"><span>Asset fulfilment</span><b>${pulse.assetPct!==null?pulse.assetPct+'%':'—'}</b></button>
+      <button type="button" class="pulse-factor" onclick="openPulseEvidence(this)" aria-label="Explain delivered CPM YTD"><span>Delivered CPM YTD</span><b style="color:var(--${cpmColor||'ink'})">${m.delCpm!==null?'$'+m.delCpm.toFixed(2):'—'}</b></button>
+    </div>
+    <details class="pulse-disclosure"><summary><span>Why this pulse</span><span>${pulse.evidence.length} evidence signal${pulse.evidence.length!==1?'s':''}${pulse.pending?' · '+pulse.pending+' pending':''}</span></summary>
+      <div class="pulse-detail"><p class="pulse-note">${esc(pulse.summary)}</p>
+      <ul class="pulse-evidence">${pulse.evidence.map(item=>`<li>${esc(item)}</li>`).join('')}</ul>
+      <div class="pulse-fresh">Recalculated from verified monthly performance and asset records. Pending submissions are excluded.</div>
+      <div class="pulse-actions"><button class="chip" onclick="setModule('executive')">Open executive summary</button></div></div>
+    </details>
   </div></div></div>`;
 
   /* media */
@@ -2152,12 +2263,88 @@ function renderDetail(){
   document.getElementById('app').innerHTML=html;
 }
 
+function openPulseEvidence(el){
+  const disclosure=el.closest('.pulse-hero')?.querySelector('.pulse-disclosure');
+  if(disclosure){
+    disclosure.open=true;
+    disclosure.querySelector('summary')?.focus({preventScroll:true});
+  }
+}
+Object.assign(window,{openPulseEvidence});
+
+/* Fraction of the contract term elapsed by today (0–1), or null if term dates are missing/invalid. */
+function termElapsedFraction(p){
+  if(!p||!p.termStart||!p.termEnd)return null;
+  const a=new Date(p.termStart+'T00:00'),b=new Date(p.termEnd+'T00:00'),now=new Date();
+  if(isNaN(a)||isNaN(b)||b<=a)return null;
+  return Math.min(1,Math.max(0,(now-a)/(b-a)));
+}
+/* Per-asset delivery judged against PACE, not just the full contract. For YTD-reported assets the
+   reference is the fraction of term elapsed (so 30/40 in July reads as ahead, not behind); for
+   weekly-scheduled assets the target already scales with weeks logged. Status: complete (met/over),
+   behind (>15% under pace), on track. */
+function assetDeliveryModel(comp,p){
+  const isYtd=comp.assetReporting==='ytd';
+  const wl=verifiedWeeksLogged(comp);
+  const elapsed=termElapsedFraction(p);
+  const rows=(comp.assets||[]).map(as=>{
+    const contracted=isYtd?(+as.contractedQty||0):(+as.perWeek||0)*wl;
+    const deliveredRaw=isYtd?cumulativeAssetDelivered(comp,as,true):verifiedAssetDeliveredTotal(comp,as.id);
+    const hasData=deliveredRaw!==null;
+    const d=hasData?deliveredRaw:0;
+    const pct=contracted>0?d/contracted:null;
+    const paceFrac=isYtd?(elapsed!==null?elapsed:1):1;
+    let status;
+    if(contracted<=0) status='none';
+    else if(d>=contracted) status='complete';
+    else if(!hasData||d<contracted*paceFrac*0.85-1e-9) status='behind';
+    else status='ontrack';
+    return {name:as.name,delivered:hasData?d:null,contracted,pct,status,over:d>contracted};
+  });
+  return {rows,isYtd,elapsed};
+}
+/* Ranked, pace-aware delivery surface. Behind-pace assets stay visible at rest (worst-first); only
+   on-track/complete collapse. Same visual grammar as the chart: bar + pace tick + glyph, colour only
+   on deviation. Replaces the flat "hide every chip behind +" so the shortfall can never be buried. */
+function deliveryMatrix(comp,p){
+  const {rows,isYtd,elapsed}=assetDeliveryModel(comp,p);
+  if(!rows.length)return '';
+  const order={behind:0,none:1,complete:2,ontrack:3};
+  const sorted=rows.slice().sort((x,y)=>(order[x.status]-order[y.status])||((x.pct??0)-(y.pct??0)));
+  const attention=sorted.filter(r=>r.status==='behind');
+  const rest=sorted.filter(r=>r.status!=='behind');
+  const paceLine=isYtd&&elapsed!==null
+    ? `Measured against ${Math.round(elapsed*100)}% of term elapsed — the tick marks expected pace`
+    : `Measured against the schedule verified to date`;
+  const rowHtml=r=>{
+    const ico=r.status==='behind'?'!':r.status==='complete'?'✓':'○';
+    const pctTxt=r.pct===null?'—':(r.over?'+'+Math.round((r.pct-1)*100)+'%':Math.round(r.pct*100)+'%');
+    const fillW=r.pct===null?0:Math.min(100,r.pct*100);
+    const showPace=isYtd&&elapsed!==null&&r.status!=='complete';
+    return `<div class="dm-row ${r.status}">
+      <span class="dm-ico ${r.status}" aria-hidden="true">${ico}</span>
+      <span class="dm-name" title="${esc(r.name)}">${esc(r.name)}</span>
+      <span class="dm-track"><span class="dm-fill ${r.status}" style="width:${fillW.toFixed(1)}%"></span>${showPace?`<span class="dm-pacemark" style="left:${(elapsed*100).toFixed(1)}%"></span>`:''}</span>
+      <span class="dm-fig"><b>${r.delivered===null?'—':num(r.delivered)}</b>/${r.contracted||'—'}<span class="pct">${pctTxt}</span></span>
+    </div>`;
+  };
+  const bits=[];
+  if(attention.length)bits.push(`<span class="sev">${attention.length} behind pace</span>`);
+  if(rest.length)bits.push(`<span class="ok">${rest.length} on track</span>`);
+  return `<div class="delivery-matrix">
+    <div class="dm-head"><h4>Integration delivery</h4><span class="dm-summary">${bits.join(' · ')||'—'}</span></div>
+    <div class="dm-pace">${paceLine}</div>
+    ${attention.map(rowHtml).join('')}
+    ${rest.length?`<details class="dm-more"><summary>${rest.length} on track &amp; complete</summary>${rest.map(rowHtml).join('')}</details>`:''}
+  </div>`;
+}
 function componentBlock(comp,p,index){
   const inv=n(comp.investment);
   const wl=verifiedWeeksLogged(comp);
   const totalMonths=termMonths(p);
   let invYtd=null,perfMonths=0;
   let body='';
+  let glanceLabel='Delivery',glanceValue='—',cpmGlance='—',assetPctSummary=null;
   if(comp.mode==='audience'){
     const g=n(comp.audienceGuaranteed),d=audDelivered(comp,p);
     perfMonths=deliveryMonthsLogged(comp,p);
@@ -2168,26 +2355,33 @@ function componentBlock(comp,p,index){
     let dc=null,periodMatched=false;
     if(invYtd!==null&&d){ dc=cpm(invYtd,d); periodMatched=dc!==null; }
     if(dc===null) dc=cpm(inv,d);
+    glanceLabel=d!==null?'Audience YTD':'Audience';
+    glanceValue=d!==null?aud(d):'Awaiting';
+    cpmGlance=dc!==null?'$'+dc.toFixed(2):pc!==null?'$'+pc.toFixed(2)+' proj':'—';
     const src=perfMonths?` <span style="color:var(--ink-faint);font-weight:400;font-size:11px">(from ${perfMonths} verified month${perfMonths>1?'s':''} · live + imported)</span>`:'';
     body=`<div class="aud-row"><span class="mlab">Views/listens YTD</span><span class="mono">${d!==null?aud(d)+' delivered':ytdTarget!==null?aud(ytdTarget)+' YTD target':'Awaiting delivery'}${ytdTarget!==null&&d!==null?' / '+aud(ytdTarget)+' YTD target':''}${audP!==null?` <span style="color:var(--${audP>=0?'good':audP>=-15?'warn':'bad'});font-weight:700">(${audP>0?'+':''}${audP}% vs YTD)</span>`:''}${g!==null?` <span style="color:var(--ink-faint);font-weight:400;font-size:11px">· ${aud(g)} full guarantee</span>`:''}${src}</span></div>
       ${d!==null&&ytdTarget!==null?bar(d,ytdTarget):bar(null,null)}
       <div class="cpm-line">${pc!==null?`Proposed CPM <b>$${pc.toFixed(2)}</b>`:''}${dc!==null?` → YTD delivered CPM <b style="color:var(--${dc<=pc?'good':'bad'})">$${dc.toFixed(2)}</b>${periodMatched?` <span style="color:var(--ink-faint);font-weight:400">(${money(invYtd)} investment YTD ÷ views/listens YTD)</span>`:''}`:''}</div>`;
   } else if(comp.mode==='fixed'){
+    glanceValue=comp.fixedDelivered?'Delivered':'Awaiting';
     body=`<div class="cpm-line">${comp.fixedDelivered?'<b style="color:var(--good)">Delivered</b> — full value counted':'<span style="color:var(--ink-faint)">Not yet delivered</span>'}</div>`;
   } else {
     const d=n(comp.deliveredQty),ct=n(comp.contractedQty); const r=compRealised(comp);
+    glanceValue=d!==null&&ct?Math.round(d/ct*100)+'%':'Awaiting';
     body=`<div class="aud-row"><span class="mlab">Fulfilment</span><span class="mono">${d!==null?d:'—'} of ${ct||'—'} ${esc(comp.unit||'')}${r!==null&&inv?` · <b>${money(r)}</b> realised`:''}</span></div>${d!==null&&ct?bar(d,ct):bar(0,1)}`;
   }
   // asset fulfilment strip (weekly asset schedule)
   let assetStrip='';
   if((comp.assets||[]).length){
-    assetStrip=`<div class="assetfulfil-strip">`+comp.assets.map(as=>{
-      const isYtd=comp.assetReporting==='ytd';
+    // keep a simple fulfilment % for the header ring; the ranked matrix carries the per-asset detail
+    const isYtd=comp.assetReporting==='ytd';
+    const measured=comp.assets.map(as=>{
       const del=isYtd?cumulativeAssetDelivered(comp,as,true):verifiedAssetDeliveredTotal(comp,as.id);
       const target=isYtd?(+as.contractedQty||0):(+as.perWeek||0)*wl;
-      const cls=del===null?'none':(del>=target?'ok':'under');
-      return `<span class="afx ${cls}" title="${esc(as.name)}: contracted ${isYtd?target:(as.perWeek+'/round')}">${esc(as.name)} ${del===null?'—':del}${target?'/'+target:''}</span>`;
-    }).join('')+`</div>`;
+      return del!==null&&target?Math.min(del/target*100,100):null;
+    }).filter(v=>v!==null);
+    assetPctSummary=measured.length?Math.round(measured.reduce((s,v)=>s+v,0)/measured.length):null;
+    assetStrip=deliveryMatrix(comp,p);
   } else if((comp.entitlements||[]).length){
     assetStrip=`<details class="comp-ent"><summary>${comp.entitlements.length} entitlements</summary><div class="ent-chips">${comp.entitlements.map(e=>`<span class="ent-chip">${esc(e)}</span>`).join('')}</div></details>`;
   }
@@ -2204,9 +2398,10 @@ function componentBlock(comp,p,index){
       </tbody></table></details>`;
   }
   const hasStored=view.mediaExpanded&&Object.prototype.hasOwnProperty.call(view.mediaExpanded,comp.id);
-  const expanded=hasStored?view.mediaExpanded[comp.id]:index===0;
+  const expanded=hasStored?view.mediaExpanded[comp.id]:false;
   return `<details class="comp media-comp" ${expanded?'open':''} ontoggle="rememberMediaOpen(this,'${comp.id}')">
-    <summary class="comp-head"><div style="display:flex;align-items:center;min-width:0"><span class="comp-name">${esc(comp.name)}</span><span class="comp-mode">${comp.mode}</span></div>
+    <summary class="comp-head"><div class="media-title-block"><span class="comp-name">${esc(comp.name)}</span><span class="comp-mode">${comp.mode}</span></div>
+      <div class="media-glance"><div class="media-glance-item"><span>${glanceLabel}</span><b>${glanceValue}</b></div>${comp.mode==='audience'?`<div class="media-glance-item"><span>CPM YTD</span><b>${cpmGlance}</b></div>`:''}${assetPctSummary!==null?`<div class="mini-progress" style="--p:${assetPctSummary}"><b>${assetPctSummary}%</b></div>`:''}</div>
       <div style="display:flex;align-items:flex-start;gap:7px"><div class="comp-investments"><span class="comp-inv">${money(comp.investment)}<small>Total investment</small></span>${comp.mode==='audience'?`<span class="comp-inv">${invYtd!==null?money(invYtd):'—'}<small>Investment YTD</small></span>`:''}</div><button class="comp-editbtn" onclick="event.preventDefault();event.stopPropagation();editComponent('${comp.id}')">Edit</button></div></summary>
     <div class="media-comp-body">${body}${assetStrip}${log}</div>
   </details>`;
@@ -2224,8 +2419,10 @@ async function verifyWeek(cid,wid){
   if(SB){ try{ await sbSetVerified(wid); await ownerRefreshWeeks(); render(); toast('Week verified'); }catch(e){ toast('Error: '+e.message); } return; }
   const s=curSnap(); const c=s.media.components.find(x=>x.id===cid); const w=c.weeks.find(x=>x.id===wid); if(w){w.status='verified';await persist();render();toast('Week verified');} }
 function quad(cls,title,items){
-  const list=(items&&items.length)?`<ul>${items.map(i=>`<li>${esc(i)}</li>`).join('')}</ul>`:`<span class="none">Nothing noted</span>`;
-  return `<div class="quad ${cls}"><h4><span class="qi"></span>${title}</h4>${list}</div>`;
+  const count=items&&items.length?items.length:0;
+  const list=count?`<ul>${items.map(i=>`<li>${esc(i)}</li>`).join('')}</ul>`:`<span class="none" style="display:block;padding:0 14px 14px">Nothing noted</span>`;
+  const preview=count?esc(items[0]):'Nothing noted';
+  return `<details class="quad insight-tile ${cls}"><summary><h4><span class="qi"></span>${title}</h4><span class="quad-count">${count}</span><span class="quad-preview">${preview}</span></summary>${list}</details>`;
 }
 function lever(key,label,d){
   const r=d.rating||'none';
