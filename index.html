@@ -1308,7 +1308,7 @@ function monthlyGraphPanel(p){
     const pendingMonths=Object.keys(pendingData).filter(mo=>!staticMonths.includes(mo));
     if(newMonths.length||pendingMonths.length){ if(!shows[showKey])shows[showKey]={baselineUntil:null,data:{},pending:{}}; }
     newMonths.forEach(mo=>{ shows[showKey].data[mo]=liveData[mo]; });
-    pendingMonths.forEach(mo=>{ if(!shows[showKey].data[mo])shows[showKey].pending[mo]=pendingData[mo]; });
+    pendingMonths.forEach(mo=>{ shows[showKey].pending[mo]=pendingData[mo]; });
     if(!shows[showKey] && (Object.keys(liveData).length||Object.keys(pendingData).length)){ shows[showKey]={baselineUntil:null,data:{},pending:{}}; }
     Object.entries(liveTk).forEach(([mo,v])=>{ if(!staticMonths.includes(mo)) liveTiktok[mo]=(liveTiktok[mo]||0)+v; });
   });
@@ -1342,21 +1342,22 @@ function monthlyGraphPanel(p){
     A.forEach((s,si)=>{
       const sh=M.shows[s], d=sh.data[mo], pendingD=(sh.pending||{})[mo];
       const verifiedV=val(d),pendingV=val(pendingD);
-      const isPending=verifiedV===null&&pendingV!==null;
-      const v=isPending?pendingV:verifiedV;
+      const hasVerified=verifiedV!==null,hasPending=pendingV!==null;
       const spread=A.length*barW+(A.length-1)*6;
       const bx=gx+groupW/2-spread/2+si*(barW+6);
-      if(v===null){ bars+=`<text x="${(bx+barW/2).toFixed(1)}" y="${base-4}" text-anchor="middle" font-size="10" fill="#B8BDC7">–</text>`; return; }
-      const h=Math.max(isPending&&v===0?4:(v/max)*(base-top),0);
+      if(!hasVerified&&!hasPending){ bars+=`<text x="${(bx+barW/2).toFixed(1)}" y="${base-4}" text-anchor="middle" font-size="10" fill="#B8BDC7">–</text>`; return; }
+      const verifiedH=hasVerified?Math.max(verifiedV===0?2:(verifiedV/max)*(base-top),0):0;
+      const pendingH=hasPending?Math.max(pendingV===0?4:(pendingV/max)*(base-top),0):0;
       const baseline=sh.baselineUntil && M.months.indexOf(mo)<=M.months.indexOf(sh.baselineUntil);
       const col=colors[s];
-      if(isPending){
-        bars+=`<rect x="${bx.toFixed(1)}" y="${(base-h).toFixed(1)}" width="${barW.toFixed(1)}" height="${h.toFixed(1)}" rx="3" fill="#F7EBD2" stroke="#C38318" stroke-width="2" stroke-dasharray="5 3"></rect>`;
-        bars+=`<text x="${(bx+barW/2).toFixed(1)}" y="${(base-h-14).toFixed(1)}" text-anchor="middle" font-size="8" fill="#9A6609" font-weight="700">PENDING</text>`;
-        bars+=`<text x="${(bx+barW/2).toFixed(1)}" y="${(base-h-4).toFixed(1)}" text-anchor="middle" font-size="9" fill="#9A6609" font-family="'JetBrains Mono',monospace">${aud(v)}</text>`;
-      }else{
-        bars+=`<rect x="${bx.toFixed(1)}" y="${(base-h).toFixed(1)}" width="${barW.toFixed(1)}" height="${h.toFixed(1)}" rx="3" fill="${col}" ${baseline?`fill-opacity="0.28" stroke="${col}" stroke-dasharray="3 2"`:''}></rect>`;
-        bars+=`<text x="${(bx+barW/2).toFixed(1)}" y="${(base-h-5).toFixed(1)}" text-anchor="middle" font-size="9" fill="#5A616E" font-family="'JetBrains Mono',monospace">${aud(v)}</text>`;
+      if(hasVerified){
+        bars+=`<rect x="${bx.toFixed(1)}" y="${(base-verifiedH).toFixed(1)}" width="${barW.toFixed(1)}" height="${verifiedH.toFixed(1)}" rx="3" fill="${col}" ${baseline?`fill-opacity="0.28" stroke="${col}" stroke-dasharray="3 2"`:''}><title>Verified: ${aud(verifiedV)}</title></rect>`;
+        if(!hasPending)bars+=`<text x="${(bx+barW/2).toFixed(1)}" y="${(base-verifiedH-5).toFixed(1)}" text-anchor="middle" font-size="9" fill="#5A616E" font-family="'JetBrains Mono',monospace">${aud(verifiedV)}</text>`;
+      }
+      if(hasPending){
+        bars+=`<rect x="${bx.toFixed(1)}" y="${(base-pendingH).toFixed(1)}" width="${barW.toFixed(1)}" height="${pendingH.toFixed(1)}" rx="3" fill="#F7EBD2" fill-opacity="${hasVerified?'0.42':'1'}" stroke="#C38318" stroke-width="2" stroke-dasharray="5 3"><title>Submitted, pending verification: ${aud(pendingV)}${hasVerified?' · last verified: '+aud(verifiedV):''}</title></rect>`;
+        bars+=`<text x="${(bx+barW/2).toFixed(1)}" y="${(base-pendingH-14).toFixed(1)}" text-anchor="middle" font-size="8" fill="#9A6609" font-weight="700">PENDING</text>`;
+        bars+=`<text x="${(bx+barW/2).toFixed(1)}" y="${(base-pendingH-4).toFixed(1)}" text-anchor="middle" font-size="9" fill="#9A6609" font-family="'JetBrains Mono',monospace">${aud(pendingV)}</text>`;
       }
     });
     bars+=`<text x="${(gx+groupW/2).toFixed(1)}" y="${base+16}" text-anchor="middle" font-size="11" fill="#5A616E" font-weight="600">${mo}</text>`;
@@ -1370,12 +1371,13 @@ function monthlyGraphPanel(p){
   const last=withData[withData.length-1], prev=withData[withData.length-2];
   let mom='';
   if(last&&prev){
+    const pendingAtLast=A.some(s=>(M.shows[s].pending||{})[last]);
     const cells=A.map(s=>{ const a=val(M.shows[s].data[last]), b=val(M.shows[s].data[prev]);
       if(a==null||b==null||b===0) return '';
       const p=Math.round((a-b)/b*100);
       return `<span style="margin-right:16px"><span style="width:9px;height:9px;border-radius:2px;background:${colors[s]};display:inline-block;margin-right:5px"></span>${esc(s)} <b style="font-family:'JetBrains Mono',monospace;color:var(--${p>=0?'good':'bad'})">${p>0?'+':''}${p}%</b></span>`;
     }).filter(Boolean).join('');
-    mom=`<div style="margin-top:6px;font-size:12px;color:var(--ink-soft)"><span style="color:var(--ink-faint);text-transform:uppercase;letter-spacing:.04em;font-size:10.5px;font-weight:600;margin-right:10px">MoM · ${last} vs ${prev}</span>${cells}</div>`;
+    mom=`<div style="margin-top:6px;font-size:12px;color:var(--ink-soft)"><span style="color:var(--ink-faint);text-transform:uppercase;letter-spacing:.04em;font-size:10.5px;font-weight:600;margin-right:10px">MoM · ${last} vs ${prev}${pendingAtLast?' · verified basis; pending excluded':''}</span>${cells}</div>`;
   }
   // July audience composition — backs the Audience lever (follows the show filter)
   let comp='';
