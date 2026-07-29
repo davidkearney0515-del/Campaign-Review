@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Partnership Review — Secure Partner Login</title>
+<title>Partnership Review — Interactive Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -309,6 +309,14 @@
   .metric-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}.metric-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius-sm);padding:14px;box-shadow:var(--shadow)}
   .metric-card .label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint)}.metric-card .value{font-family:'Space Grotesk';font-size:22px;font-weight:700;letter-spacing:-.03em;margin-top:4px}.metric-card .compare{font-size:11.5px;color:var(--ink-soft);margin-top:4px}.delta.good{color:var(--good);font-weight:700}.delta.bad{color:var(--bad);font-weight:700}.delta.warn{color:var(--warn);font-weight:700}
   .dtable{width:100%;border-collapse:collapse;font-size:12.5px}.dtable th{text-align:left;color:var(--ink-faint);font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;padding:8px 9px;border-bottom:1px solid var(--line);white-space:nowrap}.dtable td{padding:10px 9px;border-bottom:1px solid var(--line-soft)}.dtable tr:last-child td{border-bottom:0}.dtable .num{text-align:right;font-family:'JetBrains Mono';font-size:12px}.dtable .muted{color:var(--ink-faint)}
+  .perf-export{display:inline-flex;gap:6px;margin-left:10px;padding-left:12px;border-left:1px solid var(--line)}
+  .perf-x{font-size:11px;font-weight:600;color:var(--ink-soft);border:1px solid var(--line);background:#fff;padding:5px 11px;border-radius:7px;transition:.12s;cursor:pointer}
+  .perf-x:hover{border-color:var(--brand);color:var(--brand)}
+  .perf-table{margin-top:16px;border-top:1px solid var(--line-soft);padding-top:12px}
+  .perf-table>summary{font-size:12px;font-weight:600;color:var(--accent);cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:6px}
+  .perf-table>summary::-webkit-details-marker{display:none}
+  .perf-table>summary::before{content:'▸';color:var(--ink-faint);font-size:10px}
+  .perf-table[open]>summary::before{content:'▾'}
   .stackbar{height:12px;border-radius:6px;overflow:hidden;background:var(--track);display:flex;margin:12px 0}.stackbar span{height:100%}.legend{display:flex;gap:13px;flex-wrap:wrap;font-size:11.5px;color:var(--ink-soft)}.legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px}
   .funnel{display:flex;align-items:stretch;gap:5px;overflow-x:auto;padding:4px 0}.funnel-step{min-width:112px;flex:1;background:var(--accent-soft);border-radius:8px;padding:11px}.funnel-step:nth-child(2){background:#e9f0fb}.funnel-step:nth-child(3){background:#edf5f2}.funnel-step:nth-child(4){background:#f8f0e4}.funnel-step .fnum{font-family:'Space Grotesk';font-size:19px;font-weight:700}.funnel-step .flab{font-size:10.5px;color:var(--ink-soft);text-transform:uppercase;font-weight:700;letter-spacing:.04em}
   .summary-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:18px}.summary-list{margin:0;padding:0;list-style:none}.summary-list li{padding:10px 0;border-bottom:1px solid var(--line-soft);font-size:13px}.summary-list li:last-child{border-bottom:0}.summary-list .evidence{display:block;color:var(--ink-faint);font-size:11.5px;margin-top:3px}.decision-card{border-radius:var(--radius);padding:18px;border:1px solid var(--accent);background:var(--accent-soft)}.decision-card .decision{font-family:'Space Grotesk';font-size:24px;font-weight:700;color:var(--accent);margin:3px 0 7px}.timeline{border-left:2px solid var(--line);margin:4px 0 0 6px;padding-left:15px}.timeline div{position:relative;padding:0 0 14px;font-size:12.5px}.timeline div:before{content:'';position:absolute;left:-20px;top:4px;width:8px;height:8px;border-radius:50%;background:var(--accent)}.timeline small{color:var(--ink-faint);display:block;margin-top:2px}
@@ -316,7 +324,7 @@
   .overview-layout{display:grid;grid-template-columns:minmax(310px,.78fr) minmax(0,1.22fr);gap:18px;align-items:start}.overview-rail{display:flex;flex-direction:column;gap:18px}.overview-rail .panel{margin-bottom:0}.pulse-status{display:flex;align-items:center;gap:8px;margin-bottom:14px}.pulse-status b{font-family:'Space Grotesk';font-size:17px}.pulse-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:9px;overflow:hidden}.pulse-grid div{background:var(--card);padding:11px}.pulse-grid span{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint);font-weight:700}.pulse-grid b{display:block;margin-top:3px;font-size:12.5px;color:var(--ink)}.pulse-note{font-size:12.5px;color:var(--ink-soft);line-height:1.5;margin:14px 0 0}.pulse-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}
   .pulse-evidence{margin:11px 0 0;padding:10px 0 0 16px;border-top:1px solid var(--line-soft);color:var(--ink-soft);font-size:11.5px;line-height:1.45}.pulse-evidence li{margin:4px 0}.pulse-fresh{font-size:10.5px;color:var(--ink-faint);margin-top:10px}
   @media(max-width:860px){.metric-strip{grid-template-columns:1fr 1fr}.summary-grid,.overview-layout{grid-template-columns:1fr}}@media(max-width:520px){.metric-strip{grid-template-columns:1fr}.module-hero{padding:18px}.dtable{font-size:11.5px}.dtable th,.dtable td{padding:8px 6px}}
-  @media print{header.top,.module-nav,.linkbtn,.btn,.filters,#modalMount,#toastMount{display:none!important}body{background:#fff}main{max-width:none;padding:0}.panel,.metric-card{box-shadow:none}.module-hero{background:#fff;color:var(--ink);border:1px solid var(--line)}.module-hero p,.module-hero .eyebrow{color:var(--ink-soft)}}
+  @media print{header.top,.module-nav,.linkbtn,.btn,.filters,.perf-toolbar,#modalMount,#drawerMount,#toastMount{display:none!important}body{background:#fff}main{max-width:none;padding:0}.panel,.metric-card{box-shadow:none}.module-hero{background:#fff;color:var(--ink);border:1px solid var(--line)}.module-hero p,.module-hero .eyebrow{color:var(--ink-soft)}}
   @media(max-width:720px){
     main{padding:18px 14px 70px}
     .metric-strip{grid-template-columns:1fr 1fr!important;gap:8px}
@@ -490,6 +498,81 @@
   .modal{border-radius:14px}.modal-head h3{font-family:'Inter';font-weight:700}
   .toast{background:var(--nav);border-radius:8px}
 
+  /* Interactive visual language — status never relies on colour alone. */
+  .statusdot i{display:none}
+  .statusdot:before,.wk-status:before,.callbadge:before,.afx:before{display:inline-block;margin-right:5px;font-weight:800;line-height:1}
+  .sd-good:before,.wk-verified:before,.call-renew:before,.afx.ok:before{content:'✓'}
+  .sd-warn:before,.wk-pending:before,.call-renegotiate:before,.afx.under:before{content:'◷'}
+  .sd-bad:before,.wk-rejected:before,.call-exit:before{content:'!'}
+  .sd-none:before,.wk-baseline:before,.afx.none:before{content:'–'}
+  .call-evolve:before{content:'↗'}
+  .sd-warn,.wk-pending,.att-pending{background-image:repeating-linear-gradient(135deg,rgba(195,131,24,.08) 0 4px,transparent 4px 8px)}
+  .sd-bad,.wk-rejected,.att-off,.att-overdue{background-image:repeating-linear-gradient(135deg,rgba(190,30,45,.07) 0 4px,transparent 4px 8px)}
+
+  /* Chart toolbar, interactive plot and export menu. */
+  .perf-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+  .perf-view-toggle{display:inline-flex;padding:3px;border:1px solid var(--line);border-radius:9px;background:#F7F8FA}
+  .perf-view-toggle button{padding:5px 9px;border-radius:6px;font-size:10.5px;font-weight:650;color:var(--ink-soft)}
+  .perf-view-toggle button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(16,24,40,.09)}
+  .perf-export-menu{position:relative}
+  .perf-export-menu>summary{list-style:none;display:inline-flex;align-items:center;gap:7px;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--ink);font-size:11px;font-weight:700;padding:7px 10px;border-radius:8px}
+  .perf-export-menu>summary::-webkit-details-marker{display:none}
+  .perf-export-menu>summary:after{content:'⌄';color:var(--ink-faint);font-size:12px}
+  .perf-export-menu[open]>summary{border-color:#C8CDD6;box-shadow:0 0 0 3px rgba(31,58,95,.08)}
+  .perf-export-pop{position:absolute;right:0;top:calc(100% + 7px);z-index:12;width:188px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:6px;box-shadow:var(--shadow-lg)}
+  .perf-export-pop button{display:flex;width:100%;align-items:center;justify-content:space-between;text-align:left;padding:9px 10px;border-radius:7px;font-size:11.5px;color:var(--ink)}
+  .perf-export-pop button:hover{background:var(--line-soft)}
+  .perf-export-pop small{color:var(--ink-faint);font-size:9px;font-weight:650}
+  .perf-chart{overflow:visible}
+  .perf-bar{cursor:pointer;transform-box:fill-box;transform-origin:center bottom;animation:perfBarIn .34s cubic-bezier(.2,.75,.25,1) both;transition:filter .18s ease,opacity .18s ease,transform .18s ease}
+  .perf-bar:hover,.perf-bar:focus{filter:drop-shadow(0 4px 5px rgba(16,24,40,.18));transform:translateY(-2px);outline:none}
+  .perf-bar:focus rect{stroke:#111827;stroke-width:2.4}
+  .perf-target-line{stroke:#111827;stroke-width:1.5;stroke-dasharray:5 4;opacity:.7}
+  .perf-target-label{font-size:9px;font-weight:750;fill:#111827;letter-spacing:.04em}
+  @keyframes perfBarIn{from{transform:scaleY(.03);opacity:.35}to{transform:scaleY(1);opacity:1}}
+
+  /* Month exploration drawer. */
+  .drawer-scrim{position:fixed;inset:0;z-index:70;background:rgba(17,24,39,.38);backdrop-filter:blur(2px);display:flex;justify-content:flex-end;animation:drawerFade .18s ease both}
+  .perf-drawer{width:min(480px,94vw);height:100%;background:#fff;box-shadow:-18px 0 44px rgba(16,24,40,.18);display:flex;flex-direction:column;animation:drawerSlide .24s cubic-bezier(.2,.75,.25,1) both}
+  .perf-drawer-head{padding:22px 24px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
+  .perf-drawer-head .eyebrow{font-size:9.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--brand);font-weight:800}
+  .perf-drawer-head h3{font-family:'Space Grotesk';font-size:22px;letter-spacing:-.025em;margin:5px 0 2px}
+  .perf-drawer-head p{font-size:12px;color:var(--ink-soft);margin:0}
+  .drawer-close{width:32px;height:32px;border:1px solid var(--line);border-radius:8px;font-size:20px;color:var(--ink-soft);flex:none}
+  .drawer-close:hover{color:var(--ink);background:var(--line-soft)}
+  .perf-drawer-body{padding:22px 24px 32px;overflow-y:auto}
+  .drawer-kpis{display:grid;grid-template-columns:1fr 1fr;gap:1px;border:1px solid var(--line);background:var(--line);border-radius:10px;overflow:hidden;margin-bottom:18px}
+  .drawer-kpis div{background:#fff;padding:13px}
+  .drawer-kpis span{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint);font-weight:750}
+  .drawer-kpis b{display:block;font-family:'JetBrains Mono';font-size:16px;margin-top:4px}
+  .drawer-section{padding:16px 0;border-top:1px solid var(--line-soft)}
+  .drawer-section h4{font-size:10px;text-transform:uppercase;letter-spacing:.065em;color:var(--ink-faint);margin:0 0 10px}
+  .drawer-breakdown{display:grid;gap:8px}
+  .drawer-breakdown div{display:flex;justify-content:space-between;gap:15px;font-size:12.5px}
+  .drawer-breakdown b{font-family:'JetBrains Mono';font-weight:650}
+  .drawer-assets{display:grid;gap:7px}.drawer-asset{display:flex;justify-content:space-between;gap:12px;padding:8px 10px;border:1px solid var(--line-soft);border-radius:7px;font-size:11.5px}
+  .drawer-asset b{font-family:'JetBrains Mono'}
+  .drawer-clips{display:grid;gap:7px}.drawer-clips a{display:flex;justify-content:space-between;gap:10px;padding:9px 10px;border-radius:7px;background:#F7F8FA;color:var(--accent);font-size:11.5px;text-decoration:none}.drawer-clips a:hover{background:#EEF1F5}
+  .drawer-actions{margin-top:18px;padding-top:16px;border-top:1px solid var(--line);display:flex;justify-content:flex-end}
+  @keyframes drawerFade{from{opacity:0}to{opacity:1}}
+  @keyframes drawerSlide{from{transform:translateX(28px);opacity:.75}to{transform:translateX(0);opacity:1}}
+
+  /* Media Value now uses the same progressive-disclosure language as the chart drawer. */
+  .media-comp{padding:0;overflow:hidden;background:#fff}
+  .media-comp>summary{list-style:none;margin:0;padding:15px 16px;cursor:pointer;align-items:center}
+  .media-comp>summary::-webkit-details-marker{display:none}
+  .media-comp>summary:before{content:'›';color:var(--ink-faint);font-size:20px;line-height:1;margin-right:9px;transition:transform .2s ease}
+  .media-comp[open]>summary:before{transform:rotate(90deg)}
+  .media-comp>summary:hover{background:#FAFAFB}
+  .media-comp-body{padding:14px 16px 17px;border-top:1px solid var(--line-soft);animation:mediaReveal .2s ease both}
+  .media-comp .comp-name{font-size:14px}
+  .media-comp .comp-editbtn{opacity:1}
+  @keyframes mediaReveal{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+
+  @media(prefers-reduced-motion:reduce){
+    *,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+  }
+
   @media(max-width:980px){
     .app-shell{grid-template-columns:210px minmax(0,1fr)}
     .shell-nav{padding-left:16px;padding-right:16px}
@@ -568,6 +651,7 @@
 </header>
 <main id="app"></main>
 <div id="modalMount"></div>
+<div id="drawerMount"></div>
 <div id="toastMount"></div>
 </div>
 </div>
@@ -1338,6 +1422,270 @@ function pendingShowMonthly(comp){
   });
   return data;
 }
+/* ============================================================ MONTHLY PERFORMANCE — EXPORTABLE CHART ============================================================
+   buildPerfChartSVG produces a standalone, deck-ready SVG (baked title, KPI strip, legend, attribution
+   and footnote) from the same model the on-screen chart draws, so PNG/SVG exports are WYSIWYG. The
+   on-screen chart keeps its interactive controls; export reads the model the panel stashes on render. */
+function niceMax(raw){
+  // ~10% headroom above the tallest bar, rounded up to a clean number so the top gridline sits just
+  // above the data rather than miles above it.
+  if(raw<=0)return 1;
+  const target=raw*1.1;
+  const pow=Math.pow(10,Math.floor(Math.log10(target)));
+  const n=target/pow;
+  const steps=[1,1.2,1.5,2,2.5,3,4,5,6,8,10];
+  const step=steps.find(s=>s>=n)||10;
+  return step*pow;
+}
+function perfRawValue(m,d){
+  if(!d)return null;
+  return m.metric==='total'?(+d.yt||0)+(+d.soc||0)+(+d.ac||0):(+d[m.metric]||0);
+}
+function perfIsBaseline(m,show,index){
+  const b=m.shows[show]&&m.shows[show].baselineUntil;
+  return !!(b&&index<=m.months.indexOf(b));
+}
+function perfCumulative(m,show,index,includePending){
+  let total=0,has=false;
+  for(let i=0;i<=index;i++){
+    if(perfIsBaseline(m,show,i))continue;
+    const mo=m.months[i];
+    const v=perfRawValue(m,m.shows[show].data[mo]);
+    if(v!==null){total+=v;has=true;}
+    if(includePending){
+      const pv=perfRawValue(m,(m.shows[show].pending||{})[mo]);
+      if(pv!==null){total+=pv;has=true;}
+    }
+  }
+  return has?total:null;
+}
+function perfHasPendingThrough(m,show,index){
+  for(let i=0;i<=index;i++){
+    if(perfIsBaseline(m,show,i))continue;
+    if(perfRawValue(m,(m.shows[show].pending||{})[m.months[i]])!==null)return true;
+  }
+  return false;
+}
+function perfTargetAt(m,show,index){
+  const target=m.targets&&m.targets[show];
+  if(!target||!target.guarantee||!target.termMonths)return null;
+  let elapsed=0;
+  for(let i=0;i<=index;i++)if(!perfIsBaseline(m,show,i))elapsed++;
+  return target.guarantee*Math.min(elapsed,target.termMonths)/target.termMonths;
+}
+function perfPoint(m,show,index,pending){
+  const mode=m.viewMode||'monthly',mo=m.months[index];
+  if(mode==='monthly')return perfRawValue(m,pending?(m.shows[show].pending||{})[mo]:m.shows[show].data[mo]);
+  const verified=perfCumulative(m,show,index,false);
+  const projected=pending?perfCumulative(m,show,index,true):verified;
+  if(mode==='cumulative')return projected;
+  const target=perfTargetAt(m,show,index);
+  return target&&projected!==null?projected/target*100:null;
+}
+function perfFormat(m,value){
+  return (m.viewMode||'monthly')==='target'?(value===null?'—':Math.round(value)+'%'):aud(value);
+}
+function buildPerfChartSVG(spec){
+  const { months, shows, order, colors, metricLabel, partnershipName, asAt } = spec;
+  const A = order;
+  const W=1200, H=675;
+  const padL=82, padR=46, padTop=152, padBottom=128;
+  const plotW=W-padL-padR;
+  const plotTop=padTop, plotBottom=H-padBottom, plotH=plotBottom-plotTop;
+
+  let dataMax=0;
+  months.forEach((mo,i)=>A.forEach(s=>{ const v=perfPoint(spec,s,i,false); const pv=perfHasPendingThrough(spec,s,i)?perfPoint(spec,s,i,true):null; if(v!==null)dataMax=Math.max(dataMax,v); if(pv!==null)dataMax=Math.max(dataMax,pv); }));
+  const yMax=(spec.viewMode==='target')?Math.max(120,niceMax(dataMax||100)):niceMax(dataMax||1);
+  const yFor=v=> plotBottom - (v/yMax)*plotH;
+
+  const groupW=plotW/months.length;
+  const barGap=8;
+  const barW=Math.min(40,(groupW-40)/A.length);
+
+  const C={ ink:'#16181D', soft:'#5A616E', faint:'#8A909C', line:'#E7EAEE', lineSoft:'#F0F2F5', amber:'#C38318', amberFill:'#F7EBD2', amberText:'#9A6609' };
+  const F={ head:"Aptos,Arial,sans-serif", body:"Aptos,Arial,sans-serif", mono:"Aptos Mono,Consolas,monospace" };
+
+  let g='';
+  g+=`<rect x="0" y="0" width="${W}" height="${H}" fill="#ffffff"/>`;
+  g+=`<defs><pattern id="pendingHatch" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(45)"><rect width="8" height="8" fill="${C.amberFill}"/><line x1="0" y1="0" x2="0" y2="8" stroke="${C.amber}" stroke-width="2" opacity=".28"/></pattern><pattern id="baselineHatch" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(45)"><rect width="8" height="8" fill="#F1F3F6"/><line x1="0" y1="0" x2="0" y2="8" stroke="#667085" stroke-width="1.5" opacity=".22"/></pattern></defs>`;
+
+  // title block
+  g+=`<text x="${padL}" y="44" font-family="${F.body}" font-size="10" font-weight="700" fill="#E31B23" letter-spacing="1.4">PARTNERSHIP REVIEW</text>`;
+  g+=`<text x="${padL}" y="76" font-family="${F.head}" font-size="28" font-weight="700" fill="${C.ink}" letter-spacing="-0.5">Monthly performance</text>`;
+  const viewLabel={monthly:'Monthly delivery',cumulative:'Cumulative YTD',target:'Against YTD target'}[spec.viewMode||'monthly'];
+  const sub=`${partnershipName}  ·  ${metricLabel}  ·  ${viewLabel}  ·  ${months[0]}–${months[months.length-1]}`;
+  g+=`<text x="${padL}" y="101" font-family="${F.body}" font-size="14" fill="${C.soft}">${esc(sub)}</text>`;
+  g+=`<text x="${W-padR}" y="44" text-anchor="end" font-family="${F.body}" font-size="11" font-weight="700" fill="${C.ink}" letter-spacing="0.5">POINTSBET</text>`;
+  g+=`<text x="${W-padR}" y="64" text-anchor="end" font-family="${F.body}" font-size="10.5" fill="${C.faint}">Exported ${esc(asAt)}</text>`;
+
+  // KPI strip
+  let ytd=0;
+  months.forEach((mo,i)=>A.forEach(s=>{ if(perfIsBaseline(spec,s,i))return; const v=perfRawValue(spec,shows[s].data[mo]); if(v!==null)ytd+=v; }));
+  const counted=months.filter((mo,i)=>A.some(s=>!perfIsBaseline(spec,s,i)&&perfRawValue(spec,shows[s].data[mo])!==null));
+  const sumMonth=mo=>{const i=months.indexOf(mo);return A.reduce((t,s)=>{ if(perfIsBaseline(spec,s,i))return t; const v=perfRawValue(spec,shows[s].data[mo]); return t+(v||0); },0);};
+  const lastMo=counted[counted.length-1], prevMo=counted[counted.length-2];
+  const lastV=lastMo?sumMonth(lastMo):null, prevV=prevMo?sumMonth(prevMo):null;
+  const mom=(lastV!=null&&prevV)?Math.round((lastV-prevV)/prevV*100):null;
+  const kpiY=128;
+  const kpi=(x,label,value,valColor)=>{
+    g+=`<text x="${x}" y="${kpiY-14}" font-family="${F.body}" font-size="9.5" font-weight="700" fill="${C.faint}" letter-spacing="0.7">${esc(label)}</text>`;
+    g+=`<text x="${x}" y="${kpiY+6}" font-family="${F.mono}" font-size="19" font-weight="700" fill="${valColor||C.ink}" letter-spacing="-0.5">${esc(value)}</text>`;
+  };
+  kpi(padL,'YTD VERIFIED',aud(ytd));
+  if(lastMo) kpi(padL+168,'LATEST · '+String(lastMo).toUpperCase(),aud(lastV));
+  if(mom!==null) kpi(padL+336,'MONTH ON MONTH',(mom>0?'+':'')+mom+'%', mom>=0?'#10876B':'#E4632B');
+  g+=`<line x1="${padL}" y1="${padTop-10}" x2="${W-padR}" y2="${padTop-10}" stroke="${C.line}"/>`;
+
+  // baseline band — only where EVERY active show is in baseline (per-show correctness)
+  const baselineMonthIdx = months.map((mo,i)=> A.every(s=>{ const b=shows[s].baselineUntil; return b && i<=months.indexOf(b); }) ? i : -1).filter(i=>i>=0);
+  if(baselineMonthIdx.length){
+    const first=Math.min(...baselineMonthIdx), last=Math.max(...baselineMonthIdx);
+    const bx=padL+first*(plotW/months.length);
+    const bw=(last-first+1)*(plotW/months.length);
+    g+=`<rect x="${bx.toFixed(1)}" y="${plotTop}" width="${bw.toFixed(1)}" height="${plotH.toFixed(1)}" fill="#F4F1EA" opacity="0.6"/>`;
+    g+=`<text x="${(bx+bw/2).toFixed(1)}" y="${plotTop+16}" text-anchor="middle" font-family="${F.body}" font-size="10.5" font-weight="700" fill="#B49C6A" letter-spacing="0.6">PRE-SPONSORSHIP</text>`;
+  }
+
+  // y gridlines
+  const ticks=4;
+  for(let i=0;i<=ticks;i++){
+    const v=yMax*i/ticks, y=yFor(v);
+    g+=`<line x1="${padL}" y1="${y.toFixed(1)}" x2="${W-padR}" y2="${y.toFixed(1)}" stroke="${i===0?C.line:C.lineSoft}" stroke-width="1"/>`;
+    g+=`<text x="${padL-10}" y="${(y+4).toFixed(1)}" text-anchor="end" font-family="${F.mono}" font-size="11" fill="${C.faint}">${perfFormat(spec,v)}</text>`;
+  }
+  if(spec.viewMode==='target'){
+    const ty=yFor(100);
+    g+=`<line x1="${padL}" y1="${ty.toFixed(1)}" x2="${W-padR}" y2="${ty.toFixed(1)}" stroke="${C.ink}" stroke-width="1.4" stroke-dasharray="6 4" opacity=".65"/>`;
+    g+=`<text x="${W-padR}" y="${(ty-7).toFixed(1)}" text-anchor="end" font-family="${F.body}" font-size="10" font-weight="700" fill="${C.ink}">YTD TARGET · 100%</text>`;
+  }
+
+  // bars
+  months.forEach((mo,gi)=>{
+    const gx=padL+gi*groupW;
+    const spread=A.length*barW+(A.length-1)*barGap;
+    const startX=gx+groupW/2-spread/2;
+    A.forEach((s,si)=>{
+      const sh=shows[s];
+      const vv=perfPoint(spec,s,gi,false), pv=perfHasPendingThrough(spec,s,gi)?perfPoint(spec,s,gi,true):null;
+      const hasV=vv!==null, hasP=pv!==null;
+      const bx=startX+si*(barW+barGap);
+      const col=colors[s];
+      const isBaseline = perfIsBaseline(spec,s,gi);
+      if(!hasV&&!hasP){ g+=`<text x="${(bx+barW/2).toFixed(1)}" y="${(plotBottom-6).toFixed(1)}" text-anchor="middle" font-family="${F.body}" font-size="12" fill="#C4C9D2">–</text>`; return; }
+      if(hasV){
+        const h=Math.max((vv/yMax)*plotH, 2);
+        const y=plotBottom-h;
+        g+=`<rect x="${bx.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${h.toFixed(1)}" rx="3" fill="${isBaseline?'url(#baselineHatch)':col}" ${isBaseline?`stroke="${col}" stroke-width="1.3" stroke-dasharray="4 3"`:''}/>`;
+        if(!hasP) g+=`<text x="${(bx+barW/2).toFixed(1)}" y="${(y-7).toFixed(1)}" text-anchor="middle" font-family="${F.mono}" font-size="11" fill="${C.soft}" font-weight="500">${perfFormat(spec,vv)}</text>`;
+      }
+      if(hasP){
+        const h=Math.max((pv/yMax)*plotH,4);
+        const y=plotBottom-h;
+        g+=`<rect x="${bx.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${h.toFixed(1)}" rx="3" fill="url(#pendingHatch)" fill-opacity="${hasV?0.72:1}" stroke="${C.amber}" stroke-width="2" stroke-dasharray="5 3"/>`;
+        g+=`<text x="${(bx+barW/2).toFixed(1)}" y="${(y-18).toFixed(1)}" text-anchor="middle" font-family="${F.body}" font-size="9" font-weight="700" fill="${C.amberText}" letter-spacing="0.5">◷ PENDING</text>`;
+        g+=`<text x="${(bx+barW/2).toFixed(1)}" y="${(y-7).toFixed(1)}" text-anchor="middle" font-family="${F.mono}" font-size="11" fill="${C.amberText}" font-weight="500">${perfFormat(spec,pv)}</text>`;
+      }
+    });
+    g+=`<text x="${(gx+groupW/2).toFixed(1)}" y="${(plotBottom+22).toFixed(1)}" text-anchor="middle" font-family="${F.body}" font-size="13" font-weight="600" fill="${C.soft}">${esc(mo)}</text>`;
+  });
+
+  // legend — show colour keys
+  const legY=H-79; let lx=padL;
+  A.forEach(s=>{
+    g+=`<rect x="${lx}" y="${legY-9}" width="12" height="12" rx="2.5" fill="${colors[s]}"/>`;
+    g+=`<text x="${lx+18}" y="${legY+1}" font-family="${F.body}" font-size="12.5" fill="${C.ink}">${esc(s)}</text>`;
+    lx+=18+8+String(s).length*7.2+26;
+  });
+  // legend — state keys
+  const legY2=H-52; let sx=padL;
+  const stateKey=(draw,label)=>{ g+=draw(sx); g+=`<text x="${sx+22}" y="${legY2+1}" font-family="${F.body}" font-size="12" fill="${C.soft}">${label}</text>`; sx+=22+label.length*6.4+28; };
+  stateKey(x=>`<rect x="${x}" y="${legY2-9}" width="14" height="12" rx="2.5" fill="${C.ink}"/><text x="${x+7}" y="${legY2}" text-anchor="middle" font-family="${F.body}" font-size="9" font-weight="700" fill="#fff">✓</text>`,'verified · counted');
+  stateKey(x=>`<rect x="${x}" y="${legY2-9}" width="14" height="12" rx="2.5" fill="url(#pendingHatch)" stroke="${C.amber}" stroke-width="1.6" stroke-dasharray="4 2.5"/>`,'pending · not counted');
+  stateKey(x=>`<rect x="${x}" y="${legY2-9}" width="14" height="12" rx="2.5" fill="url(#baselineHatch)" stroke="${C.ink}" stroke-dasharray="3 2"/>`,'pre-sponsorship baseline');
+
+  // footer
+  g+=`<text x="${W-padR}" y="${H-13}" text-anchor="end" font-family="${F.body}" font-size="9.5" fill="${C.faint}">Pending delivery is visible but excluded from verified YTD totals, CPM and the Partnership Pulse.</text>`;
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="perfExportTitle perfExportDesc" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" font-family="${F.body}"><title id="perfExportTitle">${esc(partnershipName)} monthly performance</title><desc id="perfExportDesc">${esc(metricLabel)} shown from ${esc(months[0])} to ${esc(months[months.length-1])}. Solid bars are verified, hatched amber bars are pending, and grey hatched bars are pre-sponsorship baseline.</desc>${g}</svg>`;
+}
+
+/* --- export + data-table plumbing — all derive from the model the panel stashed, so they respect the
+   current show filter and metric exactly as drawn --- */
+function perfRows(m){
+  const val=d=>!d?null:(m.metric==='total'?(d.yt+d.soc+d.ac):d[m.metric]);
+  return m.months.map((mo,i)=>{
+    const cells=m.order.map(s=>{
+      const sh=m.shows[s]; const isB=sh.baselineUntil&&i<=m.months.indexOf(sh.baselineUntil);
+      const v=val(sh.data[mo]); const pv=val((sh.pending||{})[mo]);
+      let status='none',value=null;
+      if(v!==null){ status=isB?'baseline':'verified'; value=v; }
+      else if(pv!==null){ status='pending'; value=pv; }
+      return {show:s,status,value};
+    });
+    const total=cells.filter(c=>c.status==='verified').reduce((t,c)=>t+c.value,0);
+    return {label:mo, cells, total:cells.some(c=>c.status==='verified')?total:null};
+  });
+}
+function perfTableHTML(m){
+  const rows=perfRows(m);
+  const head=`<tr><th>Month</th>${m.order.map(s=>`<th class="num">${esc(s)}</th>`).join('')}<th class="num">Total</th></tr>`;
+  const body=rows.map(r=>`<tr><td>${esc(r.label)}</td>${r.cells.map(c=>{
+    if(c.status==='none') return '<td class="num" style="color:var(--ink-faint)">—</td>';
+    const tag=c.status==='pending'?' <span style="color:#9A6609;font-size:9px;font-weight:700">PENDING</span>':c.status==='baseline'?' <span style="color:#B49C6A;font-size:9px">baseline</span>':'';
+    const col=c.status==='verified'?'var(--ink)':c.status==='pending'?'#9A6609':'#B49C6A';
+    return `<td class="num" style="color:${col}">${aud(c.value)}${tag}</td>`;
+  }).join('')}<td class="num"><b>${r.total!==null?aud(r.total):'—'}</b></td></tr>`).join('');
+  return `<details class="perf-table"><summary>Data table &amp; export figures</summary>
+    <div style="margin-top:10px"><button class="perf-x" onclick="copyPerfData()">Copy for Excel</button>
+    <table class="dtable" style="margin-top:8px"><thead>${head}</thead><tbody>${body}</tbody></table>
+    <div style="margin-top:6px;font-size:11px;color:var(--ink-faint)">Total is verified (counted) figures only. Pending and pre-sponsorship baseline are shown for context but excluded from the total.</div></div></details>`;
+}
+function perfDataTSV(){
+  const m=view._chartModel; if(!m||!m.order||!m.order.length)return '';
+  const rows=perfRows(m);
+  const header=['Month',...m.order,'Total (verified)'].join('\t');
+  const lines=rows.map(r=>[r.label,...r.cells.map(c=>c.value!==null?c.value:''),r.total!==null?r.total:''].join('\t'));
+  const caveat=rows.some(r=>r.cells.some(c=>c.status!=='verified'&&c.status!=='none'))
+    ? '\n\nNote: values are raw figures. Pending and pre-sponsorship baseline months are excluded from the verified Total.' : '';
+  return `Monthly performance\t${m.partnershipName}\t${m.metricLabel}\n${header}\n${lines.join('\n')}${caveat}`;
+}
+function fmtToday(){ try{ return new Date().toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'}); }catch(e){ return new Date().toISOString().slice(0,10); } }
+function perfChartSpec(){
+  const m=view._chartModel; if(!m||!m.order||!m.order.length)return null;
+  return { months:m.months, shows:m.shows, order:m.order, colors:m.colors, metric:m.metric, metricLabel:m.metricLabel, partnershipName:m.partnershipName, asAt:fmtToday(),viewMode:m.viewMode,targets:m.targets };
+}
+function perfChartToSvgString(){ const s=perfChartSpec(); return s?buildPerfChartSVG(s):''; }
+function downloadBlob(blob,name){ const u=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=u; a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(u),1500); }
+function perfFileName(ext){ const m=view._chartModel; const nm=((m&&m.partnershipName)||'partnership').replace(/[^a-zA-Z0-9]+/g,'-').replace(/^-|-$/g,''); return `${nm}-monthly-performance-${new Date().toISOString().slice(0,10)}.${ext}`; }
+async function downloadPerfSvg(){ const svg=perfChartToSvgString(); if(!svg){toast('No chart to export yet');return;} downloadBlob(new Blob([svg],{type:'image/svg+xml;charset=utf-8'}),perfFileName('svg')); toast('Chart exported (SVG)'); }
+async function downloadPerfPng(){
+  const svg=perfChartToSvgString(); if(!svg){toast('No chart to export yet');return;}
+  try{ if(document.fonts&&document.fonts.ready) await document.fonts.ready; }catch(e){}
+  const scale=2;
+  const url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml;charset=utf-8'}));
+  const img=new Image();
+  img.onload=()=>{
+    try{
+      const w=img.naturalWidth||1200, h=img.naturalHeight||675;
+      const canvas=document.createElement('canvas'); canvas.width=w*scale; canvas.height=h*scale;
+      const ctx=canvas.getContext('2d'); ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.setTransform(scale,0,0,scale,0,0); ctx.drawImage(img,0,0);
+      URL.revokeObjectURL(url);
+      canvas.toBlob(b=>{ if(!b){toast('PNG export failed');return;} downloadBlob(b,perfFileName('png')); toast('Chart exported (PNG)'); },'image/png');
+    }catch(e){ URL.revokeObjectURL(url); console.error('png export',e); toast('PNG export failed: '+(e.message||'')); }
+  };
+  img.onerror=()=>{ URL.revokeObjectURL(url); toast('PNG export failed'); };
+  img.src=url;
+}
+async function copyPerfData(){
+  const tsv=perfDataTSV(); if(!tsv){toast('No data to copy');return;}
+  try{ await navigator.clipboard.writeText(tsv); toast('Copied — paste into Excel'); return; }catch(e){/* fall through */}
+  try{ const ta=document.createElement('textarea'); ta.value=tsv; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); const ok=document.execCommand('copy'); ta.remove(); toast(ok?'Copied — paste into Excel':'Copy failed'); }
+  catch(e){ toast('Copy failed'); }
+}
+Object.assign(window,{downloadPerfPng,downloadPerfSvg,copyPerfData});
+
+
 function monthlyGraphPanel(p){
   const s=currentSnap(p);
   const staticM=MONTHLY[p.name];
@@ -1379,43 +1727,57 @@ function monthlyGraphPanel(p){
   const val=d=> !d?null:(metric==='total'?(d.yt+d.soc+d.ac):d[metric]);
   const palette=['#E31B23','#1F3A5F','#C38318','#356B4C'];
   const colors={}; showNames.forEach((s,i)=>colors[s]=palette[i%palette.length]);
+  const targets={};
+  (s.media.components||[]).filter(c=>c.mode==='audience').forEach(c=>{
+    const key=staticShowKey(staticM,c.name)||c.name;
+    targets[key]={guarantee:n(c.audienceGuaranteed),termMonths:termMonths(p)};
+  });
   if(!view.graphShows) view.graphShows=['Kenty Blitz'];
   const active=showNames.filter(s=>view.graphShows.includes(s));
   const A=active.length?active:showNames;
-  let max=0; M.months.forEach(mo=>A.forEach(s=>{const sh=M.shows[s],v=val(sh.data[mo]),pv=val((sh.pending||{})[mo]); if(v!==null&&v>max)max=v;if(pv!==null&&pv>max)max=pv;}));
-  max=max*1.14||1;
+  const viewMode=view.graphView||'monthly';
+  const showPending=view.graphPending!==false;
+  // Stash the exact model the chart is drawn from, so exploration and export stay WYSIWYG.
+  const chartModel=view._chartModel={ months:M.months, shows:M.shows, order:A, colors, metric, metricLabel:((METRICS.find(x=>x[0]===metric)||[])[1])||'Total', partnershipName:p.name,viewMode,targets };
+  let max=0; M.months.forEach((mo,i)=>A.forEach(show=>{const v=perfPoint(chartModel,show,i,false),pv=showPending&&perfHasPendingThrough(chartModel,show,i)?perfPoint(chartModel,show,i,true):null;if(v!==null&&v>max)max=v;if(pv!==null&&pv>max)max=pv;}));
+  max=viewMode==='target'?Math.max(120,max*1.12||120):(max*1.14||1);
   const W=640,H=290,top=42,base=238,x0=34,plotW=W-46;
-  const groupW=plotW/M.months.length, barW=Math.min(34,(groupW-26)/A.length);
+  const groupW=plotW/M.months.length, barW=Math.max(8,Math.min(34,(groupW-26)/A.length));
   let bars='';
   M.months.forEach((mo,gi)=>{
     const gx=x0+gi*groupW;
     A.forEach((s,si)=>{
-      const sh=M.shows[s], d=sh.data[mo], pendingD=(sh.pending||{})[mo];
-      const verifiedV=val(d),pendingV=val(pendingD);
+      const sh=M.shows[s];
+      const verifiedV=perfPoint(chartModel,s,gi,false);
+      const hasPendingThrough=showPending&&perfHasPendingThrough(chartModel,s,gi);
+      const pendingV=hasPendingThrough?perfPoint(chartModel,s,gi,true):null;
       const hasVerified=verifiedV!==null,hasPending=pendingV!==null;
       const spread=A.length*barW+(A.length-1)*6;
       const bx=gx+groupW/2-spread/2+si*(barW+6);
       if(!hasVerified&&!hasPending){ bars+=`<text x="${(bx+barW/2).toFixed(1)}" y="${base-4}" text-anchor="middle" font-size="10" fill="#B8BDC7">–</text>`; return; }
       const verifiedH=hasVerified?Math.max(verifiedV===0?2:(verifiedV/max)*(base-top),0):0;
       const pendingH=hasPending?Math.max(pendingV===0?4:(pendingV/max)*(base-top),0):0;
-      const baseline=sh.baselineUntil && M.months.indexOf(mo)<=M.months.indexOf(sh.baselineUntil);
+      const baseline=viewMode==='monthly'&&perfIsBaseline(chartModel,s,gi);
       const col=colors[s];
+      bars+=`<g class="perf-bar" role="button" tabindex="0" data-month="${esc(mo)}" data-show="${esc(s)}" aria-label="${esc(s+' '+mo+', '+(hasPending?'pending '+perfFormat(chartModel,pendingV):'verified '+perfFormat(chartModel,verifiedV))+'. Open monthly details.')}" onclick="openPerfMonth(this.dataset.month,this.dataset.show)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openPerfMonth(this.dataset.month,this.dataset.show)}">`;
       if(hasVerified){
-        bars+=`<rect x="${bx.toFixed(1)}" y="${(base-verifiedH).toFixed(1)}" width="${barW.toFixed(1)}" height="${verifiedH.toFixed(1)}" rx="3" fill="${col}" ${baseline?`fill-opacity="0.28" stroke="${col}" stroke-dasharray="3 2"`:''}><title>Verified: ${aud(verifiedV)}</title></rect>`;
-        if(!hasPending)bars+=`<text x="${(bx+barW/2).toFixed(1)}" y="${(base-verifiedH-5).toFixed(1)}" text-anchor="middle" font-size="9" fill="#5A616E" font-family="'JetBrains Mono',monospace">${aud(verifiedV)}</text>`;
+        bars+=`<rect x="${bx.toFixed(1)}" y="${(base-verifiedH).toFixed(1)}" width="${barW.toFixed(1)}" height="${verifiedH.toFixed(1)}" rx="3" fill="${col}" ${baseline?`fill="url(#screenBaselineHatch)" stroke="${col}" stroke-dasharray="3 2"`:''}><title>✓ Verified: ${perfFormat(chartModel,verifiedV)}</title></rect>`;
+        if(!hasPending)bars+=`<text x="${(bx+barW/2).toFixed(1)}" y="${(base-verifiedH-5).toFixed(1)}" text-anchor="middle" font-size="9" fill="#5A616E" font-family="'JetBrains Mono',monospace">${perfFormat(chartModel,verifiedV)}</text>`;
       }
       if(hasPending){
-        bars+=`<rect x="${bx.toFixed(1)}" y="${(base-pendingH).toFixed(1)}" width="${barW.toFixed(1)}" height="${pendingH.toFixed(1)}" rx="3" fill="#F7EBD2" fill-opacity="${hasVerified?'0.42':'1'}" stroke="#C38318" stroke-width="2" stroke-dasharray="5 3"><title>Submitted, pending verification: ${aud(pendingV)}${hasVerified?' · last verified: '+aud(verifiedV):''}</title></rect>`;
-        bars+=`<text x="${(bx+barW/2).toFixed(1)}" y="${(base-pendingH-14).toFixed(1)}" text-anchor="middle" font-size="8" fill="#9A6609" font-weight="700">PENDING</text>`;
-        bars+=`<text x="${(bx+barW/2).toFixed(1)}" y="${(base-pendingH-4).toFixed(1)}" text-anchor="middle" font-size="9" fill="#9A6609" font-family="'JetBrains Mono',monospace">${aud(pendingV)}</text>`;
+        bars+=`<rect x="${bx.toFixed(1)}" y="${(base-pendingH).toFixed(1)}" width="${barW.toFixed(1)}" height="${pendingH.toFixed(1)}" rx="3" fill="url(#screenPendingHatch)" fill-opacity="${hasVerified?'0.78':'1'}" stroke="#C38318" stroke-width="2" stroke-dasharray="5 3"><title>◷ Submitted, pending verification: ${perfFormat(chartModel,pendingV)}${hasVerified?' · verified basis: '+perfFormat(chartModel,verifiedV):''}</title></rect>`;
+        bars+=`<text x="${(bx+barW/2).toFixed(1)}" y="${(base-pendingH-14).toFixed(1)}" text-anchor="middle" font-size="8" fill="#9A6609" font-weight="700">◷ PENDING</text>`;
+        bars+=`<text x="${(bx+barW/2).toFixed(1)}" y="${(base-pendingH-4).toFixed(1)}" text-anchor="middle" font-size="9" fill="#9A6609" font-family="'JetBrains Mono',monospace">${perfFormat(chartModel,pendingV)}</text>`;
       }
+      bars+='</g>';
     });
     bars+=`<text x="${(gx+groupW/2).toFixed(1)}" y="${base+16}" text-anchor="middle" font-size="11" fill="#5A616E" font-weight="600">${mo}</text>`;
   });
   const showChips=showNames.map(s=>`<label style="display:inline-flex;align-items:center;gap:6px;font-size:12.5px;margin-right:14px;cursor:pointer"><input type="checkbox" ${view.graphShows.includes(s)?'checked':''} onchange="toggleGraphShow('${s}')" style="accent-color:${colors[s]};cursor:pointer"><span style="width:10px;height:10px;border-radius:2px;background:${colors[s]};display:inline-block"></span>${esc(s)}</label>`).join('');
   const baseNote = A.some(s=>M.shows[s].baselineUntil) ? `<span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--ink-faint)"><span style="width:10px;height:10px;border-radius:2px;background:${palette[1]};opacity:.35;border:1px dashed ${palette[1]};display:inline-block"></span>pre-sponsorship (not counted)</span>` : '';
-  const pendingNote = A.some(s=>Object.keys(M.shows[s].pending||{}).length) ? `<span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#9A6609;margin-left:12px"><span style="width:10px;height:10px;border-radius:2px;background:#F7EBD2;border:2px dashed #C38318;display:inline-block"></span>submitted · pending verification (not counted)</span>` : '';
+  const pendingNote = showPending&&A.some(s=>Object.keys(M.shows[s].pending||{}).length) ? `<span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#9A6609;margin-left:12px"><span style="width:10px;height:10px;border-radius:2px;background:repeating-linear-gradient(135deg,#F7EBD2 0 3px,#EED9AF 3px 5px);border:2px dashed #C38318;display:inline-block"></span>◷ submitted · pending verification (not counted)</span>` : '';
   const btns=METRICS.map(([k,l])=>`<button class="chip ${metric===k?'on':''}" onclick="setGraphMetric('${k}')">${l}</button>`).join('');
+  const viewBtns=[['monthly','Monthly'],['cumulative','Cumulative YTD'],['target','Against target']].map(([k,l])=>`<button class="${viewMode===k?'on':''}" onclick="setGraphView('${k}')">${l}</button>`).join('');
   // month-over-month (last two months present), for selected shows + metric
   const withData=M.months.filter(mo=>A.some(s=>M.shows[s].data[mo]));
   const last=withData[withData.length-1], prev=withData[withData.length-2];
@@ -1439,19 +1801,99 @@ function monthlyGraphPanel(p){
       ${compShows.map(s=>{const d=COMPOSITION[s];return `<tr><td>${esc(s)}</td><td class="num">${d.male}%</td><td>${esc(d.ageTop)}</td><td class="num">${d.au}%</td><td>${esc(d.device)}</td></tr>`;}).join('')}
       </tbody></table></div>`;
   }
-  return `<div class="panel"><div class="panel-head"><h3>Monthly performance</h3><div class="filters">${btns}</div></div><div class="panel-body">
+  const exportMenu=`<details class="perf-export-menu"><summary>Download chart</summary><div class="perf-export-pop"><button onclick="downloadPerfPng();this.closest('details').removeAttribute('open')"><span>PowerPoint PNG</span><small>2400 × 1350</small></button><button onclick="downloadPerfSvg();this.closest('details').removeAttribute('open')"><span>Vector SVG</span><small>16:9</small></button><button onclick="copyPerfData();this.closest('details').removeAttribute('open')"><span>Copy for Excel</span><small>TSV</small></button></div></details>`;
+  const defs=`<defs><pattern id="screenPendingHatch" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(45)"><rect width="7" height="7" fill="#F7EBD2"/><line x1="0" y1="0" x2="0" y2="7" stroke="#C38318" stroke-width="1.7" opacity=".25"/></pattern><pattern id="screenBaselineHatch" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(45)"><rect width="7" height="7" fill="#F1F3F6"/><line x1="0" y1="0" x2="0" y2="7" stroke="#667085" stroke-width="1.4" opacity=".2"/></pattern></defs>`;
+  const targetLine=viewMode==='target'?`<line class="perf-target-line" x1="${x0}" y1="${(base-(100/max)*(base-top)).toFixed(1)}" x2="${W-10}" y2="${(base-(100/max)*(base-top)).toFixed(1)}"/><text class="perf-target-label" x="${W-12}" y="${(base-(100/max)*(base-top)-5).toFixed(1)}" text-anchor="end">YTD TARGET · 100%</text>`:'';
+  const pendingToggle=`<button class="chip ${showPending?'on':''}" onclick="toggleGraphPending()" aria-pressed="${showPending}">◷ Pending ${showPending?'on':'off'}</button>`;
+  return `<div class="panel"><div class="panel-head"><h3>Monthly performance</h3><div class="perf-toolbar"><div class="perf-view-toggle" aria-label="Chart view">${viewBtns}</div><div class="filters">${btns}${pendingToggle}</div>${exportMenu}</div></div><div class="panel-body">
     <div style="margin-bottom:12px;display:flex;flex-wrap:wrap;align-items:center;gap:6px 0">${showChips}${baseNote}${pendingNote}</div>
-    <svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:100%;display:block"><line x1="${x0}" y1="${base}" x2="${W-10}" y2="${base}" stroke="#E1E4E9"/>${bars}</svg>
+    <svg class="perf-chart" role="img" aria-labelledby="perfChartTitle perfChartDesc" viewBox="0 0 ${W} ${H}" width="100%" style="max-width:100%;display:block"><title id="perfChartTitle">${esc(p.name)} monthly performance</title><desc id="perfChartDesc">Use the show, metric and view controls to explore delivery. Select any bar to open its monthly detail. Solid bars are verified; amber hatched bars are pending.</desc>${defs}<line x1="${x0}" y1="${base}" x2="${W-10}" y2="${base}" stroke="#E1E4E9"/>${targetLine}${bars}</svg>
     ${mom}
     ${Object.keys(M.tiktok).length?`<div style="margin-top:8px;font-size:12px;color:var(--ink-soft);border-top:1px solid var(--line-soft);padding-top:10px"><b>TikTok — Fanatics channel total</b> (channel-wide, not show-attributable): ${M.months.filter(mo=>M.tiktok[mo]!=null).map(mo=>mo+' '+aud(M.tiktok[mo])).join(' · ')}.</div>`:''}
     <div style="margin-top:6px;font-size:11.5px;color:var(--ink-faint)">${staticMonths.length?`RLI Mar–May greyed as pre-sponsorship baseline (delivery clock from June). Kenty Blitz includes Ask Kenty. ${staticMonths.join('–')} figures from Fanatics' reissued per-platform reports.`:''} ${liveMonthSet.size?`${sortMonthLabels([...liveMonthSet]).join(', ')} from partner-submitted monthly reports. Amber dashed bars are awaiting verification and remain excluded from YTD totals, CPM and the Partnership Pulse.`:''}</div>
+    ${perfTableHTML(view._chartModel)}
     ${comp}
   </div></div>`;
 }
 function toggleGraphShow(nm){ if(!view.graphShows)view.graphShows=['Kenty Blitz']; const i=view.graphShows.indexOf(nm); if(i>=0){ if(view.graphShows.length>1) view.graphShows.splice(i,1); } else view.graphShows.push(nm); render(); }
 Object.assign(window,{toggleGraphShow});
 function setGraphMetric(m){ view.graphMetric=m; render(); }
-Object.assign(window,{setGraphMetric});
+function setGraphView(m){ view.graphView=m; render(); }
+function toggleGraphPending(){ view.graphPending=view.graphPending===false; render(); }
+Object.assign(window,{setGraphMetric,setGraphView,toggleGraphPending});
+
+/* Chart exploration reuses the existing component, week, clip and verify records. It does not
+   introduce a second approval route: "Verify submission" calls verifyWeek unchanged. */
+let drawerReturnFocus=null;
+function chartComponent(showName){
+  const p=STATE.partnerships.find(x=>x.id===view.pid); if(!p)return null;
+  const snap=currentSnap(p), staticM=MONTHLY[p.name];
+  return (snap.media.components||[]).find(c=>(staticShowKey(staticM,c.name)||c.name)===showName)||null;
+}
+function monthMatches(label,month){
+  if(label===month)return true;
+  const a=String(label||'').trim().split(/\s+/),b=String(month||'').trim().split(/\s+/);
+  return a.length===1&&b.length>1&&a[0]===b[0] || b.length===1&&a.length>1&&a[0]===b[0];
+}
+function latestMonthWeek(comp,month,status){
+  if(!comp)return null;
+  return weeksOf(comp).filter(w=>monthMatches(w.label,month)&&(!status||(w.status||'pending')===status)).sort((a,b)=>(b.submittedAt||'').localeCompare(a.submittedAt||''))[0]||null;
+}
+function drawerStatus(status){
+  const cls=status==='verified'?'wk-verified':status==='pending'?'wk-pending':'wk-baseline';
+  const label=status==='verified'?'Verified · counted':status==='pending'?'Submitted · awaiting verification':'Pre-sponsorship baseline';
+  return `<span class="wk-status ${cls}">${label}</span>`;
+}
+function openPerfMonth(month,showName){
+  const m=view._chartModel,p=STATE.partnerships.find(x=>x.id===view.pid);
+  if(!m||!p||!m.shows[showName])return;
+  const snap=currentSnap(p), comp=chartComponent(showName), i=m.months.indexOf(month), sh=m.shows[showName];
+  const pendingWeek=latestMonthWeek(comp,month,'pending');
+  const verifiedWeek=latestMonthWeek(comp,month,'verified');
+  const baseline=perfIsBaseline(m,showName,i);
+  const verified=perfRawValue(m,sh.data[month]);
+  const pending=perfRawValue(m,(sh.pending||{})[month]);
+  const status=pending!==null?'pending':baseline?'baseline':verified!==null?'verified':'none';
+  const detailWeek=pendingWeek||verifiedWeek;
+  const rawBreakdown=detailWeek&&detailWeek.audience&&Object.keys(detailWeek.audience).length
+    ? detailWeek.audience
+    : (pending!==null?(sh.pending||{})[month]:sh.data[month])||{};
+  const bucketNames={yt:'YouTube',soc:'Social (Facebook + Instagram)',ac:'Acast'};
+  const breakdown=Object.entries(rawBreakdown).map(([k,v])=>[bucketNames[k]||k,+v||0]).filter(([,v])=>v||v===0);
+  const assets=(comp&&detailWeek&&detailWeek.assets)?(comp.assets||[]).map(as=>({name:as.name,value:n(detailWeek.assets[as.id]),clip:clipHref(detailWeek,as.id)})).filter(x=>x.value!==null||x.clip):[];
+  const clips=comp&&detailWeek?weekClips(comp,detailWeek):[];
+  const note=detailWeek?parseSubmissionNote(detailWeek.note||''):{source:'',comments:''};
+  const canVerify=status==='pending'&&pendingWeek&&(view.role==='owner'||view.mode==='internal');
+  const displayValue=pending!==null?pending:verified;
+  const previousIndex=i>0?i-1:-1;
+  const prev=previousIndex>=0?perfRawValue(m,sh.data[m.months[previousIndex]]):null;
+  const change=displayValue!==null&&prev?Math.round((displayValue-prev)/prev*100):null;
+  const assetsHtml=assets.length?`<div class="drawer-section"><h4>Assets and integration delivery</h4><div class="drawer-assets">${assets.map(a=>`<div class="drawer-asset"><span>${esc(a.name)}</span><b>${a.value!==null?num(a.value):'Clip'}</b></div>`).join('')}</div></div>`:'';
+  const clipsHtml=clips.length?`<div class="drawer-section"><h4>Clip examples</h4><div class="drawer-clips">${clips.map(c=>`<a href="${esc(c.url)}" target="_blank" rel="noopener"><span>${esc(c.name)}</span><span>Open ↗</span></a>`).join('')}</div></div>`:'';
+  const contextHtml=(note.source||note.comments)?`<div class="drawer-section"><h4>Submission context</h4><div style="font-size:12px;line-height:1.55;color:var(--ink-soft)">${note.source?`<b style="color:var(--ink)">Source:</b> ${esc(note.source)}`:''}${note.comments?`<div style="margin-top:5px">${esc(note.comments)}</div>`:''}</div></div>`:'';
+  drawerReturnFocus=document.activeElement;
+  document.getElementById('drawerMount').innerHTML=`<div class="drawer-scrim" onclick="if(event.target===this)closePerfDrawer()"><aside class="perf-drawer" role="dialog" aria-modal="true" aria-labelledby="perfDrawerTitle">
+    <div class="perf-drawer-head"><div><div class="eyebrow">${esc(p.name)} · Monthly evidence</div><h3 id="perfDrawerTitle">${esc(showName)}</h3><p>${esc(month)}</p></div><button class="drawer-close" onclick="closePerfDrawer()" aria-label="Close monthly detail">×</button></div>
+    <div class="perf-drawer-body">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px">${status!=='none'?drawerStatus(status):'<span class="wk-status wk-baseline">No delivery logged</span>'}<span style="font-size:10.5px;color:var(--ink-faint)">Select another bar to change month</span></div>
+      <div class="drawer-kpis"><div><span>${pending!==null?'Submitted audience':'Verified audience'}</span><b>${displayValue!==null?aud(displayValue):'—'}</b></div><div><span>Month-on-month</span><b style="color:var(--${change===null?'ink':change>=0?'good':'bad'})">${change===null?'—':(change>0?'+':'')+change+'%'}</b></div>${pending!==null&&verified!==null?`<div><span>Last verified</span><b>${aud(verified)}</b></div>`:''}<div><span>Chart metric</span><b style="font-family:'Inter';font-size:13px">${esc(m.metricLabel)}</b></div></div>
+      <div class="drawer-section"><h4>Platform breakdown</h4><div class="drawer-breakdown">${breakdown.length?breakdown.map(([k,v])=>`<div><span>${esc(k)}</span><b>${aud(v)}</b></div>`).join(''):'<div><span>No platform breakdown available</span><b>—</b></div>'}</div></div>
+      ${assetsHtml}${clipsHtml}${contextHtml}
+      ${canVerify?`<div class="drawer-actions"><button class="btn btn-primary" onclick="verifyFromPerfDrawer('${comp.id}','${pendingWeek.id}')">✓ Verify submission</button></div>`:''}
+    </div></aside></div>`;
+  document.querySelector('.drawer-close')?.focus();
+}
+function closePerfDrawer(){
+  const mount=document.getElementById('drawerMount'); if(mount)mount.innerHTML='';
+  if(drawerReturnFocus&&drawerReturnFocus.focus)drawerReturnFocus.focus();
+  drawerReturnFocus=null;
+}
+async function verifyFromPerfDrawer(cid,wid){
+  closePerfDrawer();
+  await verifyWeek(cid,wid);
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.getElementById('drawerMount')?.innerHTML)closePerfDrawer();});
+Object.assign(window,{openPerfMonth,closePerfDrawer,verifyFromPerfDrawer});
 
 /* ===== Entitlement delivery (per-round schedule; monthly target = per-round × rounds that month) =====
    Schedule now comes straight off each component's own `assets` array — the same list partners see and
@@ -1650,7 +2092,7 @@ function renderDetail(){
   /* media */
   html+=`<div class="panel"><div class="panel-head"><h3>Media value</h3><button class="linkbtn" onclick="editComponent(null)">＋ Show / package</button></div><div class="panel-body">`;
   if((s.media.components||[]).length){
-    s.media.components.forEach(comp=>html+=componentBlock(comp,p));
+    s.media.components.forEach((comp,index)=>html+=componentBlock(comp,p,index));
     // roll-up
     if(m.inv!==null){
       let right;
@@ -1709,7 +2151,7 @@ function renderDetail(){
   document.getElementById('app').innerHTML=html;
 }
 
-function componentBlock(comp,p){
+function componentBlock(comp,p,index){
   const inv=n(comp.investment);
   const wl=verifiedWeeksLogged(comp);
   const totalMonths=termMonths(p);
@@ -1760,12 +2202,19 @@ function componentBlock(comp,p){
         <td style="text-align:right">${w.status!=='verified'?`<button class="verifybtn" onclick="verifyWeek('${comp.id}','${w.id}')">Verify</button>`:''}</td></tr>`; }).join('')}
       </tbody></table></details>`;
   }
-  return `<div class="comp">
-    <div class="comp-head"><div><span class="comp-name">${esc(comp.name)}</span><span class="comp-mode">${comp.mode}</span></div>
-      <div style="display:flex;align-items:flex-start;gap:4px"><div class="comp-investments"><span class="comp-inv">${money(comp.investment)}<small>Total investment</small></span>${comp.mode==='audience'?`<span class="comp-inv">${invYtd!==null?money(invYtd):'—'}<small>Investment YTD</small></span>`:''}</div><button class="comp-editbtn" onclick="editComponent('${comp.id}')">Edit</button></div></div>
-    ${body}${assetStrip}${log}
-  </div>`;
+  const hasStored=view.mediaExpanded&&Object.prototype.hasOwnProperty.call(view.mediaExpanded,comp.id);
+  const expanded=hasStored?view.mediaExpanded[comp.id]:index===0;
+  return `<details class="comp media-comp" ${expanded?'open':''} ontoggle="rememberMediaOpen(this,'${comp.id}')">
+    <summary class="comp-head"><div style="display:flex;align-items:center;min-width:0"><span class="comp-name">${esc(comp.name)}</span><span class="comp-mode">${comp.mode}</span></div>
+      <div style="display:flex;align-items:flex-start;gap:7px"><div class="comp-investments"><span class="comp-inv">${money(comp.investment)}<small>Total investment</small></span>${comp.mode==='audience'?`<span class="comp-inv">${invYtd!==null?money(invYtd):'—'}<small>Investment YTD</small></span>`:''}</div><button class="comp-editbtn" onclick="event.preventDefault();event.stopPropagation();editComponent('${comp.id}')">Edit</button></div></summary>
+    <div class="media-comp-body">${body}${assetStrip}${log}</div>
+  </details>`;
 }
+function rememberMediaOpen(el,id){
+  view.mediaExpanded=view.mediaExpanded||{};
+  view.mediaExpanded[id]=!!el.open;
+}
+Object.assign(window,{rememberMediaOpen});
 function weekClips(comp,w){
   if(!w||!w.assets) return [];
   return (comp.assets||[]).map(as=>({name:as.name,url:clipHref(w,as.id)})).filter(x=>x.url);
