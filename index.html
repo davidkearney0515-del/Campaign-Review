@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Partnership Review — World-Class Interactive Dashboard</title>
+<title>Partnership Review — Pace &amp; Evidence</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -634,8 +634,10 @@
   .dm-summary{font-size:11.5px;font-weight:700;color:var(--ink-soft)}
   .dm-summary .sev{color:var(--bad)} .dm-summary .ok{color:var(--good)}
   .dm-pace{font-size:10.5px;color:var(--ink-faint);margin:0 0 10px}
-  .dm-row{display:grid;grid-template-columns:15px minmax(0,1fr) 118px 78px;align-items:center;gap:11px;padding:7px 0;border-top:1px solid var(--line-soft)}
+  .dm-row{display:grid;width:100%;grid-template-columns:15px minmax(0,1fr) 118px 78px;align-items:center;gap:11px;padding:8px 5px;border-top:1px solid var(--line-soft);border-radius:6px;text-align:left;transition:background .16s ease,transform .16s ease}
   .dm-row:first-of-type{border-top:0}
+  .dm-row:hover{background:#F7F8FA;transform:translateX(2px)}
+  .dm-row:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
   .dm-ico{width:15px;height:15px;font-size:10.5px;font-weight:800;text-align:center;line-height:15px;border-radius:50%}
   .dm-ico.behind{color:var(--bad);background:var(--bad-bg)} .dm-ico.complete{color:var(--good);background:var(--good-bg)}
   .dm-ico.ontrack,.dm-ico.none{color:var(--ink-faint)}
@@ -651,11 +653,21 @@
   .dm-fig b{font-weight:700}
   .dm-fig .pct{color:var(--ink-faint);font-weight:500;margin-left:4px}
   .dm-row.behind .dm-fig .pct{color:var(--bad)} .dm-row.complete .dm-fig .pct{color:var(--good)}
+  .dm-row:after{content:'›';color:var(--ink-faint);position:absolute;right:-8px;opacity:0;transition:opacity .16s ease,transform .16s ease}
+  .dm-row{position:relative}
+  .dm-row:hover:after,.dm-row:focus-visible:after{opacity:1;transform:translateX(2px)}
   .dm-more{margin-top:2px}
   .dm-more>summary{list-style:none;cursor:pointer;font-size:10.5px;font-weight:750;color:var(--accent);padding:9px 0 2px;border-top:1px solid var(--line-soft)}
   .dm-more>summary::-webkit-details-marker{display:none}
   .dm-more>summary:before{content:'＋';color:var(--ink-faint);margin-right:6px}
   .dm-more[open]>summary:before{content:'−'}
+  .pace-basis{display:inline-flex;align-items:center;gap:5px;margin-left:7px;padding:3px 7px;border-radius:999px;background:#F1F3F6;color:var(--ink-soft);font-size:9px;font-weight:700;white-space:nowrap}
+  .evidence-status{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+  .evidence-gap{font-family:'JetBrains Mono';font-size:11px;font-weight:700}
+  .evidence-history{display:grid;gap:6px}
+  .evidence-history-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:8px 10px;border:1px solid var(--line-soft);border-radius:7px;font-size:11.5px}
+  .evidence-history-row b{font-family:'JetBrains Mono'}
+  .evidence-history-row small{color:var(--ink-faint)}
   .data-disclosure{margin-top:13px;border-top:1px solid var(--line-soft);padding-top:11px}
   .data-disclosure>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:11px;font-weight:750;color:var(--accent)}
   .data-disclosure>summary::-webkit-details-marker{display:none}
@@ -701,6 +713,9 @@
     .board{grid-template-columns:1fr}
     .overview-layout{grid-template-columns:1fr}
     .media-comp>summary{grid-template-columns:1fr auto}.media-glance{grid-column:1/-1;padding-left:29px}
+    .dm-row{grid-template-columns:15px minmax(0,1fr) 76px;gap:8px}
+    .dm-track{grid-column:2/-1;grid-row:2}
+    .dm-fig{grid-column:3;grid-row:1}
   }
   @media print{
     .app-shell{display:block}
@@ -1354,10 +1369,10 @@ function partnershipAttention(p){
     (weeksOf(c)||[]).forEach(w=>{ if((w.status||'pending')!=='verified') pending++; });
     if(inTerm){ const logged=new Set(weeksOf(c).map(w=>w.label)); if(!logged.has(nowLabel)) overdue.push(c.name); }
   });
-  return {pending,overdue,offTrack:s.status==='bad'};
+  return {pending,overdue,offTrack:currentPulse(p,s).status==='bad'};
 }
 function renderBoard(){
-  const ps=STATE.partnerships.filter(p=>view.filter==='all'?true:latestSnap(p).status===view.filter);
+  const ps=STATE.partnerships.filter(p=>view.filter==='all'?true:currentPulse(p,latestSnap(p)).status===view.filter);
   let contracted=0,valAdd=0;
   let blendInv=0,blendDel=0,haveBlend=false;
   const attentionRows=[];
@@ -1376,7 +1391,7 @@ function renderBoard(){
       const bits=[];
       if(a.pending) bits.push(`<span class="att-pill att-pending">${a.pending} pending verification${a.pending>1?'s':''}</span>`);
       if(a.overdue.length) bits.push(`<span class="att-pill att-overdue">${a.overdue.length} show${a.overdue.length>1?'s':''} not logged this month</span>`);
-      if(a.offTrack) bits.push(`<span class="att-pill att-off">Marked off track</span>`);
+      if(a.offTrack) bits.push(`<span class="att-pill att-off">Current pulse off track</span>`);
       return `<div class="att-row" onclick="openDetail('${p.id}')"><span class="att-name">${esc(p.name)}</span><span class="att-bits">${bits.join('')}</span></div>`;
     }).join('');
     html+=`<div class="att-banner"><div class="att-head">Needs attention</div>${items}</div>`;
@@ -1404,7 +1419,8 @@ function renderBoard(){
 
 function printPortfolio(){
   const rows=STATE.partnerships.map(p=>{ const s=latestSnap(p); const m=mediaRoll(s,p);
-    const stLabel={good:'On track',warn:'Watch',bad:'Off track',none:'Not set'}[s.status||'none'];
+    const derived=currentPulse(p,s).status;
+    const stLabel={good:'On track',warn:'Watch',bad:'Off track',none:'Not set'}[derived||'none'];
     const call=s.call?({renew:'Renew',evolve:'Evolve',renegotiate:'Revised terms',exit:'Exit'}[s.call]||s.call):'—';
     return `<tr>
       <td><b>${esc(p.name)}</b><br><span style="color:#666;font-size:11px">${esc(p.counterparty||'')}</span></td>
@@ -1434,7 +1450,7 @@ function printPortfolio(){
 }
 Object.assign(window,{printPortfolio});
 function pcard(p){
-  const s=latestSnap(p); const st=s.status||'none';
+  const s=latestSnap(p); const st=currentPulse(p,s).status||'none';
   const stLabel={good:'On track',warn:'Watch',bad:'Off track',none:'Not set'}[st];
   const callLabel=s.call?({renew:'Renew',evolve:'Evolve',renegotiate:'Renegotiate',exit:'Exit'}[s.call]||s.call):'Review';
   const m=mediaRoll(s,p);
@@ -2099,33 +2115,16 @@ function currentPulse(p,s){
   const audienceComps=(s.media.components||[]).filter(c=>c.mode==='audience');
   const missing=audienceComps.filter(c=>deliveryMonthsLogged(c,p)===0).map(c=>c.name);
   const pending=(s.media.components||[]).reduce((sum,c)=>sum+weeksOf(c).filter(w=>w.status!=='verified').length,0);
-  let assetActual=0,assetTarget=0,assetRows=0;
-  (s.media.components||[]).forEach(c=>{
-    if(c.assetReporting==='ytd'){
-      (c.assets||[]).forEach(as=>{
-        const target=+as.contractedQty||0;
-        const delivered=cumulativeAssetDelivered(c,as,true);
-        if(target>0&&delivered!==null){
-          assetTarget+=target;
-          assetActual+=Math.min(delivered,target);
-          assetRows++;
-        }
-      });
-      return;
-    }
-    const verified=verifiedWeeksLogged(c);
-    if(!verified)return;
-    (c.assets||[]).forEach(as=>{
-      const target=(+as.perWeek||0)*verified;
-      if(target>0){ assetTarget+=target; assetActual+=verifiedAssetDeliveredTotal(c,as.id); assetRows++; }
-    });
-  });
-  const assetPct=assetTarget?Math.round(assetActual/assetTarget*100):null;
+  const assetPace=snapshotAssetPace(p,s);
+  const assetPct=assetPace.pacePct;
+  const assetRows=assetPace.rows.filter(r=>r.expectedYtd!==null&&r.expectedYtd>0).length;
+  const assetBehind=assetPace.behind;
   const cpmDelta=(m.delCpm!==null&&m.propCpm)?Math.round((m.delCpm-m.propCpm)/m.propCpm*100):null;
   let score=0;
   if(cpmDelta!==null) score+=cpmDelta<=0?2:(cpmDelta<=10?0:-2);
   if(audienceDelta!==null) score+=audienceDelta>=0?1:(audienceDelta>=-15?0:-2);
   if(assetPct!==null) score+=assetPct>=90?1:(assetPct>=75?0:-2);
+  if(assetBehind.length) score-=Math.min(2,assetBehind.length);
   if(missing.length) score-=Math.min(2,missing.length);
   if(pending) score-=1;
   if(m.del===null) score-=2;
@@ -2136,15 +2135,16 @@ function currentPulse(p,s){
   if(m.delCpm!==null&&m.propCpm!==null) evidence.push(`Delivered CPM YTD is $${m.delCpm.toFixed(2)}, ${Math.abs(cpmDelta)}% ${cpmDelta<=0?'better':'worse'} than the proposed $${m.propCpm.toFixed(2)}.`);
   else evidence.push('There is not enough verified delivery to calculate a dependable CPM YTD.');
   if(m.del!==null&&ytdAudienceTarget!==null) evidence.push(`Views/listens YTD are ${aud(m.del)} versus a prorated YTD target of ${aud(ytdAudienceTarget)} (${audienceDelta>0?'+':''}${audienceDelta}%).`);
-  if(assetPct!==null) evidence.push(`Current asset fulfilment is ${assetPct}% across ${assetRows} measured asset${assetRows!==1?'s':''}; overdelivery is capped by component so it cannot hide another shortfall.`);
+  if(assetPct!==null) evidence.push(`Delivery pace is ${assetPct}% through ${assetPace.asOf.label} across ${assetRows} measured asset${assetRows!==1?'s':''}; each component is equally weighted and capped at 100% so overdelivery cannot hide another shortfall.`);
   else evidence.push('No verified asset delivery is available for assessment yet.');
+  if(assetBehind.length) evidence.push(`${assetBehind.length} integration component${assetBehind.length!==1?'s are':' is'} behind expected YTD pace: ${assetBehind.slice(0,3).map(r=>r.name).join(', ')}${assetBehind.length>3?' and '+(assetBehind.length-3)+' more':''}.`);
   if(missing.length) evidence.push(`No verified views/listens have been received for ${missing.join(', ')}.`);
   if(pending) evidence.push(`${pending} monthly submission${pending!==1?'s are':' is'} awaiting verification and excluded from current results.`);
   let summary;
   if(status==='good') summary='Current delivery is efficient and the verified asset record is supporting the partnership case. Maintain the plan while looking for incremental optimisation.';
   else if(status==='warn') summary='The partnership is showing positive evidence, but the current record is incomplete. Resolve the identified reporting or delivery gaps before confirming the partnership is fully on track.';
   else summary='Current delivery evidence does not support an on-track assessment. Address efficiency, asset delivery and missing reporting before further investment decisions.';
-  return {status,label,call,summary,evidence,assetPct,pending,missing,m};
+  return {status,label,call,summary,evidence,assetPct,assetCompletionPct:assetPace.completionPct,assetBehind,pending,missing,m,asOf:assetPace.asOf};
 }
 
 function renderDetail(){
@@ -2190,13 +2190,13 @@ function renderDetail(){
     <div class="pulse-compact-grid">
       <button type="button" class="pulse-factor" onclick="openPulseEvidence(this)" aria-label="Explain investment YTD"><span>Investment YTD</span><b>${m.spendToDate!==null?money(m.spendToDate):'—'}</b></button>
       <button type="button" class="pulse-factor" onclick="openPulseEvidence(this)" aria-label="Explain views or listens YTD"><span>Views/listens YTD</span><b>${m.del!==null?aud(m.del):m.guar!==null?aud(m.guar)+' guar':'—'}</b></button>
-      <button type="button" class="pulse-factor" onclick="openPulseEvidence(this)" aria-label="Explain asset fulfilment"><span>Asset fulfilment</span><b>${pulse.assetPct!==null?pulse.assetPct+'%':'—'}</b></button>
+      <button type="button" class="pulse-factor" onclick="openPulseEvidence(this)" aria-label="Explain delivery pace"><span>Delivery pace</span><b>${pulse.assetPct!==null?pulse.assetPct+'%':'—'}</b></button>
       <button type="button" class="pulse-factor" onclick="openPulseEvidence(this)" aria-label="Explain delivered CPM YTD"><span>Delivered CPM YTD</span><b style="color:var(--${cpmColor||'ink'})">${m.delCpm!==null?'$'+m.delCpm.toFixed(2):'—'}</b></button>
     </div>
     <details class="pulse-disclosure"><summary><span>Why this pulse</span><span>${pulse.evidence.length} evidence signal${pulse.evidence.length!==1?'s':''}${pulse.pending?' · '+pulse.pending+' pending':''}</span></summary>
       <div class="pulse-detail"><p class="pulse-note">${esc(pulse.summary)}</p>
       <ul class="pulse-evidence">${pulse.evidence.map(item=>`<li>${esc(item)}</li>`).join('')}</ul>
-      <div class="pulse-fresh">Recalculated from verified monthly performance and asset records. Pending submissions are excluded.</div>
+      <div class="pulse-fresh">Measured through ${esc(pulse.asOf.label)} using the selected review point. Verified records only; pending submissions are excluded.</div>
       <div class="pulse-actions"><button class="chip" onclick="setModule('executive')">Open executive summary</button></div></div>
     </details>
   </div></div></div>`;
@@ -2272,72 +2272,174 @@ function openPulseEvidence(el){
 }
 Object.assign(window,{openPulseEvidence});
 
-/* Fraction of the contract term elapsed by today (0–1), or null if term dates are missing/invalid. */
-function termElapsedFraction(p){
-  if(!p||!p.termStart||!p.termEnd)return null;
-  const a=new Date(p.termStart+'T00:00'),b=new Date(p.termEnd+'T00:00'),now=new Date();
-  if(isNaN(a)||isNaN(b)||b<=a)return null;
-  return Math.min(1,Math.max(0,(now-a)/(b-a)));
+/* A review must remain stable when reopened later. Pace is therefore anchored to the selected
+   review-point date; only records without a review date fall back to their latest verified month. */
+function periodEndDate(label,fallbackYear){
+  const text=String(label||'').trim();
+  const match=text.match(/^([A-Za-z]{3,9})(?:\s+(\d{4}))?$/);
+  if(match){
+    const mi=MONTH_NAMES.map(x=>x.toLowerCase()).indexOf(match[1].slice(0,3).toLowerCase());
+    const year=+(match[2]||fallbackYear);
+    if(mi>=0&&year)return new Date(year,mi+1,0,23,59,59,999);
+  }
+  const d=new Date(text);
+  return isNaN(d)?null:d;
 }
-/* Per-asset delivery judged against PACE, not just the full contract. For YTD-reported assets the
-   reference is the fraction of term elapsed (so 30/40 in July reads as ahead, not behind); for
-   weekly-scheduled assets the target already scales with weeks logged. Status: complete (met/over),
-   behind (>15% under pace), on track. */
-function assetDeliveryModel(comp,p){
+function reportingAsOf(p,s){
+  const snap=s||currentSnap(p);
+  const snapDate=snap&&snap.date?new Date(snap.date+'T23:59:59'):null;
+  if(snapDate&&!isNaN(snapDate))return {date:snapDate,label:fmtDate(snap.date),source:'selected review point'};
+  const fallbackYear=p&&p.termStart?new Date(p.termStart+'T00:00').getFullYear():new Date().getFullYear();
+  let latest=null,label='';
+  ((snap&&snap.media&&snap.media.components)||[]).forEach(c=>weeksOf(c).filter(w=>(w.status||'pending')==='verified').forEach(w=>{
+    const d=periodEndDate(w.label,fallbackYear);
+    if(d&&(!latest||d>latest)){latest=d;label=w.label;}
+  }));
+  if(latest)return {date:latest,label,labelSource:label,source:'latest verified reporting period'};
+  const today=new Date();
+  return {date:today,label:today.toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}),source:'current date fallback'};
+}
+function termElapsedFraction(p,s){
+  if(!p||!p.termStart||!p.termEnd)return null;
+  const a=new Date(p.termStart+'T00:00'),b=new Date(p.termEnd+'T23:59:59'),asOf=reportingAsOf(p,s).date;
+  if(isNaN(a)||isNaN(b)||b<=a)return null;
+  return Math.min(1,Math.max(0,(asOf-a)/(b-a)));
+}
+function assetDeliveryModel(comp,p,s){
   const isYtd=comp.assetReporting==='ytd';
   const wl=verifiedWeeksLogged(comp);
-  const elapsed=termElapsedFraction(p);
+  const asOf=reportingAsOf(p,s);
+  const elapsed=termElapsedFraction(p,s);
   const rows=(comp.assets||[]).map(as=>{
-    const contracted=isYtd?(+as.contractedQty||0):(+as.perWeek||0)*wl;
+    const fullContract=isYtd?(+as.contractedQty||0):null;
+    const expectedYtd=isYtd
+      ?(fullContract>0&&elapsed!==null?fullContract*elapsed:null)
+      :((+as.perWeek||0)*wl||null);
     const deliveredRaw=isYtd?cumulativeAssetDelivered(comp,as,true):verifiedAssetDeliveredTotal(comp,as.id);
     const hasData=deliveredRaw!==null;
-    const d=hasData?deliveredRaw:0;
-    const pct=contracted>0?d/contracted:null;
-    const paceFrac=isYtd?(elapsed!==null?elapsed:1):1;
-    let status;
-    if(contracted<=0) status='none';
-    else if(d>=contracted) status='complete';
-    else if(!hasData||d<contracted*paceFrac*0.85-1e-9) status='behind';
-    else status='ontrack';
-    return {name:as.name,delivered:hasData?d:null,contracted,pct,status,over:d>contracted};
+    const delivered=hasData?deliveredRaw:0;
+    const paceAttainment=expectedYtd&&expectedYtd>0?delivered/expectedYtd:null;
+    const contractCompletion=fullContract>0?delivered/fullContract:null;
+    const gap=expectedYtd!==null?delivered-expectedYtd:null;
+    const forecastFinal=isYtd&&elapsed&&elapsed>0?delivered/elapsed:null;
+    let status='none';
+    if(expectedYtd!==null&&expectedYtd>0){
+      if(fullContract>0&&delivered>=fullContract)status='complete';
+      else if(!hasData||delivered<expectedYtd*.85-1e-9)status='behind';
+      else status='ontrack';
+    }
+    return {id:as.id,name:as.name,delivered:hasData?delivered:null,fullContract,expectedYtd,paceAttainment,contractCompletion,gap,forecastFinal,status};
   });
-  return {rows,isYtd,elapsed};
+  const measured=rows.filter(r=>r.expectedYtd!==null&&r.expectedYtd>0);
+  const pacePct=measured.length?Math.round(measured.reduce((sum,r)=>sum+Math.min(r.paceAttainment||0,1),0)/measured.length*100):null;
+  const contractedRows=rows.filter(r=>r.fullContract>0);
+  const completionPct=contractedRows.length?Math.round(contractedRows.reduce((sum,r)=>sum+Math.min(r.contractCompletion||0,1),0)/contractedRows.length*100):null;
+  return {rows,isYtd,elapsed,asOf,pacePct,completionPct,behind:rows.filter(r=>r.status==='behind').length};
 }
-/* Ranked, pace-aware delivery surface. Behind-pace assets stay visible at rest (worst-first); only
-   on-track/complete collapse. Same visual grammar as the chart: bar + pace tick + glyph, colour only
-   on deviation. Replaces the flat "hide every chip behind +" so the shortfall can never be buried. */
-function deliveryMatrix(comp,p){
-  const {rows,isYtd,elapsed}=assetDeliveryModel(comp,p);
+function snapshotAssetPace(p,s){
+  const models=((s&&s.media&&s.media.components)||[]).filter(c=>(c.assets||[]).length).map(c=>({comp:c,model:assetDeliveryModel(c,p,s)}));
+  const rows=models.flatMap(x=>x.model.rows.map(r=>({...r,compId:x.comp.id,compName:x.comp.name})));
+  const measured=rows.filter(r=>r.expectedYtd!==null&&r.expectedYtd>0);
+  const pacePct=measured.length?Math.round(measured.reduce((sum,r)=>sum+Math.min(r.paceAttainment||0,1),0)/measured.length*100):null;
+  const contracted=rows.filter(r=>r.fullContract>0);
+  const completionPct=contracted.length?Math.round(contracted.reduce((sum,r)=>sum+Math.min(r.contractCompletion||0,1),0)/contracted.length*100):null;
+  return {rows,pacePct,completionPct,behind:rows.filter(r=>r.status==='behind'),asOf:reportingAsOf(p,s)};
+}
+/* Behind-pace assets remain visible; healthy delivery collapses. Each row opens its evidence trail. */
+function deliveryMatrix(comp,p,s){
+  const model=assetDeliveryModel(comp,p,s);
+  const {rows,isYtd,elapsed,asOf}=model;
   if(!rows.length)return '';
   const order={behind:0,none:1,complete:2,ontrack:3};
-  const sorted=rows.slice().sort((x,y)=>(order[x.status]-order[y.status])||((x.pct??0)-(y.pct??0)));
+  const sorted=rows.slice().sort((x,y)=>(order[x.status]-order[y.status])||((x.paceAttainment??0)-(y.paceAttainment??0)));
   const attention=sorted.filter(r=>r.status==='behind');
-  const rest=sorted.filter(r=>r.status!=='behind');
+  const healthy=sorted.filter(r=>r.status==='ontrack'||r.status==='complete');
+  const unmeasured=sorted.filter(r=>r.status==='none');
   const paceLine=isYtd&&elapsed!==null
-    ? `Measured against ${Math.round(elapsed*100)}% of term elapsed — the tick marks expected pace`
-    : `Measured against the schedule verified to date`;
+    ? `Expected through ${asOf.label} · ${Math.round(elapsed*100)}% of term elapsed`
+    : `Expected through ${asOf.label} · based on verified schedule`;
   const rowHtml=r=>{
     const ico=r.status==='behind'?'!':r.status==='complete'?'✓':'○';
-    const pctTxt=r.pct===null?'—':(r.over?'+'+Math.round((r.pct-1)*100)+'%':Math.round(r.pct*100)+'%');
-    const fillW=r.pct===null?0:Math.min(100,r.pct*100);
-    const showPace=isYtd&&elapsed!==null&&r.status!=='complete';
-    return `<div class="dm-row ${r.status}">
+    const paceTxt=r.paceAttainment===null?'—':Math.round(r.paceAttainment*100)+'% pace';
+    const base=Math.max(r.delivered||0,r.expectedYtd||0,r.fullContract||0)*1.08||1;
+    const fillW=Math.min(100,(r.delivered||0)/base*100);
+    const tickW=r.expectedYtd!==null?Math.min(100,r.expectedYtd/base*100):null;
+    return `<button type="button" class="dm-row ${r.status}" onclick="openDeliveryEvidence('${comp.id}','${r.id}')" aria-label="Open delivery evidence for ${esc(r.name)}">
       <span class="dm-ico ${r.status}" aria-hidden="true">${ico}</span>
       <span class="dm-name" title="${esc(r.name)}">${esc(r.name)}</span>
-      <span class="dm-track"><span class="dm-fill ${r.status}" style="width:${fillW.toFixed(1)}%"></span>${showPace?`<span class="dm-pacemark" style="left:${(elapsed*100).toFixed(1)}%"></span>`:''}</span>
-      <span class="dm-fig"><b>${r.delivered===null?'—':num(r.delivered)}</b>/${r.contracted||'—'}<span class="pct">${pctTxt}</span></span>
-    </div>`;
+      <span class="dm-track"><span class="dm-fill ${r.status}" style="width:${fillW.toFixed(1)}%"></span>${tickW!==null?`<span class="dm-pacemark" style="left:${tickW.toFixed(1)}%"></span>`:''}</span>
+      <span class="dm-fig"><b>${r.delivered===null?'—':num(r.delivered)}</b>/${r.expectedYtd!==null?num(Math.round(r.expectedYtd)):'—'}<span class="pct">${paceTxt}</span></span>
+    </button>`;
   };
   const bits=[];
   if(attention.length)bits.push(`<span class="sev">${attention.length} behind pace</span>`);
-  if(rest.length)bits.push(`<span class="ok">${rest.length} on track</span>`);
+  if(healthy.length)bits.push(`<span class="ok">${healthy.length} on track</span>`);
+  if(unmeasured.length)bits.push(`<span>${unmeasured.length} unmeasured</span>`);
+  const collapsed=[...unmeasured,...healthy];
   return `<div class="delivery-matrix">
-    <div class="dm-head"><h4>Integration delivery</h4><span class="dm-summary">${bits.join(' · ')||'—'}</span></div>
-    <div class="dm-pace">${paceLine}</div>
+    <div class="dm-head"><h4>Integration delivery <span class="pace-basis">Pace ${model.pacePct!==null?model.pacePct+'%':'—'}</span></h4><span class="dm-summary">${bits.join(' · ')||'—'}</span></div>
+    <div class="dm-pace">${paceLine} — tick marks expected YTD</div>
     ${attention.map(rowHtml).join('')}
-    ${rest.length?`<details class="dm-more"><summary>${rest.length} on track &amp; complete</summary>${rest.map(rowHtml).join('')}</details>`:''}
+    ${collapsed.length?`<details class="dm-more"><summary>${collapsed.length} on track, complete or unmeasured</summary>${collapsed.map(rowHtml).join('')}</details>`:''}
   </div>`;
 }
+function evidenceWeekStamp(w,p,s){
+  const fallbackYear=(reportingAsOf(p,s).date||new Date()).getFullYear();
+  const period=periodEndDate(w&&w.label,fallbackYear);
+  const submitted=w&&w.submittedAt?new Date(w.submittedAt):null;
+  return period&&!isNaN(period)?period.getTime():(submitted&&!isNaN(submitted)?submitted.getTime():0);
+}
+function openDeliveryEvidence(compId,assetId){
+  const p=STATE.partnerships.find(x=>x.id===view.pid); if(!p)return;
+  const s=currentSnap(p),comp=(s.media.components||[]).find(x=>x.id===compId); if(!comp)return;
+  const asset=(comp.assets||[]).find(x=>x.id===assetId); if(!asset)return;
+  const model=assetDeliveryModel(comp,p,s),row=model.rows.find(x=>x.id===assetId); if(!row)return;
+  const verified=weeksOf(comp).filter(w=>(w.status||'pending')==='verified').sort((a,b)=>evidenceWeekStamp(b,p,s)-evidenceWeekStamp(a,p,s));
+  const pending=weeksOf(comp).filter(w=>(w.status||'pending')!=='verified').sort((a,b)=>evidenceWeekStamp(b,p,s)-evidenceWeekStamp(a,p,s));
+  const history=verified.map(w=>({week:w,value:n(w.assets&&w.assets[assetId]),clip:clipHref(w,assetId)})).filter(x=>x.value!==null||x.clip);
+  const last=history[0]||null,previous=history[1]||null;
+  const importedBaseline=n(asset.baselineDelivered);
+  const change=last&&previous&&previous.value!==null&&last.value!==null?last.value-previous.value:null;
+  const clips=[...weeksOf(comp)].sort((a,b)=>evidenceWeekStamp(b,p,s)-evidenceWeekStamp(a,p,s)).map(w=>({label:w.label,url:clipHref(w,assetId)})).filter(x=>x.url).filter((x,i,a)=>a.findIndex(y=>y.url===x.url)===i);
+  const statusLabel=row.status==='behind'?'Behind expected pace':row.status==='complete'?'Contract complete':row.status==='ontrack'?'On track':'Not yet measurable';
+  const statusClass=row.status==='behind'?'wk-rejected':row.status==='none'?'wk-baseline':'wk-verified';
+  const gap=row.gap===null?null:Math.round(row.gap);
+  const gapText=gap===null?'—':(gap>0?'+':'')+num(gap);
+  const paceText=row.paceAttainment===null?'—':Math.round(row.paceAttainment*100)+'%';
+  const expectedText=row.expectedYtd===null?'—':num(Math.round(row.expectedYtd));
+  const forecastText=row.forecastFinal===null?'—':num(Math.round(row.forecastFinal));
+  const historyHtml=history.length?history.slice(0,6).map((x,i)=>`<div class="evidence-history-row"><span>${esc(x.week.label)}${i===0?' <small>latest verified</small>':''}</span><b>${x.value!==null?num(x.value):'—'}</b><small>${x.clip?'Evidence attached':'No clip'}</small></div>`).join(''):(importedBaseline!==null?`<div class="evidence-history-row"><span>Imported YTD baseline <small>starting position</small></span><b>${num(importedBaseline)}</b><small>Historical update</small></div>`:`<div style="font-size:12px;color:var(--ink-faint)">No verified history for this component yet.</div>`);
+  const clipsHtml=clips.length?`<div class="drawer-section"><h4>Clip examples and evidence</h4><div class="drawer-clips">${clips.slice(0,8).map(c=>`<a href="${esc(c.url)}" target="_blank" rel="noopener"><span>${esc(c.label)} · ${esc(asset.name)}</span><span>Open ↗</span></a>`).join('')}</div></div>`:'';
+  const latestPending=pending[0]||null;
+  const canVerify=latestPending&&(view.role==='owner'||view.mode==='internal');
+  drawerReturnFocus=document.activeElement;
+  document.getElementById('drawerMount').innerHTML=`<div class="drawer-scrim" onclick="if(event.target===this)closePerfDrawer()"><aside class="perf-drawer" role="dialog" aria-modal="true" aria-labelledby="deliveryEvidenceTitle">
+    <div class="perf-drawer-head"><div><div class="eyebrow">${esc(p.name)} · Delivery evidence</div><h3 id="deliveryEvidenceTitle">${esc(asset.name)}</h3><p>${esc(comp.name)} · measured through ${esc(model.asOf.label)}</p></div><button class="drawer-close" onclick="closePerfDrawer()" aria-label="Close delivery evidence">×</button></div>
+    <div class="perf-drawer-body">
+      <div class="evidence-status"><span class="wk-status ${statusClass}">${statusLabel}</span><span class="evidence-gap" style="color:var(--${gap!==null&&gap<0?'bad':'good'})">${gapText} vs expected</span></div>
+      <div class="drawer-kpis">
+        <div><span>Delivered YTD</span><b>${row.delivered===null?'—':num(row.delivered)}</b></div>
+        <div><span>Expected YTD</span><b>${expectedText}</b></div>
+        <div><span>Pace attainment</span><b style="color:var(--${row.status==='behind'?'bad':row.status==='none'?'ink':'good'})">${paceText}</b></div>
+        <div><span>Contract total</span><b>${row.fullContract?num(row.fullContract):'Schedule-based'}</b></div>
+        <div><span>Forecast final</span><b>${forecastText}</b></div>
+        <div><span>Previous position</span><b>${previous&&previous.value!==null?num(previous.value):'—'}${change!==null?` <small style="font-size:9px;color:var(--${change>=0?'good':'bad'})">${change>=0?'+':''}${num(change)}</small>`:''}</b></div>
+      </div>
+      <div class="drawer-section"><h4>Pace calculation</h4><div class="drawer-breakdown">
+        <div><span>Reporting basis</span><b style="font-family:'Inter';font-size:11px">${esc(model.asOf.source)}</b></div>
+        <div><span>As-of date</span><b>${esc(model.asOf.label)}</b></div>
+        <div><span>Term elapsed</span><b>${model.elapsed!==null?Math.round(model.elapsed*100)+'%':'—'}</b></div>
+        <div><span>Gap to expected pace</span><b style="color:var(--${gap!==null&&gap<0?'bad':'good'})">${gapText}</b></div>
+        <div><span>Pending submissions</span><b>${pending.length}</b></div>
+        <div><span>Last verified submission</span><b>${last?esc(last.week.label):(importedBaseline!==null?'Imported baseline':'—')}</b></div>
+      </div></div>
+      <div class="drawer-section"><h4>Verified delivery history</h4><div class="evidence-history">${historyHtml}</div></div>
+      ${clipsHtml}
+      ${canVerify?`<div class="drawer-actions"><button class="btn btn-primary" onclick="verifyFromPerfDrawer('${comp.id}','${latestPending.id}')">✓ Verify ${esc(latestPending.label)} submission</button></div>`:''}
+    </div></aside></div>`;
+  document.querySelector('.drawer-close')?.focus();
+}
+Object.assign(window,{openDeliveryEvidence});
 function componentBlock(comp,p,index){
   const inv=n(comp.investment);
   const wl=verifiedWeeksLogged(comp);
@@ -2373,15 +2475,9 @@ function componentBlock(comp,p,index){
   // asset fulfilment strip (weekly asset schedule)
   let assetStrip='';
   if((comp.assets||[]).length){
-    // keep a simple fulfilment % for the header ring; the ranked matrix carries the per-asset detail
-    const isYtd=comp.assetReporting==='ytd';
-    const measured=comp.assets.map(as=>{
-      const del=isYtd?cumulativeAssetDelivered(comp,as,true):verifiedAssetDeliveredTotal(comp,as.id);
-      const target=isYtd?(+as.contractedQty||0):(+as.perWeek||0)*wl;
-      return del!==null&&target?Math.min(del/target*100,100):null;
-    }).filter(v=>v!==null);
-    assetPctSummary=measured.length?Math.round(measured.reduce((s,v)=>s+v,0)/measured.length):null;
-    assetStrip=deliveryMatrix(comp,p);
+    const paceModel=assetDeliveryModel(comp,p,currentSnap(p));
+    assetPctSummary=paceModel.pacePct;
+    assetStrip=deliveryMatrix(comp,p,currentSnap(p));
   } else if((comp.entitlements||[]).length){
     assetStrip=`<details class="comp-ent"><summary>${comp.entitlements.length} entitlements</summary><div class="ent-chips">${comp.entitlements.map(e=>`<span class="ent-chip">${esc(e)}</span>`).join('')}</div></details>`;
   }
@@ -2401,7 +2497,7 @@ function componentBlock(comp,p,index){
   const expanded=hasStored?view.mediaExpanded[comp.id]:false;
   return `<details class="comp media-comp" ${expanded?'open':''} ontoggle="rememberMediaOpen(this,'${comp.id}')">
     <summary class="comp-head"><div class="media-title-block"><span class="comp-name">${esc(comp.name)}</span><span class="comp-mode">${comp.mode}</span></div>
-      <div class="media-glance"><div class="media-glance-item"><span>${glanceLabel}</span><b>${glanceValue}</b></div>${comp.mode==='audience'?`<div class="media-glance-item"><span>CPM YTD</span><b>${cpmGlance}</b></div>`:''}${assetPctSummary!==null?`<div class="mini-progress" style="--p:${assetPctSummary}"><b>${assetPctSummary}%</b></div>`:''}</div>
+      <div class="media-glance"><div class="media-glance-item"><span>${glanceLabel}</span><b>${glanceValue}</b></div>${comp.mode==='audience'?`<div class="media-glance-item"><span>CPM YTD</span><b>${cpmGlance}</b></div>`:''}${assetPctSummary!==null?`<div class="mini-progress" style="--p:${assetPctSummary}" title="Delivery pace attainment" aria-label="Delivery pace ${assetPctSummary}%"><b>${assetPctSummary}%</b></div>`:''}</div>
       <div style="display:flex;align-items:flex-start;gap:7px"><div class="comp-investments"><span class="comp-inv">${money(comp.investment)}<small>Total investment</small></span>${comp.mode==='audience'?`<span class="comp-inv">${invYtd!==null?money(invYtd):'—'}<small>Investment YTD</small></span>`:''}</div><button class="comp-editbtn" onclick="event.preventDefault();event.stopPropagation();editComponent('${comp.id}')">Edit</button></div></summary>
     <div class="media-comp-body">${body}${assetStrip}${log}</div>
   </details>`;
@@ -2860,9 +2956,7 @@ function metricValue(p,s,key){
   if(key==='ngr') return n(c.ngrAct);
   if(key==='actives') return n(c.activesAct);
   if(key==='delivery'){
-    const comps=(s.media.components||[]).filter(x=>(x.assets||[]).length); let target=0,delivered=0;
-    comps.forEach(x=>(x.assets||[]).forEach(a=>{target+=(+a.perWeek||0)*verifiedWeeksLogged(x);delivered+=verifiedAssetDeliveredTotal(x,a.id);}));
-    return target?delivered/target*100:null;
+    return snapshotAssetPace(p,s).pacePct;
   }
   return null;
 }
@@ -2923,24 +3017,25 @@ function executiveFacts(s){
 }
 function renderExecutive(p,s){
   const f=executiveFacts(s),action=s.call||'not set',label={'renew':'Renew','evolve':'Renew with revised terms','renegotiate':'Renew with revised terms','exit':'Exit','not set':'Not set'}[action]||'Not set';
-  const status={good:'Performing above expectations',warn:'Mixed performance',bad:'Requires review'}[s.status]||'Insufficient data';
+  const pulse=currentPulse(p,s);
+  const status={good:'Performing above expectations',warn:'Mixed performance',bad:'Requires review'}[pulse.status]||'Insufficient data';
   const m=mediaRoll(s,p);
   const metrics=[
     ['Investment',money(m.inv)],
     ['Reach',metricFormat('reach',metricValue(p,s,'reach'))],
     ['Delivered CPM',m.delCpm!==null?'$'+m.delCpm.toFixed(2):'—'],
-    ['Entitlement delivery',metricFormat('delivery',metricValue(p,s,'delivery'))]
+    ['Delivery pace',metricFormat('delivery',metricValue(p,s,'delivery'))]
   ];
   // benchmark row (folded in from the old Benchmarking module) — CPM & reach vs portfolio / previous / target
   const benchKeys=['reach','cpm','delivery'];
-  const benchLabels={reach:'Reach',cpm:'Delivered CPM',delivery:'Entitlement delivery'};
+  const benchLabels={reach:'Reach',cpm:'Delivered CPM',delivery:'Delivery pace'};
   const basis=benchKeys.map(k=>benchmarkBase(p,s,k)); const first=basis[0];
   const draftChange=m.del!==null&&m.guar!==null?`Audience delivery is ${Math.round((m.del-m.guar)/m.guar*100)}% against the guarantee`:'Audience delivery is not yet complete enough to compare with the guarantee';
   const draftCpm=m.delCpm!==null?`, at a delivered CPM of $${m.delCpm.toFixed(2)}${m.propCpm!==null?` versus $${m.propCpm.toFixed(2)} proposed`:''}`:'';
   let html=moduleHero('Board-ready view','Executive summary','A concise, printable decision surface — named evidence, a recommended action, and how this partnership compares. Never an overall partnership score.',`<button class="btn btn-ghost" onclick="window.print()">Print / save PDF</button>`);
   html+=`<div class="metric-strip">${metrics.map(x=>metricCard(x[0],x[1],x[0]==='Delivered CPM'&&m.periodMatched?'Spend to date vs audience to date':`As at ${fmtDate(s.date)}`)).join('')}</div>`;
   // draft summary (absorbed from AI insights)
-  html+=`<section class="panel"><div class="panel-head"><h3>Draft summary</h3><span class="lil">Edit before sharing</span></div><div class="panel-body"><div class="insight">${esc(p.name)} is currently marked ${s.status==='good'?'on track':s.status==='warn'?'for review':'with insufficient or mixed evidence'}. ${draftChange}${draftCpm}. The current recommended action is ${s.call?esc(s.call):'not set'}.</div><div class="data-note">Built only from this review point's delivery data, assessment and verdict — nothing is inferred or sent anywhere.</div></div></section>`;
+  html+=`<section class="panel"><div class="panel-head"><h3>Draft summary</h3><span class="lil">Edit before sharing</span></div><div class="panel-body"><div class="insight">${esc(p.name)} is currently marked ${pulse.status==='good'?'on track':pulse.status==='warn'?'for review':'with insufficient or mixed evidence'}. Delivery pace is ${pulse.assetPct!==null?pulse.assetPct+'% through '+esc(pulse.asOf.label):'not yet measurable'}. ${draftChange}${draftCpm}. The current recommended action is ${s.call?esc(s.call):'not set'}.</div><div class="data-note">Built only from this review point's verified delivery data, assessment and verdict — nothing is inferred or sent anywhere.</div></div></section>`;
   html+=`<div class="summary-grid"><div><section class="panel"><div class="panel-head"><h3>Decision brief</h3><span class="lil">${status}</span></div><div class="panel-body"><h4 style="margin:0 0 8px;font-size:12px;text-transform:uppercase;color:var(--good)">Key achievements</h4><ul class="summary-list">${f.highlights.map(x=>`<li>✓ ${esc(x)}<span class="evidence">Source: assessment or verified delivery</span></li>`).join('')}</ul><h4 style="margin:18px 0 8px;font-size:12px;text-transform:uppercase;color:var(--bad)">Risks</h4><ul class="summary-list">${f.risks.map(x=>`<li>⚠ ${esc(x)}<span class="evidence">Owner: partnership lead</span></li>`).join('')}</ul><h4 style="margin:18px 0 8px;font-size:12px;text-transform:uppercase;color:var(--accent)">Opportunities</h4><ul class="summary-list">${f.opps.map(x=>`<li>• ${esc(x)}</li>`).join('')}</ul></div></section>
     <section class="panel" style="margin-top:18px"><div class="panel-head"><h3>How it compares</h3><div class="filters"><select class="sel" style="width:auto" onchange="setBenchmarkBasis(this.value)"><option value="portfolio" ${view.benchmarkBasis==='portfolio'?'selected':''}>Portfolio average</option><option value="previous" ${view.benchmarkBasis==='previous'?'selected':''}>Previous review</option><option value="target" ${view.benchmarkBasis==='target'?'selected':''}>Plan / target</option></select></div></div><div class="panel-body"><table class="dtable"><thead><tr><th>Metric</th><th class="num">Current</th><th class="num">${esc(first.label)}</th><th class="num">Variance</th></tr></thead><tbody>${benchKeys.map((k,i)=>{const cur=metricValue(p,s,k),b=basis[i],d=deltaInfo(k,cur,b.value);return `<tr><td><b>${benchLabels[k]}</b></td><td class="num">${metricFormat(k,cur)}</td><td class="num">${metricFormat(k,b.value)}</td><td class="num"><span class="delta ${d.cls}">${d.text}</span></td></tr>`;}).join('')}</tbody></table><div class="data-note">Metric-level comparison only — no composite rank. ${first.sample?`${first.sample} comparable record${first.sample===1?'':'s'}.`:'No comparable records yet.'}</div></div></section></div>
     <aside><div class="decision-card"><div style="font-size:11px;text-transform:uppercase;font-weight:700;letter-spacing:.06em">Recommended action</div><div class="decision">${label}</div><div style="font-size:12.5px;color:var(--ink-soft)">${s.verdict?esc(s.verdict):'Add a verdict to document the decision rationale.'}</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px">${CALLS.map(x=>`<button class="chip ${s.call===x?'on':''}" onclick="setCall('${x}')">${x==='renegotiate'?'Revised terms':x[0].toUpperCase()+x.slice(1)}</button>`).join('')}</div></div><section class="panel" style="margin-top:18px"><div class="panel-head"><h3>Timeline</h3></div><div class="panel-body"><div class="timeline"><div>Next review<small>${fmtDate(s.date)} · partnership owner</small></div><div>Contract expiry<small>${fmtDate(p.termEnd) || 'Not recorded'}</small></div></div></div></section></aside></div>`;
