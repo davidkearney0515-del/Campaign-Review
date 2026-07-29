@@ -524,7 +524,7 @@
   .perf-export-pop button:hover{background:var(--line-soft)}
   .perf-export-pop small{color:var(--ink-faint);font-size:9px;font-weight:650}
   .perf-chart{overflow:visible}
-  .perf-bar{cursor:pointer;transform-box:fill-box;transform-origin:center bottom;animation:perfBarIn .34s cubic-bezier(.2,.75,.25,1) both;transition:filter .18s ease,opacity .18s ease,transform .18s ease}
+  .perf-bar{cursor:pointer;transform-box:fill-box;transform-origin:center bottom;animation:perfBarIn .22s cubic-bezier(.2,.75,.25,1) both;transition:filter .18s ease,opacity .18s ease,transform .18s ease}
   .perf-bar:hover,.perf-bar:focus{filter:drop-shadow(0 4px 5px rgba(16,24,40,.18));transform:translateY(-2px);outline:none}
   .perf-bar:focus rect{stroke:#111827;stroke-width:2.4}
   .perf-target-line{stroke:#111827;stroke-width:1.5;stroke-dasharray:5 4;opacity:.7}
@@ -1494,7 +1494,7 @@ function buildPerfChartSVG(spec){
   const plotTop=padTop, plotBottom=H-padBottom, plotH=plotBottom-plotTop;
 
   let dataMax=0;
-  months.forEach((mo,i)=>A.forEach(s=>{ const v=perfPoint(spec,s,i,false); const pv=perfHasPendingThrough(spec,s,i)?perfPoint(spec,s,i,true):null; if(v!==null)dataMax=Math.max(dataMax,v); if(pv!==null)dataMax=Math.max(dataMax,pv); }));
+  months.forEach((mo,i)=>A.forEach(s=>{ const v=perfPoint(spec,s,i,false); const pv=spec.showPending!==false&&perfHasPendingThrough(spec,s,i)?perfPoint(spec,s,i,true):null; if(v!==null)dataMax=Math.max(dataMax,v); if(pv!==null)dataMax=Math.max(dataMax,pv); }));
   const yMax=(spec.viewMode==='target')?Math.max(120,niceMax(dataMax||100)):niceMax(dataMax||1);
   const yFor=v=> plotBottom - (v/yMax)*plotH;
 
@@ -1503,7 +1503,7 @@ function buildPerfChartSVG(spec){
   const barW=Math.min(40,(groupW-40)/A.length);
 
   const C={ ink:'#16181D', soft:'#5A616E', faint:'#8A909C', line:'#E7EAEE', lineSoft:'#F0F2F5', amber:'#C38318', amberFill:'#F7EBD2', amberText:'#9A6609' };
-  const F={ head:"Aptos,Arial,sans-serif", body:"Aptos,Arial,sans-serif", mono:"Aptos Mono,Consolas,monospace" };
+  const F={ head:"Aptos,Calibri,Arial,sans-serif", body:"Aptos,Calibri,Arial,sans-serif", mono:"Aptos Mono,Consolas,monospace" };
 
   let g='';
   g+=`<rect x="0" y="0" width="${W}" height="${H}" fill="#ffffff"/>`;
@@ -1566,7 +1566,7 @@ function buildPerfChartSVG(spec){
     const startX=gx+groupW/2-spread/2;
     A.forEach((s,si)=>{
       const sh=shows[s];
-      const vv=perfPoint(spec,s,gi,false), pv=perfHasPendingThrough(spec,s,gi)?perfPoint(spec,s,gi,true):null;
+      const vv=perfPoint(spec,s,gi,false), pv=spec.showPending!==false&&perfHasPendingThrough(spec,s,gi)?perfPoint(spec,s,gi,true):null;
       const hasV=vv!==null, hasP=pv!==null;
       const bx=startX+si*(barW+barGap);
       const col=colors[s];
@@ -1600,13 +1600,14 @@ function buildPerfChartSVG(spec){
   const legY2=H-52; let sx=padL;
   const stateKey=(draw,label)=>{ g+=draw(sx); g+=`<text x="${sx+22}" y="${legY2+1}" font-family="${F.body}" font-size="12" fill="${C.soft}">${label}</text>`; sx+=22+label.length*6.4+28; };
   stateKey(x=>`<rect x="${x}" y="${legY2-9}" width="14" height="12" rx="2.5" fill="${C.ink}"/><text x="${x+7}" y="${legY2}" text-anchor="middle" font-family="${F.body}" font-size="9" font-weight="700" fill="#fff">✓</text>`,'verified · counted');
-  stateKey(x=>`<rect x="${x}" y="${legY2-9}" width="14" height="12" rx="2.5" fill="url(#pendingHatch)" stroke="${C.amber}" stroke-width="1.6" stroke-dasharray="4 2.5"/>`,'pending · not counted');
+  if(spec.showPending!==false)stateKey(x=>`<rect x="${x}" y="${legY2-9}" width="14" height="12" rx="2.5" fill="url(#pendingHatch)" stroke="${C.amber}" stroke-width="1.6" stroke-dasharray="4 2.5"/>`,'pending · not counted');
   stateKey(x=>`<rect x="${x}" y="${legY2-9}" width="14" height="12" rx="2.5" fill="url(#baselineHatch)" stroke="${C.ink}" stroke-dasharray="3 2"/>`,'pre-sponsorship baseline');
 
   // footer
-  g+=`<text x="${W-padR}" y="${H-13}" text-anchor="end" font-family="${F.body}" font-size="9.5" fill="${C.faint}">Pending delivery is visible but excluded from verified YTD totals, CPM and the Partnership Pulse.</text>`;
+  if(spec.showPending!==false)g+=`<text x="${W-padR}" y="${H-13}" text-anchor="end" font-family="${F.body}" font-size="9.5" fill="${C.faint}">Pending delivery is visible but excluded from verified YTD totals, CPM and the Partnership Pulse.</text>`;
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="perfExportTitle perfExportDesc" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" font-family="${F.body}"><title id="perfExportTitle">${esc(partnershipName)} monthly performance</title><desc id="perfExportDesc">${esc(metricLabel)} shown from ${esc(months[0])} to ${esc(months[months.length-1])}. Solid bars are verified, hatched amber bars are pending, and grey hatched bars are pre-sponsorship baseline.</desc>${g}</svg>`;
+  const statusDescription=spec.showPending!==false?'Solid bars are verified, hatched amber bars are pending, and grey hatched bars are pre-sponsorship baseline.':'Solid bars are verified and grey hatched bars are pre-sponsorship baseline. Pending submissions are hidden in this export.';
+  return `<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="perfExportTitle perfExportDesc" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" font-family="${F.body}"><title id="perfExportTitle">${esc(partnershipName)} monthly performance</title><desc id="perfExportDesc">${esc(metricLabel)} shown from ${esc(months[0])} to ${esc(months[months.length-1])}. ${statusDescription}</desc>${g}</svg>`;
 }
 
 /* --- export + data-table plumbing — all derive from the model the panel stashed, so they respect the
@@ -1652,7 +1653,7 @@ function perfDataTSV(){
 function fmtToday(){ try{ return new Date().toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'}); }catch(e){ return new Date().toISOString().slice(0,10); } }
 function perfChartSpec(){
   const m=view._chartModel; if(!m||!m.order||!m.order.length)return null;
-  return { months:m.months, shows:m.shows, order:m.order, colors:m.colors, metric:m.metric, metricLabel:m.metricLabel, partnershipName:m.partnershipName, asAt:fmtToday(),viewMode:m.viewMode,targets:m.targets };
+  return { months:m.months, shows:m.shows, order:m.order, colors:m.colors, metric:m.metric, metricLabel:m.metricLabel, partnershipName:m.partnershipName, asAt:fmtToday(),viewMode:m.viewMode,targets:m.targets,showPending:m.showPending };
 }
 function perfChartToSvgString(){ const s=perfChartSpec(); return s?buildPerfChartSVG(s):''; }
 function downloadBlob(blob,name){ const u=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=u; a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(u),1500); }
@@ -1738,7 +1739,7 @@ function monthlyGraphPanel(p){
   const viewMode=view.graphView||'monthly';
   const showPending=view.graphPending!==false;
   // Stash the exact model the chart is drawn from, so exploration and export stay WYSIWYG.
-  const chartModel=view._chartModel={ months:M.months, shows:M.shows, order:A, colors, metric, metricLabel:((METRICS.find(x=>x[0]===metric)||[])[1])||'Total', partnershipName:p.name,viewMode,targets };
+  const chartModel=view._chartModel={ months:M.months, shows:M.shows, order:A, colors, metric, metricLabel:((METRICS.find(x=>x[0]===metric)||[])[1])||'Total', partnershipName:p.name,viewMode,targets,showPending };
   let max=0; M.months.forEach((mo,i)=>A.forEach(show=>{const v=perfPoint(chartModel,show,i,false),pv=showPending&&perfHasPendingThrough(chartModel,show,i)?perfPoint(chartModel,show,i,true):null;if(v!==null&&v>max)max=v;if(pv!==null&&pv>max)max=pv;}));
   max=viewMode==='target'?Math.max(120,max*1.12||120):(max*1.14||1);
   const W=640,H=290,top=42,base=238,x0=34,plotW=W-46;
