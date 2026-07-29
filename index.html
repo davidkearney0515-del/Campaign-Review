@@ -1274,6 +1274,20 @@ function liveShowMonthly(comp){
   });
   return {data,tiktok};
 }
+function pendingShowMonthly(comp){
+  const byLabel={};
+  weeksOf(comp).filter(w=>w.status!=='verified').forEach(w=>{
+    const existing=byLabel[w.label];
+    if(!existing||(w.submittedAt||'')>=(existing.submittedAt||''))byLabel[w.label]=w;
+  });
+  const data={};
+  Object.values(byLabel).forEach(w=>{
+    const mo=w.label;if(!mo)return;
+    const bucket=data[mo]||(data[mo]={yt:0,soc:0,ac:0});
+    Object.entries(w.audience||{}).forEach(([plat,v])=>{bucket[platformBucket(plat)]+=+v||0;});
+  });
+  return data;
+}
 function monthlyGraphPanel(p){
   const s=currentSnap(p);
   const staticM=MONTHLY[p.name];
@@ -1284,21 +1298,28 @@ function monthlyGraphPanel(p){
   /* merge: static months are locked history and are never overwritten by a live submission
      that happens to reuse the same label; live submissions only ever add new months. */
   const shows={};
-  Object.keys(staticShows).forEach(nm=>{ shows[nm]={ baselineUntil:staticShows[nm].baselineUntil, data:{...staticShows[nm].data} }; });
+  Object.keys(staticShows).forEach(nm=>{ shows[nm]={ baselineUntil:staticShows[nm].baselineUntil, data:{...staticShows[nm].data}, pending:{} }; });
   const liveTiktok={};
   (s.media.components||[]).filter(c=>c.mode==='audience'&&(c.platforms||[]).length).forEach(c=>{
     const {data:liveData,tiktok:liveTk}=liveShowMonthly(c);
+    const pendingData=pendingShowMonthly(c);
     const showKey=staticShowKey(staticM,c.name)||c.name;
     const newMonths=Object.keys(liveData).filter(mo=>!staticMonths.includes(mo));
-    if(newMonths.length){ if(!shows[showKey])shows[showKey]={baselineUntil:null,data:{}}; newMonths.forEach(mo=>{ shows[showKey].data[mo]=liveData[mo]; }); }
-    else if(!shows[showKey] && Object.keys(liveData).length){ shows[showKey]={baselineUntil:null,data:{}}; }
+    const pendingMonths=Object.keys(pendingData).filter(mo=>!staticMonths.includes(mo));
+    if(newMonths.length||pendingMonths.length){ if(!shows[showKey])shows[showKey]={baselineUntil:null,data:{},pending:{}}; }
+    newMonths.forEach(mo=>{ shows[showKey].data[mo]=liveData[mo]; });
+    pendingMonths.forEach(mo=>{ if(!shows[showKey].data[mo])shows[showKey].pending[mo]=pendingData[mo]; });
+    if(!shows[showKey] && (Object.keys(liveData).length||Object.keys(pendingData).length)){ shows[showKey]={baselineUntil:null,data:{},pending:{}}; }
     Object.entries(liveTk).forEach(([mo,v])=>{ if(!staticMonths.includes(mo)) liveTiktok[mo]=(liveTiktok[mo]||0)+v; });
   });
   const showNames=Object.keys(shows);
   if(!showNames.length) return '';
 
   const liveMonthSet=new Set();
-  showNames.forEach(nm=>Object.keys(shows[nm].data).forEach(mo=>{ if(!staticMonths.includes(mo)) liveMonthSet.add(mo); }));
+  showNames.forEach(nm=>{
+    Object.keys(shows[nm].data).forEach(mo=>{ if(!staticMonths.includes(mo)) liveMonthSet.add(mo); });
+    Object.keys(shows[nm].pending||{}).forEach(mo=>{ if(!staticMonths.includes(mo)) liveMonthSet.add(mo); });
+  });
   const months=[...staticMonths, ...sortMonthLabels([...liveMonthSet])];
   const tiktok={...staticTiktok, ...liveTiktok};
   const M={months, shows, tiktok};
@@ -1311,7 +1332,7 @@ function monthlyGraphPanel(p){
   if(!view.graphShows) view.graphShows=['Kenty Blitz'];
   const active=showNames.filter(s=>view.graphShows.includes(s));
   const A=active.length?active:showNames;
-  let max=0; M.months.forEach(mo=>A.forEach(s=>{const v=val(M.shows[s].data[mo]); if(v!==null&&v>max)max=v;}));
+  let max=0; M.months.forEach(mo=>A.forEach(s=>{const sh=M.shows[s],v=val(sh.data[mo]),pv=val((sh.pending||{})[mo]); if(v!==null&&v>max)max=v;if(pv!==null&&pv>max)max=pv;}));
   max=max*1.14||1;
   const W=640,H=290,top=42,base=238,x0=34,plotW=W-46;
   const groupW=plotW/M.months.length, barW=Math.min(34,(groupW-26)/A.length);
@@ -1319,20 +1340,30 @@ function monthlyGraphPanel(p){
   M.months.forEach((mo,gi)=>{
     const gx=x0+gi*groupW;
     A.forEach((s,si)=>{
-      const sh=M.shows[s], d=sh.data[mo], v=val(d);
+      const sh=M.shows[s], d=sh.data[mo], pendingD=(sh.pending||{})[mo];
+      const verifiedV=val(d),pendingV=val(pendingD);
+      const isPending=verifiedV===null&&pendingV!==null;
+      const v=isPending?pendingV:verifiedV;
       const spread=A.length*barW+(A.length-1)*6;
       const bx=gx+groupW/2-spread/2+si*(barW+6);
       if(v===null){ bars+=`<text x="${(bx+barW/2).toFixed(1)}" y="${base-4}" text-anchor="middle" font-size="10" fill="#B8BDC7">–</text>`; return; }
-      const h=(v/max)*(base-top);
+      const h=Math.max(isPending&&v===0?4:(v/max)*(base-top),0);
       const baseline=sh.baselineUntil && M.months.indexOf(mo)<=M.months.indexOf(sh.baselineUntil);
       const col=colors[s];
-      bars+=`<rect x="${bx.toFixed(1)}" y="${(base-h).toFixed(1)}" width="${barW.toFixed(1)}" height="${h.toFixed(1)}" rx="3" fill="${col}" ${baseline?`fill-opacity="0.28" stroke="${col}" stroke-dasharray="3 2"`:''}></rect>`;
-      bars+=`<text x="${(bx+barW/2).toFixed(1)}" y="${(base-h-5).toFixed(1)}" text-anchor="middle" font-size="9" fill="#5A616E" font-family="'JetBrains Mono',monospace">${aud(v)}</text>`;
+      if(isPending){
+        bars+=`<rect x="${bx.toFixed(1)}" y="${(base-h).toFixed(1)}" width="${barW.toFixed(1)}" height="${h.toFixed(1)}" rx="3" fill="#F7EBD2" stroke="#C38318" stroke-width="2" stroke-dasharray="5 3"></rect>`;
+        bars+=`<text x="${(bx+barW/2).toFixed(1)}" y="${(base-h-14).toFixed(1)}" text-anchor="middle" font-size="8" fill="#9A6609" font-weight="700">PENDING</text>`;
+        bars+=`<text x="${(bx+barW/2).toFixed(1)}" y="${(base-h-4).toFixed(1)}" text-anchor="middle" font-size="9" fill="#9A6609" font-family="'JetBrains Mono',monospace">${aud(v)}</text>`;
+      }else{
+        bars+=`<rect x="${bx.toFixed(1)}" y="${(base-h).toFixed(1)}" width="${barW.toFixed(1)}" height="${h.toFixed(1)}" rx="3" fill="${col}" ${baseline?`fill-opacity="0.28" stroke="${col}" stroke-dasharray="3 2"`:''}></rect>`;
+        bars+=`<text x="${(bx+barW/2).toFixed(1)}" y="${(base-h-5).toFixed(1)}" text-anchor="middle" font-size="9" fill="#5A616E" font-family="'JetBrains Mono',monospace">${aud(v)}</text>`;
+      }
     });
     bars+=`<text x="${(gx+groupW/2).toFixed(1)}" y="${base+16}" text-anchor="middle" font-size="11" fill="#5A616E" font-weight="600">${mo}</text>`;
   });
   const showChips=showNames.map(s=>`<label style="display:inline-flex;align-items:center;gap:6px;font-size:12.5px;margin-right:14px;cursor:pointer"><input type="checkbox" ${view.graphShows.includes(s)?'checked':''} onchange="toggleGraphShow('${s}')" style="accent-color:${colors[s]};cursor:pointer"><span style="width:10px;height:10px;border-radius:2px;background:${colors[s]};display:inline-block"></span>${esc(s)}</label>`).join('');
   const baseNote = A.some(s=>M.shows[s].baselineUntil) ? `<span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--ink-faint)"><span style="width:10px;height:10px;border-radius:2px;background:${palette[1]};opacity:.35;border:1px dashed ${palette[1]};display:inline-block"></span>pre-sponsorship (not counted)</span>` : '';
+  const pendingNote = A.some(s=>Object.keys(M.shows[s].pending||{}).length) ? `<span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#9A6609;margin-left:12px"><span style="width:10px;height:10px;border-radius:2px;background:#F7EBD2;border:2px dashed #C38318;display:inline-block"></span>submitted · pending verification (not counted)</span>` : '';
   const btns=METRICS.map(([k,l])=>`<button class="chip ${metric===k?'on':''}" onclick="setGraphMetric('${k}')">${l}</button>`).join('');
   // month-over-month (last two months present), for selected shows + metric
   const withData=M.months.filter(mo=>A.some(s=>M.shows[s].data[mo]));
@@ -1357,11 +1388,11 @@ function monthlyGraphPanel(p){
       </tbody></table></div>`;
   }
   return `<div class="panel"><div class="panel-head"><h3>Monthly performance</h3><div class="filters">${btns}</div></div><div class="panel-body">
-    <div style="margin-bottom:12px;display:flex;flex-wrap:wrap;align-items:center;gap:6px 0">${showChips}${baseNote}</div>
+    <div style="margin-bottom:12px;display:flex;flex-wrap:wrap;align-items:center;gap:6px 0">${showChips}${baseNote}${pendingNote}</div>
     <svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:100%;display:block"><line x1="${x0}" y1="${base}" x2="${W-10}" y2="${base}" stroke="#E1E4E9"/>${bars}</svg>
     ${mom}
     ${Object.keys(M.tiktok).length?`<div style="margin-top:8px;font-size:12px;color:var(--ink-soft);border-top:1px solid var(--line-soft);padding-top:10px"><b>TikTok — Fanatics channel total</b> (channel-wide, not show-attributable): ${M.months.filter(mo=>M.tiktok[mo]!=null).map(mo=>mo+' '+aud(M.tiktok[mo])).join(' · ')}.</div>`:''}
-    <div style="margin-top:6px;font-size:11.5px;color:var(--ink-faint)">${staticMonths.length?`RLI Mar–May greyed as pre-sponsorship baseline (delivery clock from June). Kenty Blitz includes Ask Kenty. ${staticMonths.join('–')} figures from Fanatics' reissued per-platform reports.`:''} ${liveMonthSet.size?`${sortMonthLabels([...liveMonthSet]).join(', ')} from partner-submitted monthly reports, counted once PointsBet verifies them.`:''}</div>
+    <div style="margin-top:6px;font-size:11.5px;color:var(--ink-faint)">${staticMonths.length?`RLI Mar–May greyed as pre-sponsorship baseline (delivery clock from June). Kenty Blitz includes Ask Kenty. ${staticMonths.join('–')} figures from Fanatics' reissued per-platform reports.`:''} ${liveMonthSet.size?`${sortMonthLabels([...liveMonthSet]).join(', ')} from partner-submitted monthly reports. Amber dashed bars are awaiting verification and remain excluded from YTD totals, CPM and the Partnership Pulse.`:''}</div>
     ${comp}
   </div></div>`;
 }
