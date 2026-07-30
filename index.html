@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Partnership Review — Visual Scorecards</title>
+<title>Partnership Review Dashboard 2026 — Clean Edition</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -693,12 +693,10 @@
   /* Visual Media Value scorecards: decision-ready metrics with evidence on demand. */
   .media-comp>summary{grid-template-columns:minmax(180px,1fr) auto}
   .media-header-meta{display:flex;align-items:center;justify-content:flex-end;gap:14px}
-  .media-investment-pill{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-family:'JetBrains Mono';font-size:9px;font-weight:800;white-space:nowrap}
-  .media-score-grid{display:grid;grid-template-columns:1.35fr 1fr 1fr;gap:10px}
-  .media-score{position:relative;min-height:174px;padding:15px 16px 14px;border:1px solid var(--line);border-radius:11px;background:linear-gradient(180deg,#fff,#FCFDFD);overflow:hidden}
-  .media-score.good{background:linear-gradient(180deg,#fff,var(--good-bg))}
-  .media-score.warn{background:linear-gradient(180deg,#fff,var(--warn-bg))}
-  .media-score.bad{background:linear-gradient(180deg,#fff,var(--bad-bg))}
+  .media-investment-pill{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:999px;background:#F1F3F6;color:var(--ink-soft);font-family:'JetBrains Mono';font-size:9px;font-weight:800;white-space:nowrap}
+  .media-score-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .media-score{position:relative;min-height:142px;padding:15px 16px 13px;border:1px solid var(--line);border-radius:10px;background:#fff;overflow:hidden}
+  .media-score.good,.media-score.warn,.media-score.bad{background:#fff}
   .media-score-label{display:block;margin-bottom:8px;font-size:9px;text-transform:uppercase;letter-spacing:.075em;color:var(--ink-faint);font-weight:800}
   .media-score-value-row{display:flex;align-items:flex-end;gap:8px;min-height:38px}
   .media-score-value{font-family:'Space Grotesk';font-size:27px;line-height:1;letter-spacing:-.045em;color:var(--ink)}
@@ -715,21 +713,16 @@
   @keyframes scoreGrow{from{transform:scaleX(0);transform-origin:left}to{transform:scaleX(1);transform-origin:left}}
   .media-score-note{margin-top:10px;color:var(--ink-soft);font-size:10.5px;line-height:1.35}
   .media-score-note b{font-family:'JetBrains Mono';color:var(--ink)}
-  .audience-spark{position:absolute;right:13px;top:34px;width:96px;height:38px}
-  .audience-spark path{fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
-  .audience-spark path.good,.audience-spark.good circle{stroke:var(--good);fill:var(--good)}
-  .audience-spark path.warn,.audience-spark.warn circle{stroke:var(--warn);fill:var(--warn)}
-  .audience-spark path.bad,.audience-spark.bad circle{stroke:var(--bad);fill:var(--bad)}
-  .integration-score{margin-top:11px;border:1px solid #F1DFC0;border-radius:11px;background:linear-gradient(90deg,#FFFCF6,#fff);overflow:hidden}
+  .integration-score{margin-top:12px;border:1px solid var(--line);border-left:3px solid var(--warn);border-radius:10px;background:#fff;overflow:hidden}
   .integration-score>summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;padding:14px 15px}
   .integration-score>summary::-webkit-details-marker{display:none}
-  .integration-score>summary:hover{background:rgba(255,247,229,.45)}
+  .integration-score>summary:hover{background:#FAFAFB}
   .integration-icon{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--warn-bg);color:var(--warn);font-size:15px;font-weight:800}
   .integration-copy b{display:block;font-size:12.5px;color:var(--ink)}
   .integration-copy span{display:block;margin-top:2px;color:var(--ink-soft);font-size:10.5px}
-  .integration-explore{color:var(--accent);font-size:10.5px;font-weight:800;white-space:nowrap}
-  .integration-segments{display:flex;gap:4px;margin-top:8px}
-  .integration-segments i{display:block;flex:1;height:6px;border-radius:999px;background:#E8EBEF}
+  .integration-explore{color:var(--ink);font-size:10.5px;font-weight:800;white-space:nowrap}
+  .integration-copy .integration-segments{display:flex;gap:5px;margin-top:8px;width:min(250px,100%)}
+  .integration-copy .integration-segments i{display:block;flex:1 1 0;min-width:12px;height:5px;border-radius:999px;background:#E8EBEF}
   .integration-segments i.good{background:var(--good)}.integration-segments i.warn{background:var(--warn)}.integration-segments i.bad{background:var(--bad)}
   .integration-expanded{padding:0 15px 15px;border-top:1px solid rgba(159,105,0,.12);animation:mediaReveal .2s ease both}
   .asset-card-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding-top:12px}
@@ -742,7 +735,8 @@
   .asset-card.bad .asset-card-ico{color:var(--bad);background:var(--bad-bg)}
   .asset-card-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;font-weight:700}
   .asset-card-stat{font-family:'JetBrains Mono';font-size:9.5px;color:var(--ink-soft);white-space:nowrap}
-  .media-method-note{margin-top:11px;padding-top:10px;border-top:1px solid var(--line-soft);color:var(--ink-faint);font-size:9.5px;line-height:1.4}
+  .media-comp .wklog>summary{color:var(--ink-soft);font-weight:700}
+  .media-comp .wklog>summary:hover{color:var(--ink)}
 
   .quads{background:transparent;border:0;gap:10px;overflow:visible}
   .quad.insight-tile{border:1px solid var(--line);border-radius:9px;min-height:0;padding:0;background:#fff;overflow:hidden;transition:border-color .18s ease,box-shadow .18s ease}
@@ -1056,16 +1050,6 @@ function performanceDelivery(c,p){
     total:counted.reduce((sum,[,d])=>sum+Object.values(d||{}).reduce((a,v)=>a+(+v||0),0),0),
     months:counted.length
   };
-}
-function performanceSeries(c,p){
-  const staticM=(typeof MONTHLY!=='undefined'&&p)?MONTHLY[p.name]:null;
-  const staticMonths=staticM?staticM.months.slice():[];
-  const staticKey=staticShowKey(staticM,c.name);
-  const staticShow=staticKey?staticM.shows[staticKey]:null;
-  const data=staticShow?{...staticShow.data}:{};
-  const live=liveShowMonthly(c).data;
-  Object.entries(live).forEach(([mo,d])=>{ if(!staticMonths.includes(mo))data[mo]=d; });
-  return sortMonthLabels(Object.keys(data)).map(mo=>Object.values(data[mo]||{}).reduce((sum,v)=>sum+(+v||0),0)).filter(v=>Number.isFinite(v));
 }
 function canonicalShowName(name){
   return (name||'').toLowerCase().replace(/\s*\([^)]*\)\s*$/,'').replace(/[^a-z0-9]+/g,' ').trim();
@@ -2541,19 +2525,6 @@ function scoreBullet(actual,target,kind){
     <span class="score-bullet-tick" style="left:${tick.toFixed(1)}%"></span>
   </div>`;
 }
-function audienceSparkline(comp,p,kind){
-  const values=performanceSeries(comp,p);
-  if(values.length<2)return '';
-  const w=96,h=38,pad=3,min=Math.min(...values),max=Math.max(...values),range=max-min||1;
-  const pts=values.map((v,i)=>{
-    const x=pad+i*(w-pad*2)/(values.length-1);
-    const y=h-pad-(v-min)/range*(h-pad*2);
-    return [x,y];
-  });
-  const d=pts.map((pt,i)=>(i?'L':'M')+pt[0].toFixed(1)+' '+pt[1].toFixed(1)).join(' ');
-  const last=pts[pts.length-1];
-  return `<svg class="audience-spark ${kind}" viewBox="0 0 ${w} ${h}" aria-label="Verified monthly audience trend" role="img"><path class="${kind}" d="${d}"></path><circle cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="3"></circle></svg>`;
-}
 function integrationVisual(comp,p,s){
   const model=assetDeliveryModel(comp,p,s),rows=model.rows;
   if(!rows.length)return '';
@@ -2598,7 +2569,6 @@ function audienceScorecards(comp,p,s,metrics){
     <section class="media-score ${audienceKind}">
       <span class="media-score-label">Views / listens YTD</span>
       <div class="media-score-value-row"><b class="media-score-value">${d!==null?aud(d):'—'}</b>${mediaStatus(audienceKind,audienceLabel)}</div>
-      ${audienceSparkline(comp,p,audienceKind)}
       ${scoreBullet(d,ytdTarget,audienceKind)}
       <div class="media-score-note">Target to date <b>${ytdTarget!==null?aud(ytdTarget):'—'}</b>${perfMonths?` · ${perfMonths} verified month${perfMonths!==1?'s':''}`:''}</div>
     </section>
@@ -2633,7 +2603,6 @@ function componentBlock(comp,p,index){
     if(invYtd!==null&&d){ dc=cpm(invYtd,d); periodMatched=dc!==null; }
     if(dc===null) dc=cpm(inv,d);
     body=audienceScorecards(comp,p,currentSnap(p),{g,d,ytdTarget,audP,pc,dc,invYtd,perfMonths});
-    body+=`<div class="media-method-note">Verified delivery only. CPM uses ${invYtd!==null?money(invYtd):'period-matched investment'} YTD ÷ verified views/listens YTD; the guarantee tile compares verified audience with the full contract guarantee.</div>`;
   } else if(comp.mode==='fixed'){
     body=`<div class="cpm-line">${comp.fixedDelivered?'<b style="color:var(--good)">Delivered</b> — full value counted':'<span style="color:var(--ink-faint)">Not yet delivered</span>'}</div>`;
   } else {
