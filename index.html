@@ -443,6 +443,21 @@
   .detail-head{border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;box-shadow:none;padding:5px 0 25px;margin-bottom:17px}
   .dh-name{font-size:34px;letter-spacing:-.045em}
   .dh-cp{font-size:11.5px;margin-top:7px}.dh-term{font-size:10.5px}
+  .dh-identity{min-width:240px}
+  .dh-headline-strip{display:grid;grid-template-columns:repeat(3,minmax(150px,1fr));margin-top:24px;border-top:1px solid var(--line)}
+  .dh-headline-stat{padding:17px 20px 0 0}
+  .dh-headline-stat+.dh-headline-stat{padding-left:20px;border-left:1px solid var(--line)}
+  .dh-headline-stat span{display:block;margin-bottom:7px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.085em;color:var(--ink-faint)}
+  .dh-headline-stat b{display:block;font-family:'JetBrains Mono';font-size:19px;line-height:1.15;letter-spacing:-.035em;color:var(--ink)}
+  .dh-headline-stat.period b{font-family:'Inter';font-size:15px;letter-spacing:-.02em}
+  .dh-right .linkbtn{padding:6px 8px}
+  @media(max-width:720px){
+    .detail-head .dh-right{align-items:flex-start}
+    .dh-headline-strip{grid-template-columns:1fr 1fr;margin-top:18px}
+    .dh-headline-stat{padding:14px 14px 0 0}
+    .dh-headline-stat+.dh-headline-stat{padding-left:14px}
+    .dh-headline-stat.period{grid-column:1/-1;border-left:0;border-top:1px solid var(--line);margin-top:14px;padding-left:0}
+  }
   select.sel,input.inp,textarea.inp{border-radius:7px;font-size:12px}
   input.inp:focus,textarea.inp:focus,select.sel:focus{outline:3px solid rgba(227,27,35,.13);border-color:var(--brand)}
   .module-nav{gap:22px;padding:0;margin:0 0 20px;border-bottom:1px solid var(--line)}
@@ -2224,13 +2239,16 @@ function renderDetail(){
   const invShown=m.inv!==null?m.inv:p.contractedValue;
 
   let html=`<div class="detail-head"><div class="dh-top">
-    <div><h1 class="dh-name">${esc(p.name)} ${p.example?'<span class="example-tag">Example — safe to delete</span>':''}</h1>
-      <div class="dh-cp"><span class="cat">${esc(p.category)}</span> ${esc(p.counterparty||'')}
-        <span class="dh-term">· ${fmtDate(p.termStart)} – ${fmtDate(p.termEnd)} · investment ${moneyFull(invShown)}</span></div></div>
+    <div class="dh-identity"><h1 class="dh-name">${esc(p.name)} ${p.example?'<span class="example-tag">Example — safe to delete</span>':''}</h1>
+      <div class="dh-cp"><span class="cat">${esc(p.category)}</span><span>${esc(p.counterparty||'')}</span></div></div>
     <div class="dh-right">
       <div style="display:flex;gap:6px"><button class="linkbtn" onclick="editPartnerAccess()">Partner access</button><button class="linkbtn" onclick="editPartnership('${p.id}')">Edit partnership</button></div>
     </div></div>
-    ${s.context?`<div style="margin-top:12px;font-size:12.5px;color:var(--ink-soft);border-top:1px solid var(--line-soft);padding-top:11px">${esc(s.context)}</div>`:''}
+    <div class="dh-headline-strip" aria-label="Partnership headlines">
+      <div class="dh-headline-stat"><span>Total investment</span><b>${moneyFull(invShown)}</b></div>
+      <div class="dh-headline-stat"><span>Contracted CPM</span><b>${m.propCpm!==null?'$'+m.propCpm.toFixed(2):'—'}</b></div>
+      <div class="dh-headline-stat period"><span>Partnership period</span><b>${fmtDate(p.termStart)} – ${fmtDate(p.termEnd)}</b></div>
+    </div>
   </div>`;
 
   const modules=[['overview','Overview'],['efficiency','Media efficiency'],['executive','Executive summary']];
