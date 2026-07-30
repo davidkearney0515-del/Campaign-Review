@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Partnership Review — Pace &amp; Evidence</title>
+<title>Partnership Review — Visual Scorecards</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -675,6 +675,60 @@
   .data-disclosure[open]>summary:before{content:'−'}
   .data-disclosure-body{padding-top:12px;animation:mediaReveal .2s ease both}
 
+  /* Visual Media Value scorecards: decision-ready metrics with evidence on demand. */
+  .media-comp>summary{grid-template-columns:minmax(180px,1fr) auto}
+  .media-header-meta{display:flex;align-items:center;justify-content:flex-end;gap:14px}
+  .media-investment-pill{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-family:'JetBrains Mono';font-size:9px;font-weight:800;white-space:nowrap}
+  .media-score-grid{display:grid;grid-template-columns:1.35fr 1fr 1fr;gap:10px}
+  .media-score{position:relative;min-height:174px;padding:15px 16px 14px;border:1px solid var(--line);border-radius:11px;background:linear-gradient(180deg,#fff,#FCFDFD);overflow:hidden}
+  .media-score.good{background:linear-gradient(180deg,#fff,var(--good-bg))}
+  .media-score.warn{background:linear-gradient(180deg,#fff,var(--warn-bg))}
+  .media-score.bad{background:linear-gradient(180deg,#fff,var(--bad-bg))}
+  .media-score-label{display:block;margin-bottom:8px;font-size:9px;text-transform:uppercase;letter-spacing:.075em;color:var(--ink-faint);font-weight:800}
+  .media-score-value-row{display:flex;align-items:flex-end;gap:8px;min-height:38px}
+  .media-score-value{font-family:'Space Grotesk';font-size:27px;line-height:1;letter-spacing:-.045em;color:var(--ink)}
+  .media-score-value small{font-size:15px;color:var(--ink-soft)}
+  .media-status-pill{display:inline-flex;align-items:center;gap:5px;margin-bottom:1px;padding:4px 7px;border-radius:999px;font-size:9.5px;font-weight:800;white-space:nowrap}
+  .media-status-pill.good{color:var(--good);background:var(--good-bg)}
+  .media-status-pill.warn{color:var(--warn);background:var(--warn-bg)}
+  .media-status-pill.bad{color:var(--bad);background:var(--bad-bg)}
+  .score-bullet{position:relative;height:8px;margin-top:16px;background:var(--track);border-radius:999px;overflow:visible}
+  .score-bullet-fill{position:absolute;inset:0 auto 0 0;width:0;border-radius:999px;background:var(--ink-faint);animation:scoreGrow .22s cubic-bezier(.2,.7,.2,1) both}
+  .score-bullet-fill.good{background:var(--good)}.score-bullet-fill.warn{background:var(--warn)}.score-bullet-fill.bad{background:var(--bad)}
+  .score-bullet-tick{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink);border-radius:2px}
+  .score-bullet-tick:before{content:'';position:absolute;top:-2px;left:-2px;width:6px;height:3px;border-radius:0 0 2px 2px;background:var(--ink)}
+  @keyframes scoreGrow{from{transform:scaleX(0);transform-origin:left}to{transform:scaleX(1);transform-origin:left}}
+  .media-score-note{margin-top:10px;color:var(--ink-soft);font-size:10.5px;line-height:1.35}
+  .media-score-note b{font-family:'JetBrains Mono';color:var(--ink)}
+  .audience-spark{position:absolute;right:13px;top:34px;width:96px;height:38px}
+  .audience-spark path{fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+  .audience-spark path.good,.audience-spark.good circle{stroke:var(--good);fill:var(--good)}
+  .audience-spark path.warn,.audience-spark.warn circle{stroke:var(--warn);fill:var(--warn)}
+  .audience-spark path.bad,.audience-spark.bad circle{stroke:var(--bad);fill:var(--bad)}
+  .integration-score{margin-top:11px;border:1px solid #F1DFC0;border-radius:11px;background:linear-gradient(90deg,#FFFCF6,#fff);overflow:hidden}
+  .integration-score>summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;padding:14px 15px}
+  .integration-score>summary::-webkit-details-marker{display:none}
+  .integration-score>summary:hover{background:rgba(255,247,229,.45)}
+  .integration-icon{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--warn-bg);color:var(--warn);font-size:15px;font-weight:800}
+  .integration-copy b{display:block;font-size:12.5px;color:var(--ink)}
+  .integration-copy span{display:block;margin-top:2px;color:var(--ink-soft);font-size:10.5px}
+  .integration-explore{color:var(--accent);font-size:10.5px;font-weight:800;white-space:nowrap}
+  .integration-segments{display:flex;gap:4px;margin-top:8px}
+  .integration-segments i{display:block;flex:1;height:6px;border-radius:999px;background:#E8EBEF}
+  .integration-segments i.good{background:var(--good)}.integration-segments i.warn{background:var(--warn)}.integration-segments i.bad{background:var(--bad)}
+  .integration-expanded{padding:0 15px 15px;border-top:1px solid rgba(159,105,0,.12);animation:mediaReveal .2s ease both}
+  .asset-card-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding-top:12px}
+  .asset-card{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center;width:100%;padding:11px;border:1px solid var(--line-soft);border-radius:9px;background:#fff;text-align:left;transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease}
+  .asset-card:hover{transform:translateY(-1px);border-color:#CDD3DC;box-shadow:0 5px 12px rgba(16,24,40,.05)}
+  .asset-card:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+  .asset-card-ico{display:grid;place-items:center;width:19px;height:19px;border-radius:50%;font-size:11px;font-weight:800}
+  .asset-card.good .asset-card-ico{color:var(--good);background:var(--good-bg)}
+  .asset-card.warn .asset-card-ico{color:var(--warn);background:var(--warn-bg)}
+  .asset-card.bad .asset-card-ico{color:var(--bad);background:var(--bad-bg)}
+  .asset-card-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;font-weight:700}
+  .asset-card-stat{font-family:'JetBrains Mono';font-size:9.5px;color:var(--ink-soft);white-space:nowrap}
+  .media-method-note{margin-top:11px;padding-top:10px;border-top:1px solid var(--line-soft);color:var(--ink-faint);font-size:9.5px;line-height:1.4}
+
   .quads{background:transparent;border:0;gap:10px;overflow:visible}
   .quad.insight-tile{border:1px solid var(--line);border-radius:9px;min-height:0;padding:0;background:#fff;overflow:hidden;transition:border-color .18s ease,box-shadow .18s ease}
   .quad.insight-tile:hover{border-color:#D2D7DF;box-shadow:0 5px 14px rgba(16,24,40,.04)}
@@ -712,7 +766,10 @@
     .dh-name,.pbanner h1{font-size:28px}
     .board{grid-template-columns:1fr}
     .overview-layout{grid-template-columns:1fr}
-    .media-comp>summary{grid-template-columns:1fr auto}.media-glance{grid-column:1/-1;padding-left:29px}
+    .media-comp>summary{grid-template-columns:1fr}.media-header-meta{justify-content:flex-start;flex-wrap:wrap}
+    .media-score-grid{grid-template-columns:1fr}.media-score{min-height:154px}
+    .asset-card-grid{grid-template-columns:1fr}
+    .integration-score>summary{grid-template-columns:auto minmax(0,1fr)}.integration-explore{grid-column:2}
     .dm-row{grid-template-columns:15px minmax(0,1fr) 76px;gap:8px}
     .dm-track{grid-column:2/-1;grid-row:2}
     .dm-fig{grid-column:3;grid-row:1}
@@ -881,7 +938,9 @@ function pctDiff(a,e){ const A=n(a),E=n(e); if(A===null||E===null||E===0)return 
 function cpm(inv,audience){ const i=n(inv),a=n(audience); if(i===null||a===null||a===0)return null; return i/(a/1000); }
 
 function latestSnap(p){ return p.snapshots[p.snapshots.length-1]; }
-function currentSnap(p){ if(view.sid){const s=p.snapshots.find(x=>x.id===view.sid);if(s)return s;} return latestSnap(p); }
+/* The active product is a current-year operating view. Historical review points remain stored
+   for future year-based reporting, but the interface always opens the latest current record. */
+function currentSnap(p){ return latestSnap(p); }
 function curSnap(){ const p=STATE.partnerships.find(x=>x.id===view.pid); return currentSnap(p); }
 
 /* weekly log helpers */
@@ -982,6 +1041,16 @@ function performanceDelivery(c,p){
     total:counted.reduce((sum,[,d])=>sum+Object.values(d||{}).reduce((a,v)=>a+(+v||0),0),0),
     months:counted.length
   };
+}
+function performanceSeries(c,p){
+  const staticM=(typeof MONTHLY!=='undefined'&&p)?MONTHLY[p.name]:null;
+  const staticMonths=staticM?staticM.months.slice():[];
+  const staticKey=staticShowKey(staticM,c.name);
+  const staticShow=staticKey?staticM.shows[staticKey]:null;
+  const data=staticShow?{...staticShow.data}:{};
+  const live=liveShowMonthly(c).data;
+  Object.entries(live).forEach(([mo,d])=>{ if(!staticMonths.includes(mo))data[mo]=d; });
+  return sortMonthLabels(Object.keys(data)).map(mo=>Object.values(data[mo]||{}).reduce((sum,v)=>sum+(+v||0),0)).filter(v=>Number.isFinite(v));
 }
 function canonicalShowName(name){
   return (name||'').toLowerCase().replace(/\s*\([^)]*\)\s*$/,'').replace(/[^a-z0-9]+/g,' ').trim();
@@ -2117,8 +2186,9 @@ function currentPulse(p,s){
   const pending=(s.media.components||[]).reduce((sum,c)=>sum+weeksOf(c).filter(w=>w.status!=='verified').length,0);
   const assetPace=snapshotAssetPace(p,s);
   const assetPct=assetPace.pacePct;
-  const assetRows=assetPace.rows.filter(r=>r.expectedYtd!==null&&r.expectedYtd>0).length;
+  const assetRows=assetPace.rows.filter(r=>r.expectedYtd!==null&&r.expectedYtd>0&&r.status!=='awaiting').length;
   const assetBehind=assetPace.behind;
+  const assetAwaiting=assetPace.awaiting||[];
   const cpmDelta=(m.delCpm!==null&&m.propCpm)?Math.round((m.delCpm-m.propCpm)/m.propCpm*100):null;
   let score=0;
   if(cpmDelta!==null) score+=cpmDelta<=0?2:(cpmDelta<=10?0:-2);
@@ -2138,13 +2208,14 @@ function currentPulse(p,s){
   if(assetPct!==null) evidence.push(`Delivery pace is ${assetPct}% through ${assetPace.asOf.label} across ${assetRows} measured asset${assetRows!==1?'s':''}; each component is equally weighted and capped at 100% so overdelivery cannot hide another shortfall.`);
   else evidence.push('No verified asset delivery is available for assessment yet.');
   if(assetBehind.length) evidence.push(`${assetBehind.length} integration component${assetBehind.length!==1?'s are':' is'} behind expected YTD pace: ${assetBehind.slice(0,3).map(r=>r.name).join(', ')}${assetBehind.length>3?' and '+(assetBehind.length-3)+' more':''}.`);
+  if(assetAwaiting.length) evidence.push(`${assetAwaiting.length} integration component${assetAwaiting.length!==1?'s are':' is'} awaiting first verified delivery and ${assetAwaiting.length!==1?'are':'is'} not yet scored against pace.`);
   if(missing.length) evidence.push(`No verified views/listens have been received for ${missing.join(', ')}.`);
   if(pending) evidence.push(`${pending} monthly submission${pending!==1?'s are':' is'} awaiting verification and excluded from current results.`);
   let summary;
   if(status==='good') summary='Current delivery is efficient and the verified asset record is supporting the partnership case. Maintain the plan while looking for incremental optimisation.';
   else if(status==='warn') summary='The partnership is showing positive evidence, but the current record is incomplete. Resolve the identified reporting or delivery gaps before confirming the partnership is fully on track.';
   else summary='Current delivery evidence does not support an on-track assessment. Address efficiency, asset delivery and missing reporting before further investment decisions.';
-  return {status,label,call,summary,evidence,assetPct,assetCompletionPct:assetPace.completionPct,assetBehind,pending,missing,m,asOf:assetPace.asOf};
+  return {status,label,call,summary,evidence,assetPct,assetCompletionPct:assetPace.completionPct,assetBehind,assetAwaiting,pending,missing,m,asOf:assetPace.asOf};
 }
 
 function renderDetail(){
@@ -2157,9 +2228,6 @@ function renderDetail(){
       <div class="dh-cp"><span class="cat">${esc(p.category)}</span> ${esc(p.counterparty||'')}
         <span class="dh-term">· ${fmtDate(p.termStart)} – ${fmtDate(p.termEnd)} · investment ${moneyFull(invShown)}</span></div></div>
     <div class="dh-right">
-      <div class="snap-select"><label>Review point</label>
-        <select class="sel" onchange="pickSnap(this.value)">${p.snapshots.map(sn=>`<option value="${sn.id}" ${sn.id===s.id?'selected':''}>${esc(sn.label)} — ${fmtDate(sn.date)}</option>`).join('')}</select>
-        <button class="linkbtn" onclick="addSnapshot()">＋ New</button></div>
       <div style="display:flex;gap:6px"><button class="linkbtn" onclick="editPartnerAccess()">Partner access</button><button class="linkbtn" onclick="editPartnership('${p.id}')">Edit partnership</button></div>
     </div></div>
     ${s.context?`<div style="margin-top:12px;font-size:12.5px;color:var(--ink-soft);border-top:1px solid var(--line-soft);padding-top:11px">${esc(s.context)}</div>`:''}
@@ -2325,41 +2393,42 @@ function assetDeliveryModel(comp,p,s){
     let status='none';
     if(expectedYtd!==null&&expectedYtd>0){
       if(fullContract>0&&delivered>=fullContract)status='complete';
+      else if((!hasData||delivered===0)&&wl<=1)status='awaiting';
       else if(!hasData||delivered<expectedYtd*.85-1e-9)status='behind';
       else status='ontrack';
     }
     return {id:as.id,name:as.name,delivered:hasData?delivered:null,fullContract,expectedYtd,paceAttainment,contractCompletion,gap,forecastFinal,status};
   });
-  const measured=rows.filter(r=>r.expectedYtd!==null&&r.expectedYtd>0);
+  const measured=rows.filter(r=>r.expectedYtd!==null&&r.expectedYtd>0&&r.status!=='awaiting');
   const pacePct=measured.length?Math.round(measured.reduce((sum,r)=>sum+Math.min(r.paceAttainment||0,1),0)/measured.length*100):null;
   const contractedRows=rows.filter(r=>r.fullContract>0);
   const completionPct=contractedRows.length?Math.round(contractedRows.reduce((sum,r)=>sum+Math.min(r.contractCompletion||0,1),0)/contractedRows.length*100):null;
-  return {rows,isYtd,elapsed,asOf,pacePct,completionPct,behind:rows.filter(r=>r.status==='behind').length};
+  return {rows,isYtd,elapsed,asOf,pacePct,completionPct,behind:rows.filter(r=>r.status==='behind').length,awaiting:rows.filter(r=>r.status==='awaiting').length,verifiedPeriods:wl};
 }
 function snapshotAssetPace(p,s){
   const models=((s&&s.media&&s.media.components)||[]).filter(c=>(c.assets||[]).length).map(c=>({comp:c,model:assetDeliveryModel(c,p,s)}));
   const rows=models.flatMap(x=>x.model.rows.map(r=>({...r,compId:x.comp.id,compName:x.comp.name})));
-  const measured=rows.filter(r=>r.expectedYtd!==null&&r.expectedYtd>0);
+  const measured=rows.filter(r=>r.expectedYtd!==null&&r.expectedYtd>0&&r.status!=='awaiting');
   const pacePct=measured.length?Math.round(measured.reduce((sum,r)=>sum+Math.min(r.paceAttainment||0,1),0)/measured.length*100):null;
   const contracted=rows.filter(r=>r.fullContract>0);
   const completionPct=contracted.length?Math.round(contracted.reduce((sum,r)=>sum+Math.min(r.contractCompletion||0,1),0)/contracted.length*100):null;
-  return {rows,pacePct,completionPct,behind:rows.filter(r=>r.status==='behind'),asOf:reportingAsOf(p,s)};
+  return {rows,pacePct,completionPct,behind:rows.filter(r=>r.status==='behind'),awaiting:rows.filter(r=>r.status==='awaiting'),asOf:reportingAsOf(p,s)};
 }
 /* Behind-pace assets remain visible; healthy delivery collapses. Each row opens its evidence trail. */
 function deliveryMatrix(comp,p,s){
   const model=assetDeliveryModel(comp,p,s);
   const {rows,isYtd,elapsed,asOf}=model;
   if(!rows.length)return '';
-  const order={behind:0,none:1,complete:2,ontrack:3};
+  const order={behind:0,awaiting:1,none:2,complete:3,ontrack:4};
   const sorted=rows.slice().sort((x,y)=>(order[x.status]-order[y.status])||((x.paceAttainment??0)-(y.paceAttainment??0)));
   const attention=sorted.filter(r=>r.status==='behind');
   const healthy=sorted.filter(r=>r.status==='ontrack'||r.status==='complete');
-  const unmeasured=sorted.filter(r=>r.status==='none');
+  const unmeasured=sorted.filter(r=>r.status==='none'||r.status==='awaiting');
   const paceLine=isYtd&&elapsed!==null
     ? `Expected through ${asOf.label} · ${Math.round(elapsed*100)}% of term elapsed`
     : `Expected through ${asOf.label} · based on verified schedule`;
   const rowHtml=r=>{
-    const ico=r.status==='behind'?'!':r.status==='complete'?'✓':'○';
+    const ico=r.status==='behind'?'!':r.status==='complete'?'✓':r.status==='awaiting'?'◷':'○';
     const paceTxt=r.paceAttainment===null?'—':Math.round(r.paceAttainment*100)+'% pace';
     const base=Math.max(r.delivered||0,r.expectedYtd||0,r.fullContract||0)*1.08||1;
     const fillW=Math.min(100,(r.delivered||0)/base*100);
@@ -2374,7 +2443,7 @@ function deliveryMatrix(comp,p,s){
   const bits=[];
   if(attention.length)bits.push(`<span class="sev">${attention.length} behind pace</span>`);
   if(healthy.length)bits.push(`<span class="ok">${healthy.length} on track</span>`);
-  if(unmeasured.length)bits.push(`<span>${unmeasured.length} unmeasured</span>`);
+  if(unmeasured.length)bits.push(`<span>${unmeasured.length} awaiting or unmeasured</span>`);
   const collapsed=[...unmeasured,...healthy];
   return `<div class="delivery-matrix">
     <div class="dm-head"><h4>Integration delivery <span class="pace-basis">Pace ${model.pacePct!==null?model.pacePct+'%':'—'}</span></h4><span class="dm-summary">${bits.join(' · ')||'—'}</span></div>
@@ -2401,8 +2470,8 @@ function openDeliveryEvidence(compId,assetId){
   const importedBaseline=n(asset.baselineDelivered);
   const change=last&&previous&&previous.value!==null&&last.value!==null?last.value-previous.value:null;
   const clips=[...weeksOf(comp)].sort((a,b)=>evidenceWeekStamp(b,p,s)-evidenceWeekStamp(a,p,s)).map(w=>({label:w.label,url:clipHref(w,assetId)})).filter(x=>x.url).filter((x,i,a)=>a.findIndex(y=>y.url===x.url)===i);
-  const statusLabel=row.status==='behind'?'Behind expected pace':row.status==='complete'?'Contract complete':row.status==='ontrack'?'On track':'Not yet measurable';
-  const statusClass=row.status==='behind'?'wk-rejected':row.status==='none'?'wk-baseline':'wk-verified';
+  const statusLabel=row.status==='behind'?'Behind expected pace':row.status==='complete'?'Contract complete':row.status==='ontrack'?'On track':row.status==='awaiting'?'Awaiting first delivery':'Not yet measurable';
+  const statusClass=row.status==='behind'?'wk-rejected':row.status==='awaiting'?'wk-pending':row.status==='none'?'wk-baseline':'wk-verified';
   const gap=row.gap===null?null:Math.round(row.gap);
   const gapText=gap===null?'—':(gap>0?'+':'')+num(gap);
   const paceText=row.paceAttainment===null?'—':Math.round(row.paceAttainment*100)+'%';
@@ -2416,11 +2485,11 @@ function openDeliveryEvidence(compId,assetId){
   document.getElementById('drawerMount').innerHTML=`<div class="drawer-scrim" onclick="if(event.target===this)closePerfDrawer()"><aside class="perf-drawer" role="dialog" aria-modal="true" aria-labelledby="deliveryEvidenceTitle">
     <div class="perf-drawer-head"><div><div class="eyebrow">${esc(p.name)} · Delivery evidence</div><h3 id="deliveryEvidenceTitle">${esc(asset.name)}</h3><p>${esc(comp.name)} · measured through ${esc(model.asOf.label)}</p></div><button class="drawer-close" onclick="closePerfDrawer()" aria-label="Close delivery evidence">×</button></div>
     <div class="perf-drawer-body">
-      <div class="evidence-status"><span class="wk-status ${statusClass}">${statusLabel}</span><span class="evidence-gap" style="color:var(--${gap!==null&&gap<0?'bad':'good'})">${gapText} vs expected</span></div>
+      <div class="evidence-status"><span class="wk-status ${statusClass}">${statusLabel}</span><span class="evidence-gap" style="color:var(--${row.status==='awaiting'?'warn':gap!==null&&gap<0?'bad':'good'})">${gapText} vs expected</span></div>
       <div class="drawer-kpis">
         <div><span>Delivered YTD</span><b>${row.delivered===null?'—':num(row.delivered)}</b></div>
         <div><span>Expected YTD</span><b>${expectedText}</b></div>
-        <div><span>Pace attainment</span><b style="color:var(--${row.status==='behind'?'bad':row.status==='none'?'ink':'good'})">${paceText}</b></div>
+        <div><span>Pace attainment</span><b style="color:var(--${row.status==='behind'?'bad':row.status==='awaiting'?'warn':row.status==='none'?'ink':'good'})">${paceText}</b></div>
         <div><span>Contract total</span><b>${row.fullContract?num(row.fullContract):'Schedule-based'}</b></div>
         <div><span>Forecast final</span><b>${forecastText}</b></div>
         <div><span>Previous position</span><b>${previous&&previous.value!==null?num(previous.value):'—'}${change!==null?` <small style="font-size:9px;color:var(--${change>=0?'good':'bad'})">${change>=0?'+':''}${num(change)}</small>`:''}</b></div>
@@ -2440,13 +2509,101 @@ function openDeliveryEvidence(compId,assetId){
   document.querySelector('.drawer-close')?.focus();
 }
 Object.assign(window,{openDeliveryEvidence});
+function mediaStatus(kind,label){
+  const glyph=kind==='good'?'✓':kind==='bad'?'!':'◷';
+  return `<span class="media-status-pill ${kind}"><span aria-hidden="true">${glyph}</span>${esc(label)}</span>`;
+}
+function scoreBullet(actual,target,kind){
+  if(actual===null||target===null||!isFinite(actual)||!isFinite(target)||target<=0)return `<div class="score-bullet" aria-hidden="true"></div>`;
+  const base=Math.max(actual,target)*1.08||1;
+  const fill=Math.min(100,Math.max(0,actual/base*100));
+  const tick=Math.min(100,Math.max(0,target/base*100));
+  return `<div class="score-bullet" role="img" aria-label="Actual ${num(Math.round(actual))}; benchmark ${num(Math.round(target))}">
+    <span class="score-bullet-fill ${kind}" style="width:${fill.toFixed(1)}%"></span>
+    <span class="score-bullet-tick" style="left:${tick.toFixed(1)}%"></span>
+  </div>`;
+}
+function audienceSparkline(comp,p,kind){
+  const values=performanceSeries(comp,p);
+  if(values.length<2)return '';
+  const w=96,h=38,pad=3,min=Math.min(...values),max=Math.max(...values),range=max-min||1;
+  const pts=values.map((v,i)=>{
+    const x=pad+i*(w-pad*2)/(values.length-1);
+    const y=h-pad-(v-min)/range*(h-pad*2);
+    return [x,y];
+  });
+  const d=pts.map((pt,i)=>(i?'L':'M')+pt[0].toFixed(1)+' '+pt[1].toFixed(1)).join(' ');
+  const last=pts[pts.length-1];
+  return `<svg class="audience-spark ${kind}" viewBox="0 0 ${w} ${h}" aria-label="Verified monthly audience trend" role="img"><path class="${kind}" d="${d}"></path><circle cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="3"></circle></svg>`;
+}
+function integrationVisual(comp,p,s){
+  const model=assetDeliveryModel(comp,p,s),rows=model.rows;
+  if(!rows.length)return '';
+  const good=rows.filter(r=>r.status==='ontrack'||r.status==='complete');
+  const behind=rows.filter(r=>r.status==='behind');
+  const awaiting=rows.filter(r=>r.status==='awaiting'||r.status==='none');
+  const pending=weeksOf(comp).filter(w=>(w.status||'pending')!=='verified').length;
+  let headline,kind='warn';
+  if(behind.length){headline=`${behind.length} component${behind.length!==1?'s':''} behind pace`;kind='bad';}
+  else if(awaiting.length){headline='Integration schedule — awaiting first delivery';kind='warn';}
+  else{headline='Integration delivery on track';kind='good';}
+  const verified=model.verifiedPeriods||0;
+  const periodWord=comp.assetReporting==='ytd'?'month':'week';
+  const sub=`${good.length} of ${rows.length} assets on pace · ${verified} ${periodWord}${verified!==1?'s':''} verified${pending?' · '+pending+' pending':''}`;
+  const card=r=>{
+    const state=r.status==='behind'?'bad':(r.status==='ontrack'||r.status==='complete')?'good':'warn';
+    const glyph=state==='good'?'✓':state==='bad'?'!':'◷';
+    const stat=r.status==='awaiting'||r.status==='none'?'Awaiting':`${r.delivered===null?'—':num(r.delivered)} / ${r.expectedYtd===null?'—':num(Math.round(r.expectedYtd))}`;
+    return `<button type="button" class="asset-card ${state}" onclick="openDeliveryEvidence('${comp.id}','${r.id}')" aria-label="Open delivery evidence for ${esc(r.name)}">
+      <span class="asset-card-ico" aria-hidden="true">${glyph}</span><span class="asset-card-name" title="${esc(r.name)}">${esc(r.name)}</span><span class="asset-card-stat">${stat}</span>
+    </button>`;
+  };
+  return `<details class="integration-score ${kind}">
+    <summary><span class="integration-icon" aria-hidden="true">${kind==='good'?'✓':kind==='bad'?'!':'◷'}</span>
+      <span class="integration-copy"><b>${esc(headline)}</b><span>${esc(sub)}</span><span class="integration-segments" aria-hidden="true">${rows.map(r=>`<i class="${r.status==='behind'?'bad':r.status==='ontrack'||r.status==='complete'?'good':'warn'}"></i>`).join('')}</span></span>
+      <span class="integration-explore">Explore ${rows.length} components ›</span>
+    </summary>
+    <div class="integration-expanded"><div class="asset-card-grid">${rows.map(card).join('')}</div></div>
+  </details>`;
+}
+function audienceScorecards(comp,p,s,metrics){
+  const {g,d,ytdTarget,audP,pc,dc,invYtd,perfMonths}=metrics;
+  const audienceKind=d===null||ytdTarget===null?'warn':audP>=0?'good':audP>=-15?'warn':'bad';
+  const audienceLabel=d===null?'Awaiting delivery':audP===null?'Awaiting target':`${audP>0?'+':''}${audP}% vs target`;
+  const cpmDelta=dc!==null&&pc?Math.round((dc-pc)/pc*100):null;
+  const cpmKind=dc===null||pc===null?'warn':dc<=pc?'good':dc<=pc*1.1?'warn':'bad';
+  const cpmLabel=dc===null?'Awaiting delivery':`${Math.abs(cpmDelta)}% ${cpmDelta<=0?'cheaper':'higher'}`;
+  const guaranteePct=d!==null&&g?Math.round(d/g*100):null;
+  const guaranteeKind=guaranteePct===null?'warn':guaranteePct>=100?'good':guaranteePct>=85?'warn':'bad';
+  const guaranteeLabel=guaranteePct===null?'Awaiting delivery':guaranteePct>=100?'Guarantee met':`${guaranteePct}% delivered`;
+  return `<div class="media-score-grid">
+    <section class="media-score ${audienceKind}">
+      <span class="media-score-label">Views / listens YTD</span>
+      <div class="media-score-value-row"><b class="media-score-value">${d!==null?aud(d):'—'}</b>${mediaStatus(audienceKind,audienceLabel)}</div>
+      ${audienceSparkline(comp,p,audienceKind)}
+      ${scoreBullet(d,ytdTarget,audienceKind)}
+      <div class="media-score-note">Target to date <b>${ytdTarget!==null?aud(ytdTarget):'—'}</b>${perfMonths?` · ${perfMonths} verified month${perfMonths!==1?'s':''}`:''}</div>
+    </section>
+    <section class="media-score ${cpmKind}">
+      <span class="media-score-label">Delivered CPM YTD</span>
+      <div class="media-score-value-row"><b class="media-score-value">${dc!==null?'$'+dc.toFixed(2):'—'}</b>${mediaStatus(cpmKind,cpmLabel)}</div>
+      ${scoreBullet(dc,pc,cpmKind)}
+      <div class="media-score-note">Proposed <b>${pc!==null?'$'+pc.toFixed(2):'—'}</b>${invYtd!==null?` · ${money(invYtd)} invested YTD`:''}</div>
+    </section>
+    <section class="media-score ${guaranteeKind}">
+      <span class="media-score-label">Full-year guarantee</span>
+      <div class="media-score-value-row"><b class="media-score-value">${guaranteePct!==null?guaranteePct+'%':'—'}</b>${mediaStatus(guaranteeKind,guaranteeLabel)}</div>
+      ${scoreBullet(d,g,guaranteeKind)}
+      <div class="media-score-note"><b>${d!==null?aud(d):'—'}</b> of <b>${g!==null?aud(g):'—'}</b></div>
+    </section>
+  </div>`;
+}
 function componentBlock(comp,p,index){
   const inv=n(comp.investment);
   const wl=verifiedWeeksLogged(comp);
   const totalMonths=termMonths(p);
   let invYtd=null,perfMonths=0;
   let body='';
-  let glanceLabel='Delivery',glanceValue='—',cpmGlance='—',assetPctSummary=null;
   if(comp.mode==='audience'){
     const g=n(comp.audienceGuaranteed),d=audDelivered(comp,p);
     perfMonths=deliveryMonthsLogged(comp,p);
@@ -2457,27 +2614,18 @@ function componentBlock(comp,p,index){
     let dc=null,periodMatched=false;
     if(invYtd!==null&&d){ dc=cpm(invYtd,d); periodMatched=dc!==null; }
     if(dc===null) dc=cpm(inv,d);
-    glanceLabel=d!==null?'Audience YTD':'Audience';
-    glanceValue=d!==null?aud(d):'Awaiting';
-    cpmGlance=dc!==null?'$'+dc.toFixed(2):pc!==null?'$'+pc.toFixed(2)+' proj':'—';
-    const src=perfMonths?` <span style="color:var(--ink-faint);font-weight:400;font-size:11px">(from ${perfMonths} verified month${perfMonths>1?'s':''} · live + imported)</span>`:'';
-    body=`<div class="aud-row"><span class="mlab">Views/listens YTD</span><span class="mono">${d!==null?aud(d)+' delivered':ytdTarget!==null?aud(ytdTarget)+' YTD target':'Awaiting delivery'}${ytdTarget!==null&&d!==null?' / '+aud(ytdTarget)+' YTD target':''}${audP!==null?` <span style="color:var(--${audP>=0?'good':audP>=-15?'warn':'bad'});font-weight:700">(${audP>0?'+':''}${audP}% vs YTD)</span>`:''}${g!==null?` <span style="color:var(--ink-faint);font-weight:400;font-size:11px">· ${aud(g)} full guarantee</span>`:''}${src}</span></div>
-      ${d!==null&&ytdTarget!==null?bar(d,ytdTarget):bar(null,null)}
-      <div class="cpm-line">${pc!==null?`Proposed CPM <b>$${pc.toFixed(2)}</b>`:''}${dc!==null?` → YTD delivered CPM <b style="color:var(--${dc<=pc?'good':'bad'})">$${dc.toFixed(2)}</b>${periodMatched?` <span style="color:var(--ink-faint);font-weight:400">(${money(invYtd)} investment YTD ÷ views/listens YTD)</span>`:''}`:''}</div>`;
+    body=audienceScorecards(comp,p,currentSnap(p),{g,d,ytdTarget,audP,pc,dc,invYtd,perfMonths});
+    body+=`<div class="media-method-note">Verified delivery only. CPM uses ${invYtd!==null?money(invYtd):'period-matched investment'} YTD ÷ verified views/listens YTD; the guarantee tile compares verified audience with the full contract guarantee.</div>`;
   } else if(comp.mode==='fixed'){
-    glanceValue=comp.fixedDelivered?'Delivered':'Awaiting';
     body=`<div class="cpm-line">${comp.fixedDelivered?'<b style="color:var(--good)">Delivered</b> — full value counted':'<span style="color:var(--ink-faint)">Not yet delivered</span>'}</div>`;
   } else {
     const d=n(comp.deliveredQty),ct=n(comp.contractedQty); const r=compRealised(comp);
-    glanceValue=d!==null&&ct?Math.round(d/ct*100)+'%':'Awaiting';
     body=`<div class="aud-row"><span class="mlab">Fulfilment</span><span class="mono">${d!==null?d:'—'} of ${ct||'—'} ${esc(comp.unit||'')}${r!==null&&inv?` · <b>${money(r)}</b> realised`:''}</span></div>${d!==null&&ct?bar(d,ct):bar(0,1)}`;
   }
   // asset fulfilment strip (weekly asset schedule)
   let assetStrip='';
   if((comp.assets||[]).length){
-    const paceModel=assetDeliveryModel(comp,p,currentSnap(p));
-    assetPctSummary=paceModel.pacePct;
-    assetStrip=deliveryMatrix(comp,p,currentSnap(p));
+    assetStrip=integrationVisual(comp,p,currentSnap(p));
   } else if((comp.entitlements||[]).length){
     assetStrip=`<details class="comp-ent"><summary>${comp.entitlements.length} entitlements</summary><div class="ent-chips">${comp.entitlements.map(e=>`<span class="ent-chip">${esc(e)}</span>`).join('')}</div></details>`;
   }
@@ -2495,10 +2643,10 @@ function componentBlock(comp,p,index){
   }
   const hasStored=view.mediaExpanded&&Object.prototype.hasOwnProperty.call(view.mediaExpanded,comp.id);
   const expanded=hasStored?view.mediaExpanded[comp.id]:false;
+  const investmentPct=invYtd!==null&&inv?Math.round(invYtd/inv*100):null;
   return `<details class="comp media-comp" ${expanded?'open':''} ontoggle="rememberMediaOpen(this,'${comp.id}')">
     <summary class="comp-head"><div class="media-title-block"><span class="comp-name">${esc(comp.name)}</span><span class="comp-mode">${comp.mode}</span></div>
-      <div class="media-glance"><div class="media-glance-item"><span>${glanceLabel}</span><b>${glanceValue}</b></div>${comp.mode==='audience'?`<div class="media-glance-item"><span>CPM YTD</span><b>${cpmGlance}</b></div>`:''}${assetPctSummary!==null?`<div class="mini-progress" style="--p:${assetPctSummary}" title="Delivery pace attainment" aria-label="Delivery pace ${assetPctSummary}%"><b>${assetPctSummary}%</b></div>`:''}</div>
-      <div style="display:flex;align-items:flex-start;gap:7px"><div class="comp-investments"><span class="comp-inv">${money(comp.investment)}<small>Total investment</small></span>${comp.mode==='audience'?`<span class="comp-inv">${invYtd!==null?money(invYtd):'—'}<small>Investment YTD</small></span>`:''}</div><button class="comp-editbtn" onclick="event.preventDefault();event.stopPropagation();editComponent('${comp.id}')">Edit</button></div></summary>
+      <div class="media-header-meta"><div class="comp-investments"><span class="comp-inv">${money(comp.investment)}<small>Total investment</small></span>${comp.mode==='audience'?`<span class="comp-inv">${invYtd!==null?money(invYtd):'—'}<small>Investment YTD</small></span>`:''}</div>${investmentPct!==null?`<span class="media-investment-pill">${investmentPct}% invested</span>`:''}<button class="comp-editbtn" onclick="event.preventDefault();event.stopPropagation();editComponent('${comp.id}')">Edit</button></div></summary>
     <div class="media-comp-body">${body}${assetStrip}${log}</div>
   </details>`;
 }
