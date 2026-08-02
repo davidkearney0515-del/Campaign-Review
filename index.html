@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Partnership Review Dashboard 2026 — Clean Edition</title>
+<title>Partnership Review Dashboard 2026 — Fox Footy</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -306,7 +306,7 @@
   .module-nav button:hover{background:var(--line-soft);color:var(--ink)} .module-nav button.on{background:var(--ink);color:#fff}
   .module-hero{background:linear-gradient(135deg,#16181D,#2a313d);color:#fff;border-radius:var(--radius);padding:22px 24px;margin-bottom:18px;box-shadow:var(--shadow)}
   .module-hero .eyebrow{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#aeb7c6}.module-hero h2{font-family:'Space Grotesk';font-size:23px;letter-spacing:-.02em;margin:5px 0 6px}.module-hero p{margin:0;color:#cbd2dc;max-width:720px;font-size:13px}
-  .metric-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}.metric-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius-sm);padding:14px;box-shadow:var(--shadow)}
+  .metric-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:18px}.metric-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius-sm);padding:14px;box-shadow:var(--shadow)}
   .metric-card .label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint)}.metric-card .value{font-family:'Space Grotesk';font-size:22px;font-weight:700;letter-spacing:-.03em;margin-top:4px}.metric-card .compare{font-size:11.5px;color:var(--ink-soft);margin-top:4px}.delta.good{color:var(--good);font-weight:700}.delta.bad{color:var(--bad);font-weight:700}.delta.warn{color:var(--warn);font-weight:700}
   .dtable{width:100%;border-collapse:collapse;font-size:12.5px}.dtable th{text-align:left;color:var(--ink-faint);font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;padding:8px 9px;border-bottom:1px solid var(--line);white-space:nowrap}.dtable td{padding:10px 9px;border-bottom:1px solid var(--line-soft)}.dtable tr:last-child td{border-bottom:0}.dtable .num{text-align:right;font-family:'JetBrains Mono';font-size:12px}.dtable .muted{color:var(--ink-faint)}
   .perf-export{display:inline-flex;gap:6px;margin-left:10px;padding-left:12px;border-left:1px solid var(--line)}
@@ -1142,7 +1142,7 @@ function fmtDate(d){ if(!d)return ''; return new Date(d+'T00:00').toLocaleDateSt
 
 /* ============================================================ SEED ============================================================ */
 function seed(){
-  return { partnerships:[ fanaticsSeed(), espnSeed() ] };
+  return { partnerships:[ fanaticsSeed(), espnSeed(), foxFootySeed() ] };
 }
 function blankLevers(){ return {growth:{rating:'',note:''},audience:{rating:'',note:''},channels:{rating:'',note:''},compliance:{rating:'',note:''}}; }
 function blankAssess(){ return {deliverables:[],winning:[],falling:[],evolution:[],levers:blankLevers()}; }
@@ -1241,11 +1241,74 @@ function espnSeed(){
       }
     }] };
 }
+function foxFootySeed(){
+  return { id:'fox-footy-afl-2026', name:'Fox Footy AFL Partnership', counterparty:'Fox Footy / Foxtel Media', category:'AFL',
+    termStart:'2026-03-01', termEnd:'2026-10-06', contractedValue:5075300,
+    snapshots:[{ id:'fox-footy-2026-current', label:'2026 Partnership', date:'2026-08-02', status:'warn', call:'renew',
+      verdict:'Renew with tighter delivery discipline: Fox Footy remains the core qualified AFL environment, but the 2026 return depends on verified audience, stronger social execution and concentration around the highest-performing integrations.',
+      context:'The final approved AFL partnership is $5.0753m. Reporting follows the final 12 December 2025 schedule; the separate $1m NRL social/digital proposal is outside this partnership.',
+      commercial:blankCommercial(),
+      media:{ valueAdd:'', components:[
+        { id:'fox-afl-tvcs', name:'Fox Footy Linear TVCs', mode:'audience', investment:1378200,
+          audienceGuaranteed:7984677, audienceDelivered:'', platforms:['Linear TV commercial impressions'], assetReporting:'ytd',
+          assets:[{id:'fox_tvcs',name:'Commercial spots — Sun to Thu',contractedQty:310}], weeks:[] },
+        { id:'fox-afl-integrations', name:'Fox Footy Integrations', mode:'audience', investment:1497100,
+          audienceGuaranteed:22287085, audienceDelivered:'', platforms:['Linear integration audience','FoxCatcher social audience'], assetReporting:'ytd',
+          assets:[
+            {id:'fox_odds_gfx',name:'Odds GFX exposure — minutes',contractedQty:108},
+            {id:'fox_first_crack',name:'First Crack talent betting segments',contractedQty:30},
+            {id:'fox_our_picks',name:'Our Picks — AFL 360 sponsored segments',contractedQty:24},
+            {id:'fox_afl360_live',name:'AFL 360 live odds segments',contractedQty:30},
+            {id:'fox_afl360_replays',name:'AFL 360 replay odds segments',contractedQty:60},
+            {id:'fox_fc_thu_pre',name:'FoxCatcher Thursday preview shows',contractedQty:30},
+            {id:'fox_fc_thu_post',name:'FoxCatcher Thursday post-game shows',contractedQty:30},
+            {id:'fox_fc_fri',name:'FoxCatcher Friday shows',contractedQty:30},
+            {id:'fox_fc_social',name:'FoxCatcher social integrations',contractedQty:81}
+          ], weeks:[] },
+        { id:'fox-afl-streaming', name:'Kayo & Foxtel Go Streaming', mode:'audience', investment:1400000,
+          audienceGuaranteed:17500000, audienceDelivered:'', platforms:['Kayo DAI impressions','Foxtel Go DAI impressions'], weeks:[] },
+        { id:'fox-afl-statmate', name:'StatMate Social', mode:'audience', investment:200000,
+          audienceGuaranteed:8500000, audienceDelivered:'', platforms:['Facebook','Instagram'], assetReporting:'ytd',
+          assets:[{id:'fox_statmate_social',name:'StatMate social infographics',contractedQty:54}], weeks:[] },
+        { id:'fox-afl-digital', name:'FoxSports.com.au Digital', mode:'audience', investment:500000,
+          audienceGuaranteed:82595238, audienceDelivered:'', platforms:['FoxSports.com.au impressions','Video pre-roll impressions'], assetReporting:'ytd',
+          assets:[
+            {id:'fox_homepage_takeovers',name:'Homepage takeovers',contractedQty:5},
+            {id:'fox_article_odds',name:'Article odds-widget campaign',contractedQty:1},
+            {id:'fox_index_odds',name:'Index / latest-news odds-widget campaign',contractedQty:1},
+            {id:'fox_match_centre',name:'Match-centre odds integration',contractedQty:1},
+            {id:'fox_score_centre',name:'Score-centre integration',contractedQty:1},
+            {id:'fox_ladder',name:'Ladder-page integration',contractedQty:1},
+            {id:'fox_fixtures',name:'Fixtures-page integration',contractedQty:1},
+            {id:'fox_launch_display',name:'Season-launch display burst',contractedQty:1},
+            {id:'fox_finals_display',name:'Finals display burst',contractedQty:1}
+          ], weeks:[] },
+        { id:'fox-afl-production', name:'Production', mode:'fixed', investment:100000, fixedDelivered:false,
+          entitlements:['StatMate production and boosting support'] }
+      ]},
+      assessment:{
+        deliverables:['310 linear commercial spots across Sunday to Thursday','Weekly Fox Footy integrations spanning AFL 360, First Crack and FoxCatcher','17.5m contracted streaming impressions across Kayo and Foxtel Go','54 StatMate social infographics and 81 FoxCatcher social integrations','82.60m contracted FoxSports.com.au digital impressions'],
+        winning:['Fox Footy remains the core qualified AFL environment and a major share of dedicated AFL media','Thursday post-game was the strongest integration timeslot in the prior-year review','The final schedule adds FoxCatcher social audience into the integration package','Digital carries scale at an efficient contracted CPM'],
+        falling:['Magazine-program audiences softened year on year','Social integration needs stronger creative execution and evidence','The size of the investment requires tighter verification and clearer delivery accountability'],
+        evolution:['Concentrate integration weight around Thursday post-game','Use FoxCatcher and StatMate as repeatable, evidence-backed content franchises','Report audience monthly by workstream and attach representative clips','Review YTD pace and delivered CPM before further investment decisions'],
+        levers:{
+          growth:{rating:'watch',note:'The AFL platform remains strategically important, but renewal value depends on stronger measurable delivery across the full package.'},
+          audience:{rating:'good',note:'A strongly qualified AFL audience: approximately 70% male, with 61%+ Men 25+ and a 63% Victorian skew in the renewal review.'},
+          channels:{rating:'good',note:'Broad reach across linear, Kayo/Foxtel Go, social and FoxSports.com.au, with Thursday post-game the standout integration opportunity.'},
+          compliance:{rating:'watch',note:'Monthly reporting, clip evidence and consistent verification are required across the package.'}
+        }
+      }
+    }] };
+}
 function ensureCorePartnerships(doc){
   if(!doc||!Array.isArray(doc.partnerships))return false;
   let changed=false;
   if(!doc.partnerships.some(p=>p.id==='espn-linear-2026'||p.name==='ESPN Linear Partnership')){
     doc.partnerships.push(espnSeed());
+    changed=true;
+  }
+  if(!doc.partnerships.some(p=>p.id==='fox-footy-afl-2026'||p.name==='Fox Footy AFL Partnership')){
+    doc.partnerships.push(foxFootySeed());
     changed=true;
   }
   return changed;
@@ -2791,6 +2854,50 @@ const FANATICS_SUBMISSION_SCHEMA={
       {id:'espn_ros_bb',name:'ROS billboards',contractedQty:400,baselineDelivered:270},
       {id:'espn_vignettes',name:'Vignette bursts',contractedQty:2,baselineDelivered:1}
     ]
+  },
+  'Fox Footy Linear TVCs':{
+    platforms:['Linear TV commercial impressions'],
+    assetReporting:'ytd',
+    assets:[{id:'fox_tvcs',name:'Commercial spots — Sun to Thu',contractedQty:310}]
+  },
+  'Fox Footy Integrations':{
+    platforms:['Linear integration audience','FoxCatcher social audience'],
+    assetReporting:'ytd',
+    assets:[
+      {id:'fox_odds_gfx',name:'Odds GFX exposure — minutes',contractedQty:108},
+      {id:'fox_first_crack',name:'First Crack talent betting segments',contractedQty:30},
+      {id:'fox_our_picks',name:'Our Picks — AFL 360 sponsored segments',contractedQty:24},
+      {id:'fox_afl360_live',name:'AFL 360 live odds segments',contractedQty:30},
+      {id:'fox_afl360_replays',name:'AFL 360 replay odds segments',contractedQty:60},
+      {id:'fox_fc_thu_pre',name:'FoxCatcher Thursday preview shows',contractedQty:30},
+      {id:'fox_fc_thu_post',name:'FoxCatcher Thursday post-game shows',contractedQty:30},
+      {id:'fox_fc_fri',name:'FoxCatcher Friday shows',contractedQty:30},
+      {id:'fox_fc_social',name:'FoxCatcher social integrations',contractedQty:81}
+    ]
+  },
+  'Kayo & Foxtel Go Streaming':{
+    platforms:['Kayo DAI impressions','Foxtel Go DAI impressions'],
+    assets:[]
+  },
+  'StatMate Social':{
+    platforms:['Facebook','Instagram'],
+    assetReporting:'ytd',
+    assets:[{id:'fox_statmate_social',name:'StatMate social infographics',contractedQty:54}]
+  },
+  'FoxSports.com.au Digital':{
+    platforms:['FoxSports.com.au impressions','Video pre-roll impressions'],
+    assetReporting:'ytd',
+    assets:[
+      {id:'fox_homepage_takeovers',name:'Homepage takeovers',contractedQty:5},
+      {id:'fox_article_odds',name:'Article odds-widget campaign',contractedQty:1},
+      {id:'fox_index_odds',name:'Index / latest-news odds-widget campaign',contractedQty:1},
+      {id:'fox_match_centre',name:'Match-centre odds integration',contractedQty:1},
+      {id:'fox_score_centre',name:'Score-centre integration',contractedQty:1},
+      {id:'fox_ladder',name:'Ladder-page integration',contractedQty:1},
+      {id:'fox_fixtures',name:'Fixtures-page integration',contractedQty:1},
+      {id:'fox_launch_display',name:'Season-launch display burst',contractedQty:1},
+      {id:'fox_finals_display',name:'Finals display burst',contractedQty:1}
+    ]
   }
 };
 function ensurePartnerSubmissionSchema(c){
@@ -2936,6 +3043,7 @@ async function ownerRefreshWeeks(){ if(!SB)return; hydrateWeeks(await sbLoadWeek
 
 function inferPublishedPartnershipName(pid,shows){
   if(pid==='espn-linear-2026'||(shows||[]).some(s=>s.name==='ESPN Linear'))return 'ESPN Linear Partnership';
+  if(pid==='fox-footy-afl-2026'||(shows||[]).some(s=>/^Fox Footy|^Kayo & Foxtel Go|^StatMate Social|^FoxSports\.com\.au/.test(s.name||'')))return 'Fox Footy AFL Partnership';
   if((shows||[]).some(s=>/^Kenty|Rugby League Insider/.test(s.name||'')))return 'FanaticsTV';
   return (shows&&shows[0]&&shows[0].partnership_name)||'Your partnership';
 }
@@ -3118,7 +3226,7 @@ function renderEfficiency(p,s){
   const m=mediaRoll(s,p);
   const comps=(s.media.components||[]).filter(c=>c.mode==='audience');
   let html=moduleHero('Media efficiency','Media efficiency','How the money spent on this partnership converts into audience, per show and blended. Investment is set per show and is the single source of truth for every CPM.',`<button class="btn btn-primary" onclick="editComponent(null)">＋ Show / package</button>`);
-  html+=`<div class="metric-strip">${metricCard('Total investment',money(m.inv),'Sum of per-show costs')}${metricCard('Views/listens YTD',metricFormat('reach',m.del!==null?m.del:m.guar),m.del!==null?'From monthly performance':'Guaranteed')}${metricCard('Blended delivered CPM YTD',m.delCpm!==null?'$'+m.delCpm.toFixed(2):'—',m.periodMatched?'Investment YTD ÷ views/listens YTD':'Across all shows')}${metricCard('Proposed CPM',m.propCpm!==null?'$'+m.propCpm.toFixed(2):'—','At guaranteed delivery')}</div>`;
+  html+=`<div class="metric-strip">${metricCard('Total investment',money(m.inv),'Sum of per-show costs')}${metricCard('Investment YTD',m.spendToDate!==null?money(m.spendToDate):'—','Prorated to verified delivery period')}${metricCard('Views/listens YTD',metricFormat('reach',m.del!==null?m.del:m.guar),m.del!==null?'From monthly performance':'Guaranteed')}${metricCard('Blended delivered CPM YTD',m.delCpm!==null?'$'+m.delCpm.toFixed(2):'—',m.periodMatched?'Investment YTD ÷ views/listens YTD':'Across all shows')}${metricCard('Proposed CPM',m.propCpm!==null?'$'+m.propCpm.toFixed(2):'—','At guaranteed delivery')}</div>`;
   // per-show CPM table
   html+=`<section class="panel"><div class="panel-head"><h3>CPM by show</h3><span class="lil">Investment YTD ÷ views/listens YTD</span></div><div class="panel-body"><table class="dtable"><thead><tr><th>Show</th><th class="num">Total investment</th><th class="num">Investment YTD</th><th class="num">Views/listens YTD</th><th class="num">Delivered CPM YTD</th><th class="num">Proposed CPM</th></tr></thead><tbody>`;
   if(comps.length){
