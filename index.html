@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Partnership Review Dashboard 2026 — Fanatics Simplified Reporting</title>
+<title>Partnership Review Dashboard 2026 — Fanatics Audio + History Corrections</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -1045,8 +1045,8 @@ async function hydrateClipUrls(){
   await Promise.all(jobs);
 }
 /* One source of truth for the performance graph and all YTD calculations.
-   Locked historical report data is combined with later verified submissions using the same
-   no-overwrite rule as the graph. Pre-sponsorship baseline months remain visible in the graph
+   Imported history remains the official basis until a submitted correction is verified. A verified
+   correction replaces that same month everywhere; pre-sponsorship baseline months remain visible
    but are excluded from delivered YTD and CPM. */
 function performanceDelivery(c,p){
   const staticM=(typeof MONTHLY!=='undefined'&&p)?MONTHLY[p.name]:null;
@@ -1056,7 +1056,7 @@ function performanceDelivery(c,p){
   const data=staticShow?{...staticShow.data}:{};
   const baselineUntil=staticShow?staticShow.baselineUntil:null;
   const live=liveShowMonthly(c).data;
-  Object.entries(live).forEach(([mo,d])=>{ if(!staticMonths.includes(mo)) data[mo]=d; });
+  Object.entries(live).forEach(([mo,d])=>{ const matched=staticMonths.find(sm=>monthMatches(sm,mo)); data[matched||mo]=d; });
   const baselineIndex=baselineUntil?staticMonths.indexOf(baselineUntil):-1;
   const counted=Object.entries(data).filter(([mo])=>{
     const i=staticMonths.indexOf(mo);
@@ -2026,8 +2026,8 @@ function monthlyGraphPanel(p){
   const staticShows=staticM?staticM.shows:{};
   const staticTiktok=staticM?staticM.tiktok:{};
 
-  /* merge: static months are locked history and are never overwritten by a live submission
-     that happens to reuse the same label; live submissions only ever add new months. */
+  /* merge: imported months stay official until a correction is verified. Pending corrections are
+     shown as pending evidence; verified corrections replace the matching imported month. */
   const shows={};
   Object.keys(staticShows).forEach(nm=>{ shows[nm]={ baselineUntil:staticShows[nm].baselineUntil, data:{...staticShows[nm].data}, pending:{} }; });
   const liveTiktok={};
@@ -2035,13 +2035,14 @@ function monthlyGraphPanel(p){
     const {data:liveData,tiktok:liveTk}=liveShowMonthly(c);
     const pendingData=pendingShowMonthly(c);
     const showKey=staticShowKey(staticM,c.name)||c.name;
-    const newMonths=Object.keys(liveData).filter(mo=>!staticMonths.includes(mo));
-    const pendingMonths=Object.keys(pendingData).filter(mo=>!staticMonths.includes(mo));
+    const normaliseMonth=mo=>staticMonths.find(sm=>monthMatches(sm,mo))||mo;
+    const newMonths=Object.keys(liveData);
+    const pendingMonths=Object.keys(pendingData);
     if(newMonths.length||pendingMonths.length){ if(!shows[showKey])shows[showKey]={baselineUntil:null,data:{},pending:{}}; }
-    newMonths.forEach(mo=>{ shows[showKey].data[mo]=liveData[mo]; });
-    pendingMonths.forEach(mo=>{ shows[showKey].pending[mo]=pendingData[mo]; });
+    newMonths.forEach(mo=>{ shows[showKey].data[normaliseMonth(mo)]=liveData[mo]; });
+    pendingMonths.forEach(mo=>{ shows[showKey].pending[normaliseMonth(mo)]=pendingData[mo]; });
     if(!shows[showKey] && (Object.keys(liveData).length||Object.keys(pendingData).length)){ shows[showKey]={baselineUntil:null,data:{},pending:{}}; }
-    Object.entries(liveTk).forEach(([mo,v])=>{ if(!staticMonths.includes(mo)) liveTiktok[mo]=(liveTiktok[mo]||0)+v; });
+    Object.entries(liveTk).forEach(([mo,v])=>{ const key=normaliseMonth(mo); liveTiktok[key]=(liveTiktok[key]||0)+v; });
   });
   const showNames=Object.keys(shows);
   if(!showNames.length) return '';
@@ -2841,9 +2842,11 @@ function importedHistory(c,p){
   if(!staticM||!sh)return [];
   const baselineIndex=sh.baselineUntil?staticM.months.indexOf(sh.baselineUntil):-1;
   return staticM.months.filter(mo=>sh.data[mo]).map(mo=>{
-    const d=sh.data[mo], i=staticM.months.indexOf(mo);
+    const correction=weeksOf(c).filter(w=>w.status==='verified'&&monthMatches(w.label,mo)).sort((a,b)=>(b.submittedAt||'').localeCompare(a.submittedAt||''))[0]||null;
+    const d=correction?Object.entries(correction.audience||{}).reduce((out,[platform,value])=>{out[platformBucket(platform)]+=+value||0;return out;},{yt:0,ac:0,soc:0}):sh.data[mo], i=staticM.months.indexOf(mo);
     return {kind:'imported',id:`imported_${slug(c.name)}_${mo}`,label:importedMonthLabel(mo,p),
-      total:Object.values(d).reduce((a,v)=>a+(+v||0),0),data:d,baseline:baselineIndex>=0&&i<=baselineIndex};
+      total:Object.values(d).reduce((a,v)=>a+(+v||0),0),data:d,baseline:baselineIndex>=0&&i<=baselineIndex,
+      corrected:!!correction,correctionId:correction&&correction.id};
   });
 }
 function importedPartnershipLabels(p){
@@ -2866,14 +2869,15 @@ function renderPartner(){
     <div class="pb-eyebrow">${eyebrow}</div>
     <h1>${title}</h1>
     <p>Review verified delivery to date, then submit the next month's views/listens and entitlements for each show.</p>
-    <div class="pb-note"><i></i>Imported history is read-only. New submissions remain pending until PointsBet verifies them.</div>
+    <div class="pb-note"><i></i>Imported history can be corrected. Any change remains pending until PointsBet verifies it and the current approved figure stays official in the meantime.</div>
   </div>`;
 
   if(!comps.length){ html+=`<div class="empty-state"><h3>No shows set up yet</h3><p>PointsBet hasn't configured any shows for this period.</p></div>`; document.getElementById('app').innerHTML=html; return; }
 
   comps.forEach(c=>{
     const imported=importedHistory(c,p);
-    const live=weeksOf(c).map(w=>({kind:'live',...w,total:weekAudTotal(w)}));
+    const correctedIds=new Set(imported.map(x=>x.correctionId).filter(Boolean));
+    const live=weeksOf(c).filter(w=>!correctedIds.has(w.id)).map(w=>({kind:'live',...w,total:weekAudTotal(w)}));
     const rows=[...imported,...live];
     const delivered=performanceDelivery(c,p);
     const pending=live.filter(w=>w.status!=='verified').length;
@@ -2885,8 +2889,8 @@ function renderPartner(){
     if(rows.length){ html+=`<div class="wk-list">`+rows.map(w=>{
         if(w.kind==='imported'){
           const breakdown=[['YouTube',w.data.yt],['Social',w.data.soc],['Audio',w.data.ac]].filter(([,v])=>v!==undefined);
-          return `<div class="wk-item ${w.baseline?'is-baseline':''}"><div class="wk-l"><span class="wk-status ${w.baseline?'wk-baseline':'wk-verified'}">${w.baseline?'baseline':'verified'}</span><span>${esc(w.label)}</span><span class="wk-source">${w.baseline?'Pre-partnership · excluded from YTD':'Imported report · read-only'}</span></div>
-            <div style="display:flex;align-items:center;gap:14px"><span class="wk-aud">${aud(w.total)}</span><details class="wk-breakdown"><summary>View breakdown</summary><div class="wk-breakdown-data">${breakdown.map(([label,v])=>`<span>${label}<b>${aud(v)}</b></span>`).join('')}</div></details></div></div>`;
+          return `<div class="wk-item ${w.baseline?'is-baseline':''}"><div class="wk-l"><span class="wk-status ${w.baseline?'wk-baseline':'wk-verified'}">${w.baseline?'baseline':'verified'}</span><span>${esc(w.label)}</span><span class="wk-source">${w.corrected?'Verified correction':w.baseline?'Pre-partnership · excluded from YTD':'Imported report'}</span></div>
+            <div style="display:flex;align-items:center;gap:14px"><span class="wk-aud">${aud(w.total)}</span><details class="wk-breakdown"><summary>View breakdown</summary><div class="wk-breakdown-data">${breakdown.map(([label,v])=>`<span>${label}<b>${aud(v)}</b></span>`).join('')}</div></details><button class="linkbtn" onclick="openWeekForm('${c.id}','${w.correctionId||''}','${esc(w.label)}')">${w.corrected?'Edit':'Correct'}</button></div></div>`;
         }
         // partner-visible fulfilment feedback: only once verified, and only entitlement counts vs contracted — never CPM/$/target audience
         let fulfil='';
@@ -2896,8 +2900,9 @@ function renderPartner(){
           if(scored){ const pc=Math.round(onT/scored*100); fulfil=`<span class="wk-fulfil wk-fulfil-${pc>=100?'ok':pc>=70?'mid':'low'}" title="${onT} of ${scored} entitlements met their per-round target">${pc}% on target</span>`; }
         }
         const report=reportHref(w);
-        return `<div class="wk-item"><div class="wk-l"><span class="wk-status wk-${w.status||'pending'}">${w.status||'pending'}</span><span>${esc(w.label)}</span>${fulfil}</div>
-        <div style="display:flex;align-items:center;gap:12px">${report?`<a class="report-link" href="${esc(report)}" target="_blank" rel="noopener">Detailed report ↗</a>`:''}${c.mode==='audience'?`<span class="wk-aud">${aud(weekAudTotal(w))}</span>`:''}<button class="linkbtn" onclick="openWeekForm('${c.id}','${w.id}')">Edit</button></div></div>`;
+        const historicalCorrection=imported.some(row=>monthMatches(row.label,w.label));
+        return `<div class="wk-item"><div class="wk-l"><span class="wk-status wk-${w.status||'pending'}">${w.status||'pending'}</span><span>${esc(w.label)}</span>${historicalCorrection?'<span class="wk-source">Correction</span>':''}${fulfil}</div>
+        <div style="display:flex;align-items:center;gap:12px">${report?`<a class="report-link" href="${esc(report)}" target="_blank" rel="noopener">Detailed report ↗</a>`:''}${c.mode==='audience'?`<span class="wk-aud">${aud(weekAudTotal(w))}</span>`:''}<button class="linkbtn" onclick="openWeekForm('${c.id}','${w.id}','${historicalCorrection?esc(w.label):''}')">Edit</button></div></div>`;
       }).join('')+`</div>`;
     } else html+=`<div class="wk-empty">No delivery received yet${nextMonth?` — ${esc(nextMonth)} reporting is due`:''}.</div>`;
     html+= nextMonth?`<button class="btn btn-primary" onclick="openWeekForm('${c.id}')">＋ Log ${esc(nextMonth)}</button>`:`<div class="wk-hint" style="margin:8px 0 0">Every reporting month is already recorded. Use Edit on a submitted month to send a correction.</div>`;
@@ -3007,11 +3012,16 @@ function ensurePartnerSubmissionSchema(c){
   return c;
 }
 
-function openWeekForm(cid,wid){
+function openWeekForm(cid,wid,importedLabel){
   const p=STATE.partnerships.find(x=>x.id===view.partnerPid);
   const s=latestSnap(p);
   const c=ensurePartnerSubmissionSchema(s.media.components.find(x=>x.id===cid));
-  const w=wid?(c.weeks||[]).find(x=>x.id===wid):null;
+  const importedEdit=!wid&&importedLabel?importedHistory(c,p).find(x=>x.label===importedLabel):null;
+  const w=wid?(c.weeks||[]).find(x=>x.id===wid):importedEdit?{
+    label:importedEdit.label,status:'verified',note:'',assets:{},audience:{
+      YouTube:+importedEdit.data.yt||0,Audio:+importedEdit.data.ac||0,Social:+importedEdit.data.soc||0
+    }
+  }:null;
   const submissionNote=parseSubmissionNote(w&&w.note);
   const plats=(c.platforms||[]);
   const assets=(c.assets||[]);
@@ -3040,7 +3050,10 @@ function openWeekForm(cid,wid){
     monthOpts=baseOpts.filter(m=>!usedLabels.has(m));
   }
   const monthSelect=monthOpts.length?`<select class="inp" id="w_label" ${w?'disabled':''}>${!w?'<option value="" disabled selected>Select month</option>':''}${monthOpts.map(m=>`<option value="${esc(m)}" ${w&&w.label===m?'selected':''}>${esc(m)}</option>`).join('')}</select>`:`<div class="wk-hint" style="margin:0">Every month in this show's term already has an entry. Edit an existing month above to make a correction.</div>`;
-  const reverifyNote=(w&&w.status==='verified')?`<div class="wk-hint" style="color:var(--warn);margin-top:-4px;margin-bottom:14px">This month is already verified. Saving a change here will send it back to PointsBet for re-verification before it counts again.</div>`:'';
+  const correctingImported=!!importedLabel;
+  const reverifyNote=correctingImported
+    ?`<div style="border:1px solid #E8C77A;background:var(--warn-bg);color:#7A5200;border-radius:8px;padding:11px 12px;margin-top:-4px;margin-bottom:14px;font-size:12px;line-height:1.45"><b>Correction warning:</b> this is an approved historical month. Your revised figures will be submitted as pending. The existing approved figures remain in totals and charts until PointsBet verifies the correction.</div>`
+    :(w&&w.status==='verified')?`<div class="wk-hint" style="color:var(--warn);margin-top:-4px;margin-bottom:14px">This month is already verified. Saving a change here will send it back to PointsBet for re-verification before it counts again.</div>`:'';
   const reportingGuide=p.name==='FanaticsTV'
         ?`<div style="border-left:3px solid var(--accent);background:var(--accent-soft);padding:10px 12px;margin-bottom:16px;font-size:12.5px"><b>Fanatics reporting:</b> enter this show's YouTube, combined Audio and combined Social audience for the selected month, plus all applicable entitlement delivery.</div>`
         :c.assetReporting==='ytd'
@@ -3056,14 +3069,15 @@ function openWeekForm(cid,wid){
   mount(scrim(`<div class="modal-head"><h3>${wid?'Edit month':'Log a month'} — ${esc(c.name)}</h3><button class="x" onclick="closeModal()">×</button></div>
     <div class="modal-body">
       <div class="field" style="max-width:260px"><label>Month</label>${monthSelect}</div>
+      ${correctingImported?'<input type="hidden" id="w_imported" value="1">':''}
       ${reverifyNote}
       ${reportingGuide}
       ${audFields}${assetFields}${reportField}
       <div class="wk-sub">Reporting information</div>
       <div class="field"><label>Comments <span style="color:var(--ink-faint);font-weight:400">(optional)</span></label><textarea class="inp" id="w_comments" rows="3" placeholder="Explain anomalies, corrections, unavailable figures or anything PointsBet should know.">${esc(submissionNote.comments)}</textarea></div>
     </div>
-    <div class="modal-foot"><div>${wid?`<button class="btn btn-danger" onclick="deleteWeek('${cid}','${wid}')">Delete month</button>`:''}</div>
-      <div style="display:flex;gap:8px"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveWeek('${cid}','${wid||''}')">Submit</button></div></div>`,true));
+    <div class="modal-foot"><div>${wid&&!correctingImported?`<button class="btn btn-danger" onclick="deleteWeek('${cid}','${wid}')">Delete month</button>`:''}</div>
+      <div style="display:flex;gap:8px"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveWeek('${cid}','${wid||''}')">${correctingImported?'Submit correction':'Submit'}</button></div></div>`,true));
 }
 function slug(s){ return s.replace(/[^a-zA-Z0-9]/g,'_'); }
 async function saveWeek(cid,wid){
@@ -3078,6 +3092,7 @@ async function saveWeek(cid,wid){
   (c.platforms||[]).forEach(pl=>{ const v=document.getElementById('wa_'+slug(pl)); if(v&&v.value!==''){audience[pl]=+v.value;audienceEntries++;} });
   const assetsObj={};
   let assetEntries=0;
+  const importedCorrection=!!document.getElementById('w_imported');
   if((c.assets||[]).length){
     c.assets.forEach(as=>{
       const v=document.getElementById('wk_'+as.id); if(v&&v.value!==''){assetsObj[as.id]=+v.value;assetEntries++;}
@@ -3086,7 +3101,7 @@ async function saveWeek(cid,wid){
     });
   } else if(c.mode==='fulfilment'){ const v=document.getElementById('wk_qty'); if(v&&v.value!==''){assetsObj.qty=+v.value;assetEntries++;} }
   if(c.mode==='audience'&&(c.platforms||[]).length&&!audienceEntries){toast('Enter at least one audience figure for this month');return;}
-  if((c.assets||[]).length&&!assetEntries){toast(c.assetReporting==='ytd'?'Enter the current integration totals YTD':'Enter at least one asset delivery figure for this month');return;}
+  if((c.assets||[]).length&&!assetEntries&&!importedCorrection){toast(c.assetReporting==='ytd'?'Enter the current integration totals YTD':'Enter at least one asset delivery figure for this month');return;}
 
   const previousReport=w&&w.assets?w.assets.__report:null;
   const previousReportName=w&&w.assets?w.assets.__report_name:null;
