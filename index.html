@@ -1180,7 +1180,7 @@ function blankSnap(label){ return {id:uid(),label:label||'Review',date:new Date(
 
 function fanaticsSeed(){
   return { id:uid(), name:'FanaticsTV', counterparty:'Fanatics (Warren Livingston)', category:'NRL',
-    fanaticsReportingVersion:2,
+    fanaticsReportingVersion:3,
     termStart:'2026-03-01', termEnd:'2026-10-31', contractedValue:625000,
     snapshots:[
       { id:uid(), label:'2025 Back-half (delivered)', date:'2025-09-30', status:'good', call:'renew',
@@ -1208,22 +1208,20 @@ function fanaticsSeed(){
         commercial:blankCommercial(),
         media:{ valueAdd:'', components:[
           { id:'kb2026', name:'Kenty Blitz', mode:'audience', investment:250000, audienceGuaranteed:11025000, audienceDelivered:'',
-            platforms:['YouTube','Social'],
-            assets:[{id:'kb_sm',name:'StatMate mention',perWeek:2},{id:'kb_multi',name:"Kenty's Multi segment",perWeek:1},{id:'kb_tvc',name:'TVC insertion',perWeek:3},{id:'kb_odds',name:'Match preview odds',perWeek:1},{id:'kb_soc',name:"Kenty's Multi social post",perWeek:1},{id:'kb_picks',name:"Kenty's Picks social post",perWeek:1}],
+            platforms:['YouTube','Audio','Social'],
+            assets:[{id:'kb_multi',name:"Kenty's Multi segment",perWeek:1},{id:'kb_tvc',name:'TVC insertion',perWeek:3},{id:'kb_odds',name:'Match preview odds',perWeek:1},{id:'kb_soc',name:"Kenty's Multi social post",perWeek:1},{id:'kb_picks',name:"Kenty's Picks social post",perWeek:1}],
             weeks:[] },
           { id:'kp2026', name:'Kenty Primetime', mode:'audience', investment:175000, audienceGuaranteed:6125000, audienceDelivered:'',
-            platforms:['YouTube','Social'],
+            platforms:['YouTube','Audio','Social'],
             assets:[{id:'kp_int',name:'Woodsy & Kenty integration',perWeek:1},{id:'kp_clips',name:'Show clips social',perWeek:2},{id:'kp_tvc',name:'TVC insertion',perWeek:2}],
             weeks:[] },
           { id:'rli2026', name:'Rugby League Insider (RLI)', mode:'audience', investment:200000, audienceGuaranteed:23864400, audienceDelivered:'',
-            platforms:['YouTube','Facebook','Instagram','TikTok'],
+            platforms:['YouTube','Audio','Social'],
             assets:[{id:'rli_ffu',name:'Friday Fill Up segment',perWeek:1},{id:'rli_odds',name:'Odds overlay',perWeek:1},{id:'rli_res',name:'Results overlay',perWeek:1},{id:'rli_recap',name:'Monday recap',perWeek:1},{id:'rli_nics',name:"Nic's Tips",perWeek:1},{id:'rli_tvc',name:'TVC',perWeek:2},{id:'rli_fb',name:'FB posts',perWeek:10},{id:'rli_ig',name:'IG posts',perWeek:10},{id:'rli_tt',name:'TikTok posts',perWeek:10},{id:'rli_yts',name:'YT Shorts',perWeek:10},{id:'rli_itm',name:'In-the-Moment weekend reactive',perWeek:4}],
             weeks:[
               {id:'w1',label:'Round 12',audience:{YouTube:420000,Acast:95000,Facebook:610000,Instagram:280000,TikTok:540000},assets:{rli_ffu:1,rli_odds:1,rli_res:1,rli_recap:1,rli_nics:1,rli_tvc:2,rli_fb:10,rli_ig:10,rli_tt:9,rli_yts:10,rli_itm:4},status:'verified',note:'YouTube Analytics + Meta',submittedAt:'2026-06-02'},
               {id:'w2',label:'Round 13',audience:{YouTube:465000,Acast:102000,Facebook:720000,Instagram:310000,TikTok:680000},assets:{rli_ffu:1,rli_odds:1,rli_res:1,rli_recap:1,rli_nics:1,rli_tvc:2,rli_fb:10,rli_ig:11,rli_tt:10,rli_yts:10,rli_itm:5},status:'pending',note:'',submittedAt:'2026-06-09'}
-            ] },
-          { id:'fanatics-audio-2026', name:'Fanatics Audio — all shows', mode:'audience', investment:'', audienceGuaranteed:'', audienceDelivered:'',
-            platforms:['Audio — all Fanatics shows'], assets:[], weeks:[] }
+            ] }
         ]},
         assessment:{
           deliverables:['Kenty Blitz Mon–Thu across the season','RLI Mon–Sun cadence, 18 weeks','Odds + results overlay on all 8 matches/round','ITM × Pull \'Em three-act series (pre-game / half-time / post-game)'],
@@ -1356,19 +1354,22 @@ function alignFoxLinearBaseline(p){
   return true;
 }
 function alignFanaticsSimplifiedReporting(p){
-  if(!p||p.name!=='FanaticsTV'||p.fanaticsReportingVersion===2)return false;
+  if(!p||p.name!=='FanaticsTV'||p.fanaticsReportingVersion===3)return false;
   const latest=(p.snapshots||[]).slice().sort((a,b)=>(a.date||'').localeCompare(b.date||''))[p.snapshots.length-1]||null;
   const comps=latest&&latest.media&&Array.isArray(latest.media.components)?latest.media.components:[];
   const platforms={
-    'Kenty Blitz':['YouTube','Social'],
-    'Kenty Primetime':['YouTube','Social'],
-    'Rugby League Insider (RLI)':['YouTube','Facebook','Instagram','TikTok']
+    'Kenty Blitz':['YouTube','Audio','Social'],
+    'Kenty Primetime':['YouTube','Audio','Social'],
+    'Rugby League Insider (RLI)':['YouTube','Audio','Social']
   };
-  comps.forEach(c=>{if(platforms[c.name])c.platforms=[...platforms[c.name]];});
-  if(!comps.some(c=>c.id==='fanatics-audio-2026'||c.name==='Fanatics Audio — all shows')){
-    comps.push({id:'fanatics-audio-2026',name:'Fanatics Audio — all shows',mode:'audience',investment:'',audienceGuaranteed:'',audienceDelivered:'',platforms:['Audio — all Fanatics shows'],assets:[],weeks:[]});
-  }
-  p.fanaticsReportingVersion=2;
+  comps.forEach(c=>{
+    if(platforms[c.name])c.platforms=[...platforms[c.name]];
+    if(c.name==='Kenty Blitz')c.assets=(c.assets||[]).filter(a=>a.id!=='kb_sm'&&!/statmate\s*mention/i.test(a.name||''));
+  });
+  const removed=comps.filter(c=>c.id==='fanatics-audio-2026'||c.name==='Fanatics Audio — all shows');
+  if(removed.some(c=>weeksOf(c).length))p.fanaticsLegacyCombinedAudio=removed;
+  if(latest&&latest.media)latest.media.components=comps.filter(c=>c.id!=='fanatics-audio-2026'&&c.name!=='Fanatics Audio — all shows');
+  p.fanaticsReportingVersion=3;
   return true;
 }
 function ensureCorePartnerships(doc){
@@ -2911,9 +2912,8 @@ function setPartner(pid){ view.partnerPid=pid; render(); }
    fields when those arrays are absent so a selected month never opens blank. */
 const FANATICS_SUBMISSION_SCHEMA={
   'Kenty Blitz':{
-    platforms:['YouTube','Social'],
+    platforms:['YouTube','Audio','Social'],
     assets:[
-      {id:'kb_sm',name:'StatMate mention',perWeek:2},
       {id:'kb_multi',name:"Kenty's Multi segment",perWeek:1},
       {id:'kb_tvc',name:'TVC insertion',perWeek:3},
       {id:'kb_odds',name:'Match preview odds',perWeek:1},
@@ -2922,7 +2922,7 @@ const FANATICS_SUBMISSION_SCHEMA={
     ]
   },
   'Kenty Primetime':{
-    platforms:['YouTube','Social'],
+    platforms:['YouTube','Audio','Social'],
     assets:[
       {id:'kp_int',name:'Woodsy & Kenty integration',perWeek:1},
       {id:'kp_clips',name:'Show clips social',perWeek:2},
@@ -2930,7 +2930,7 @@ const FANATICS_SUBMISSION_SCHEMA={
     ]
   },
   'Rugby League Insider (RLI)':{
-    platforms:['YouTube','Facebook','Instagram','TikTok'],
+    platforms:['YouTube','Audio','Social'],
     assets:[
       {id:'rli_ffu',name:'Friday Fill Up segment',perWeek:1},
       {id:'rli_odds',name:'Odds overlay',perWeek:1},
@@ -2944,10 +2944,6 @@ const FANATICS_SUBMISSION_SCHEMA={
       {id:'rli_yts',name:'YT Shorts',perWeek:10},
       {id:'rli_itm',name:'In-the-Moment weekend reactive',perWeek:4}
     ]
-  },
-  'Fanatics Audio — all shows':{
-    platforms:['Audio — all Fanatics shows'],
-    assets:[]
   },
   'ESPN Linear':{
     platforms:['Linear TV audience (M18+)'],
@@ -2990,7 +2986,21 @@ function ensurePartnerSubmissionSchema(c){
   const schema=FANATICS_SUBMISSION_SCHEMA[(c&&c.name)||''];
   if(!c||!schema)return c;
   c.platforms=[...schema.platforms];
-  if(!Array.isArray(c.assets)||!c.assets.length)c.assets=schema.assets.map(a=>({...a}));
+  if(c.name==='Kenty Blitz')c.assets=(c.assets||[]).filter(a=>a.id!=='kb_sm'&&!/statmate\s*mention/i.test(a.name||''));
+  if(!Array.isArray(c.assets)||(!c.assets.length&&schema.assets.length))c.assets=schema.assets.map(a=>({...a}));
+  if(['Kenty Blitz','Kenty Primetime','Rugby League Insider (RLI)'].includes(c.name)){
+    weeksOf(c).forEach(w=>{
+      const old=w.audience||{};
+      if(old.Audio===undefined){
+        const audio=Object.entries(old).filter(([k])=>/audio|acast|spotify|apple/i.test(k)).reduce((sum,[,v])=>sum+(+v||0),0);
+        if(audio)old.Audio=audio;
+      }
+      if(old.Social===undefined){
+        const social=Object.entries(old).filter(([k])=>/social|facebook|instagram|tiktok/i.test(k)).reduce((sum,[,v])=>sum+(+v||0),0);
+        if(social)old.Social=social;
+      }
+    });
+  }
   if(schema.assetReporting&&!c.assetReporting)c.assetReporting=schema.assetReporting;
   if(!c.assetReporting&&(c.assets||[]).some(a=>a.contractedQty!==undefined))c.assetReporting='ytd';
   if(!c.mode)c.mode='audience';
@@ -3031,10 +3041,8 @@ function openWeekForm(cid,wid){
   }
   const monthSelect=monthOpts.length?`<select class="inp" id="w_label" ${w?'disabled':''}>${!w?'<option value="" disabled selected>Select month</option>':''}${monthOpts.map(m=>`<option value="${esc(m)}" ${w&&w.label===m?'selected':''}>${esc(m)}</option>`).join('')}</select>`:`<div class="wk-hint" style="margin:0">Every month in this show's term already has an entry. Edit an existing month above to make a correction.</div>`;
   const reverifyNote=(w&&w.status==='verified')?`<div class="wk-hint" style="color:var(--warn);margin-top:-4px;margin-bottom:14px">This month is already verified. Saving a change here will send it back to PointsBet for re-verification before it counts again.</div>`:'';
-  const reportingGuide=p.name==='FanaticsTV'&&c.name==='Fanatics Audio — all shows'
-      ?`<div style="border-left:3px solid var(--accent);background:var(--accent-soft);padding:10px 12px;margin-bottom:16px;font-size:12.5px"><b>Fanatics audio:</b> enter one combined audio total across all Fanatics shows for this month.</div>`
-      :p.name==='FanaticsTV'
-        ?`<div style="border-left:3px solid var(--accent);background:var(--accent-soft);padding:10px 12px;margin-bottom:16px;font-size:12.5px"><b>Fanatics reporting:</b> enter this show's video/social audience and asset delivery for the selected month. Audio is entered once in <b>Fanatics Audio — all shows</b>.</div>`
+  const reportingGuide=p.name==='FanaticsTV'
+        ?`<div style="border-left:3px solid var(--accent);background:var(--accent-soft);padding:10px 12px;margin-bottom:16px;font-size:12.5px"><b>Fanatics reporting:</b> enter this show's YouTube, combined Audio and combined Social audience for the selected month, plus all applicable entitlement delivery.</div>`
         :c.assetReporting==='ytd'
           ?`<div style="border-left:3px solid var(--accent);background:var(--accent-soft);padding:10px 12px;margin-bottom:16px;font-size:12.5px"><b>Cumulative reporting:</b> enter this month's audience and the latest cumulative integration totals YTD.</div>`
           :`<div style="border-left:3px solid var(--accent);background:var(--accent-soft);padding:10px 12px;margin-bottom:16px;font-size:12.5px"><b>Monthly reporting:</b> enter audience and delivery for the selected month.</div>`;
