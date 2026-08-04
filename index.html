@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Partnership Review Dashboard 2026 — Fox Footy</title>
+<title>Partnership Review Dashboard 2026 — Fanatics Simplified Reporting</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -278,6 +278,11 @@
   .wk-clip a{display:block;font-size:11px;color:var(--accent);margin-bottom:5px;text-decoration:none}
   .wk-clip a:hover{text-decoration:underline}
   .wk-clip input[type=file]{width:100%;font-size:10.5px;color:var(--ink-faint);border:1px dashed var(--line);border-radius:7px;padding:6px 7px;background:transparent}
+  .report-upload{border:1px dashed var(--line);border-radius:9px;padding:12px;background:#fff}
+  .report-upload input[type=file]{display:block;width:100%;margin-top:8px;font-size:12px;color:var(--ink-soft)}
+  .report-current{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 11px;margin-bottom:9px;border-radius:7px;background:var(--accent-soft);font-size:12px}
+  .report-current a,.report-link{color:var(--accent);font-weight:650;text-decoration:none}
+  .report-current a:hover,.report-link:hover{text-decoration:underline}
   .asset-fulfil{font-size:11px;color:var(--ink-soft);margin-top:3px}
   .asset-fulfil.ok{color:var(--good)} .asset-fulfil.under{color:var(--warn)}
 
@@ -1011,10 +1016,22 @@ function clipHref(w,assetId){
   const raw=w.assets[assetId+'__clip']||'';
   return raw.startsWith('http')?safeUrl(raw):'';
 }
+function reportHref(w){
+  if(!w||!w.assets)return '';
+  const signed=w.assets.__report__signed;
+  if(signed)return safeUrl(signed);
+  const raw=w.assets.__report||'';
+  return raw.startsWith('http')?safeUrl(raw):'';
+}
 async function hydrateClipUrls(){
   if(!SB||!STATE)return;
   const jobs=[];
   (STATE.partnerships||[]).forEach(p=>(p.snapshots||[]).forEach(s=>((s.media&&s.media.components)||[]).forEach(c=>weeksOf(c).forEach(w=>{
+    const reportPath=storedClipPath((w.assets||{}).__report);
+    if(reportPath)jobs.push(SB.storage.from('pr-clips').createSignedUrl(reportPath,3600).then(({data,error})=>{
+      if(!error&&data&&data.signedUrl)w.assets.__report__signed=data.signedUrl;
+      else if(error)console.warn('report signed-url failed for',reportPath,error);
+    }).catch(err=>console.warn('report signed-url error for',reportPath,err)));
     (c.assets||[]).forEach(as=>{
       const raw=(w.assets||{})[as.id+'__clip'];
       const path=storedClipPath(raw);
@@ -1060,10 +1077,15 @@ function staticShowKey(staticM,name){
   const wanted=canonicalShowName(name);
   return Object.keys(staticM.shows).find(k=>canonicalShowName(k)===wanted)||null;
 }
-function deliveryMonthsLogged(c,p){ return performanceDelivery(c,p).months; }
+function deliveryMonthsLogged(c,p){
+  const perf=performanceDelivery(c,p);
+  return perf.months||(+c.baselineMonthsElapsed||0);
+}
 function audDelivered(c,p){
   const perf=performanceDelivery(c,p);
-  return perf.total!==null?perf.total:n(c.audienceDelivered);
+  if(perf.total!==null)return perf.total;
+  const baseline=n(c.baselineAudienceYtd);
+  return baseline!==null?baseline:n(c.audienceDelivered);
 }
 
 /* Contract term length in whole calendar months (inclusive) — used to spread investment evenly
@@ -1084,12 +1106,14 @@ function termMonths(p){
 function mediaRoll(s,p){
   let inv=0,guar=0,del=0,hasAud=false,hasInv=false;
   let spendToDate=0,hasSpendToDate=false;
+  let reportedInv=0,reportedGuar=0,hasReportedBenchmark=false;
   const totalMonths=termMonths(p);
   (s.media.components||[]).forEach(c=>{
     const ci=n(c.investment); if(ci!==null){inv+=ci;hasInv=true;}
     if(c.mode==='audience'){
       const g=n(c.audienceGuaranteed),d=audDelivered(c,p);
       if(g!==null){guar+=g;hasAud=true;} if(d!==null)del+=d;
+      if(d!==null&&ci!==null&&g!==null){reportedInv+=ci;reportedGuar+=g;hasReportedBenchmark=true;}
       if(ci!==null&&totalMonths){ const monthsLogged=Math.min(deliveryMonthsLogged(c,p),totalMonths);
         if(monthsLogged>0){ spendToDate+=(ci/totalMonths)*monthsLogged; hasSpendToDate=true; } }
     }
@@ -1097,6 +1121,8 @@ function mediaRoll(s,p){
   const delCpmPeriod=(hasSpendToDate&&del)?cpm(spendToDate,del):null;
   return { inv:hasInv?inv:null, guar:hasAud?guar:null, del:del||null, hasAud,
     propCpm:(hasInv&&guar)?cpm(inv,guar):null,
+    delCpmBenchmark:hasReportedBenchmark&&reportedGuar?cpm(reportedInv,reportedGuar):null,
+    reportedInv:hasReportedBenchmark?reportedInv:null, reportedGuar:hasReportedBenchmark?reportedGuar:null,
     delCpm: delCpmPeriod!==null?delCpmPeriod:((hasInv&&del)?cpm(inv,del):null),
     spendToDate: hasSpendToDate?spendToDate:null, periodMatched: delCpmPeriod!==null };
 }
@@ -1107,7 +1133,9 @@ function audienceTargetYtd(s,p){
   (s.media.components||[]).filter(c=>c.mode==='audience').forEach(c=>{
     const g=n(c.audienceGuaranteed),months=deliveryMonthsLogged(c,p),d=audDelivered(c,p);
     if(g===null)return;
-    if(months>0){ target+=g*Math.min(months,totalMonths)/totalMonths; hasTarget=true; }
+    const explicitTarget=n(c.baselineAudienceTargetYtd);
+    if(explicitTarget!==null){target+=explicitTarget;hasTarget=true;}
+    else if(months>0){ target+=g*Math.min(months,totalMonths)/totalMonths; hasTarget=true; }
     else if(d!==null){ target+=g; hasTarget=true; } // legacy delivered snapshots without monthly history
   });
   return hasTarget?target:null;
@@ -1152,6 +1180,7 @@ function blankSnap(label){ return {id:uid(),label:label||'Review',date:new Date(
 
 function fanaticsSeed(){
   return { id:uid(), name:'FanaticsTV', counterparty:'Fanatics (Warren Livingston)', category:'NRL',
+    fanaticsReportingVersion:2,
     termStart:'2026-03-01', termEnd:'2026-10-31', contractedValue:625000,
     snapshots:[
       { id:uid(), label:'2025 Back-half (delivered)', date:'2025-09-30', status:'good', call:'renew',
@@ -1179,20 +1208,22 @@ function fanaticsSeed(){
         commercial:blankCommercial(),
         media:{ valueAdd:'', components:[
           { id:'kb2026', name:'Kenty Blitz', mode:'audience', investment:250000, audienceGuaranteed:11025000, audienceDelivered:'',
-            platforms:['YouTube','Spotify','Apple Podcasts','Social'],
+            platforms:['YouTube','Social'],
             assets:[{id:'kb_sm',name:'StatMate mention',perWeek:2},{id:'kb_multi',name:"Kenty's Multi segment",perWeek:1},{id:'kb_tvc',name:'TVC insertion',perWeek:3},{id:'kb_odds',name:'Match preview odds',perWeek:1},{id:'kb_soc',name:"Kenty's Multi social post",perWeek:1},{id:'kb_picks',name:"Kenty's Picks social post",perWeek:1}],
             weeks:[] },
           { id:'kp2026', name:'Kenty Primetime', mode:'audience', investment:175000, audienceGuaranteed:6125000, audienceDelivered:'',
-            platforms:['YouTube','Spotify','Apple Podcasts','Social'],
+            platforms:['YouTube','Social'],
             assets:[{id:'kp_int',name:'Woodsy & Kenty integration',perWeek:1},{id:'kp_clips',name:'Show clips social',perWeek:2},{id:'kp_tvc',name:'TVC insertion',perWeek:2}],
             weeks:[] },
           { id:'rli2026', name:'Rugby League Insider (RLI)', mode:'audience', investment:200000, audienceGuaranteed:23864400, audienceDelivered:'',
-            platforms:['YouTube','Acast','Facebook','Instagram','TikTok'],
+            platforms:['YouTube','Facebook','Instagram','TikTok'],
             assets:[{id:'rli_ffu',name:'Friday Fill Up segment',perWeek:1},{id:'rli_odds',name:'Odds overlay',perWeek:1},{id:'rli_res',name:'Results overlay',perWeek:1},{id:'rli_recap',name:'Monday recap',perWeek:1},{id:'rli_nics',name:"Nic's Tips",perWeek:1},{id:'rli_tvc',name:'TVC',perWeek:2},{id:'rli_fb',name:'FB posts',perWeek:10},{id:'rli_ig',name:'IG posts',perWeek:10},{id:'rli_tt',name:'TikTok posts',perWeek:10},{id:'rli_yts',name:'YT Shorts',perWeek:10},{id:'rli_itm',name:'In-the-Moment weekend reactive',perWeek:4}],
             weeks:[
               {id:'w1',label:'Round 12',audience:{YouTube:420000,Acast:95000,Facebook:610000,Instagram:280000,TikTok:540000},assets:{rli_ffu:1,rli_odds:1,rli_res:1,rli_recap:1,rli_nics:1,rli_tvc:2,rli_fb:10,rli_ig:10,rli_tt:9,rli_yts:10,rli_itm:4},status:'verified',note:'YouTube Analytics + Meta',submittedAt:'2026-06-02'},
               {id:'w2',label:'Round 13',audience:{YouTube:465000,Acast:102000,Facebook:720000,Instagram:310000,TikTok:680000},assets:{rli_ffu:1,rli_odds:1,rli_res:1,rli_recap:1,rli_nics:1,rli_tvc:2,rli_fb:10,rli_ig:11,rli_tt:10,rli_yts:10,rli_itm:5},status:'pending',note:'',submittedAt:'2026-06-09'}
-            ] }
+            ] },
+          { id:'fanatics-audio-2026', name:'Fanatics Audio — all shows', mode:'audience', investment:'', audienceGuaranteed:'', audienceDelivered:'',
+            platforms:['Audio — all Fanatics shows'], assets:[], weeks:[] }
         ]},
         assessment:{
           deliverables:['Kenty Blitz Mon–Thu across the season','RLI Mon–Sun cadence, 18 weeks','Odds + results overlay on all 8 matches/round','ITM × Pull \'Em three-act series (pre-game / half-time / post-game)'],
@@ -1243,14 +1274,18 @@ function espnSeed(){
 }
 function foxFootySeed(){
   return { id:'fox-footy-afl-2026', name:'Fox Footy AFL Partnership', counterparty:'Fox Footy / Foxtel Media', category:'AFL',
-    termStart:'2026-03-01', termEnd:'2026-10-06', contractedValue:5075300,
+    termStart:'2026-03-01', termEnd:'2026-10-06', contractedValue:5075300, foxScopeVersion:2, foxLinearBaselineVersion:1,
     snapshots:[{ id:'fox-footy-2026-current', label:'2026 Partnership', date:'2026-08-02', status:'warn', call:'renew',
-      verdict:'Renew with tighter delivery discipline: Fox Footy remains the core qualified AFL environment, but the 2026 return depends on verified audience, stronger social execution and concentration around the highest-performing integrations.',
-      context:'The final approved AFL partnership is $5.0753m. Reporting follows the final 12 December 2025 schedule; the separate $1m NRL social/digital proposal is outside this partnership.',
+      verdict:'Renew with tighter delivery discipline: Fox Footy remains the core qualified AFL environment, with this review focused on linear TVCs, integrations and production delivery.',
+      context:'The full approved AFL partnership is $5.0753m. This dashboard actively reviews the $2.9753m Linear TVCs, Fox Footy Integrations and Production scope; streaming, standalone social and FoxSports.com.au digital remain part of the commercial agreement but are outside this active review.',
       commercial:blankCommercial(),
       media:{ valueAdd:'', components:[
         { id:'fox-afl-tvcs', name:'Fox Footy Linear TVCs', mode:'audience', investment:1378200,
-          audienceGuaranteed:7984677, audienceDelivered:'', platforms:['Linear TV commercial impressions'], assetReporting:'ytd',
+          audienceGuaranteed:7984677, audienceDelivered:'', baselineAudienceYtd:5853800,
+          baselineAudienceTargetYtd:5329097, baselineMonthsElapsed:5, baselineAsOf:'19 Jul 2026',
+          baselineSource:'Foxtel — PointsBet AFL Tracking TV (CUME)',
+          baselineHighlights:['AFL 360 audiences +6% YoY','Bounce audiences +8.4% YoY','First Crack flat YoY','Midweek Tackle +8% YoY'],
+          platforms:['Linear TV commercial impressions'], assetReporting:'ytd',
           assets:[{id:'fox_tvcs',name:'Commercial spots — Sun to Thu',contractedQty:310}], weeks:[] },
         { id:'fox-afl-integrations', name:'Fox Footy Integrations', mode:'audience', investment:1497100,
           audienceGuaranteed:22287085, audienceDelivered:'', platforms:['Linear integration audience','FoxCatcher social audience'], assetReporting:'ytd',
@@ -1265,40 +1300,76 @@ function foxFootySeed(){
             {id:'fox_fc_fri',name:'FoxCatcher Friday shows',contractedQty:30},
             {id:'fox_fc_social',name:'FoxCatcher social integrations',contractedQty:81}
           ], weeks:[] },
-        { id:'fox-afl-streaming', name:'Kayo & Foxtel Go Streaming', mode:'audience', investment:1400000,
-          audienceGuaranteed:17500000, audienceDelivered:'', platforms:['Kayo DAI impressions','Foxtel Go DAI impressions'], weeks:[] },
-        { id:'fox-afl-statmate', name:'StatMate Social', mode:'audience', investment:200000,
-          audienceGuaranteed:8500000, audienceDelivered:'', platforms:['Facebook','Instagram'], assetReporting:'ytd',
-          assets:[{id:'fox_statmate_social',name:'StatMate social infographics',contractedQty:54}], weeks:[] },
-        { id:'fox-afl-digital', name:'FoxSports.com.au Digital', mode:'audience', investment:500000,
-          audienceGuaranteed:82595238, audienceDelivered:'', platforms:['FoxSports.com.au impressions','Video pre-roll impressions'], assetReporting:'ytd',
-          assets:[
-            {id:'fox_homepage_takeovers',name:'Homepage takeovers',contractedQty:5},
-            {id:'fox_article_odds',name:'Article odds-widget campaign',contractedQty:1},
-            {id:'fox_index_odds',name:'Index / latest-news odds-widget campaign',contractedQty:1},
-            {id:'fox_match_centre',name:'Match-centre odds integration',contractedQty:1},
-            {id:'fox_score_centre',name:'Score-centre integration',contractedQty:1},
-            {id:'fox_ladder',name:'Ladder-page integration',contractedQty:1},
-            {id:'fox_fixtures',name:'Fixtures-page integration',contractedQty:1},
-            {id:'fox_launch_display',name:'Season-launch display burst',contractedQty:1},
-            {id:'fox_finals_display',name:'Finals display burst',contractedQty:1}
-          ], weeks:[] },
         { id:'fox-afl-production', name:'Production', mode:'fixed', investment:100000, fixedDelivered:false,
           entitlements:['StatMate production and boosting support'] }
       ]},
       assessment:{
-        deliverables:['310 linear commercial spots across Sunday to Thursday','Weekly Fox Footy integrations spanning AFL 360, First Crack and FoxCatcher','17.5m contracted streaming impressions across Kayo and Foxtel Go','54 StatMate social infographics and 81 FoxCatcher social integrations','82.60m contracted FoxSports.com.au digital impressions'],
-        winning:['Fox Footy remains the core qualified AFL environment and a major share of dedicated AFL media','Thursday post-game was the strongest integration timeslot in the prior-year review','The final schedule adds FoxCatcher social audience into the integration package','Digital carries scale at an efficient contracted CPM'],
-        falling:['Magazine-program audiences softened year on year','Social integration needs stronger creative execution and evidence','The size of the investment requires tighter verification and clearer delivery accountability'],
-        evolution:['Concentrate integration weight around Thursday post-game','Use FoxCatcher and StatMate as repeatable, evidence-backed content franchises','Report audience monthly by workstream and attach representative clips','Review YTD pace and delivered CPM before further investment decisions'],
+        deliverables:['5.85m cumulative Linear TV audience delivered against a 5.33m target through 19 July','310 linear commercial spots across Sunday to Thursday','Weekly Fox Footy integrations spanning AFL 360, First Crack and FoxCatcher','Production support delivered against the agreed scope'],
+        winning:['Linear TV audience is 110% of the cumulative target through 19 July — 524,703 ahead','AFL 360 audiences are up 6% YoY and Bounce audiences are up 8.4% YoY','Midweek Tackle audiences are up 8% YoY while First Crack is flat','Fox Footy remains the core qualified AFL environment and a major share of dedicated AFL media'],
+        falling:['Magazine-program audiences softened year on year','Verified linear audience and integration evidence still need to be supplied consistently','The size of the tracked investment requires clear delivery accountability'],
+        evolution:['Concentrate integration weight around Thursday post-game','Report verified linear audience monthly and attach representative integration clips','Confirm production completion and evidence against the agreed scope','Review YTD pace and delivered CPM before further investment decisions'],
         levers:{
-          growth:{rating:'watch',note:'The AFL platform remains strategically important, but renewal value depends on stronger measurable delivery across the full package.'},
-          audience:{rating:'good',note:'A strongly qualified AFL audience: approximately 70% male, with 61%+ Men 25+ and a 63% Victorian skew in the renewal review.'},
-          channels:{rating:'good',note:'Broad reach across linear, Kayo/Foxtel Go, social and FoxSports.com.au, with Thursday post-game the standout integration opportunity.'},
-          compliance:{rating:'watch',note:'Monthly reporting, clip evidence and consistent verification are required across the package.'}
+          growth:{rating:'watch',note:'The AFL platform remains strategically important, but renewal value depends on stronger measurable linear and integration delivery.'},
+          audience:{rating:'good',note:'Linear TV cumulative audience is 5.85m against a 5.33m target through 19 July (110%), supported by YoY growth for AFL 360, Bounce and Midweek Tackle.'},
+          channels:{rating:'good',note:'Linear TVCs and Fox Footy integrations provide the core tracked reach, with Thursday post-game the standout integration opportunity.'},
+          compliance:{rating:'watch',note:'Monthly linear reporting, integration clip evidence and production confirmation are required across the tracked scope.'}
         }
       }
     }] };
+}
+function alignFoxTrackedScope(p){
+  if(!p||p.id!=='fox-footy-afl-2026'||p.foxScopeVersion===2)return false;
+  const allowed=new Set(['fox-afl-tvcs','fox-afl-integrations','fox-afl-production']);
+  (p.snapshots||[]).forEach(s=>{
+    if(s.media&&Array.isArray(s.media.components)){
+      const excluded=s.media.components.filter(c=>!allowed.has(c.id));
+      if(excluded.length)p.foxExcludedComponents=(p.foxExcludedComponents||[]).concat(excluded);
+      s.media.components=s.media.components.filter(c=>allowed.has(c.id));
+    }
+    s.verdict='Renew with tighter delivery discipline: Fox Footy remains the core qualified AFL environment, with this review focused on linear TVCs, integrations and production delivery.';
+    s.context='The full approved AFL partnership is $5.0753m. This dashboard actively reviews the $2.9753m Linear TVCs, Fox Footy Integrations and Production scope; streaming, standalone social and FoxSports.com.au digital remain part of the commercial agreement but are outside this active review.';
+    s.assessment=foxFootySeed().snapshots[0].assessment;
+  });
+  p.contractedValue=5075300;
+  p.foxScopeVersion=2;
+  return true;
+}
+function alignFoxLinearBaseline(p){
+  if(!p||p.id!=='fox-footy-afl-2026'||p.foxLinearBaselineVersion===1)return false;
+  const seeded=foxFootySeed().snapshots[0];
+  (p.snapshots||[]).forEach(s=>{
+    const comp=((s.media&&s.media.components)||[]).find(c=>c.id==='fox-afl-tvcs');
+    if(comp){
+      comp.baselineAudienceYtd=5853800;
+      comp.baselineAudienceTargetYtd=5329097;
+      comp.baselineMonthsElapsed=5;
+      comp.baselineAsOf='19 Jul 2026';
+      comp.baselineSource='Foxtel — PointsBet AFL Tracking TV (CUME)';
+      comp.baselineHighlights=['AFL 360 audiences +6% YoY','Bounce audiences +8.4% YoY','First Crack flat YoY','Midweek Tackle +8% YoY'];
+    }
+    if(s.id==='fox-footy-2026-current'||s===p.snapshots[p.snapshots.length-1]){
+      s.assessment=seeded.assessment;
+      s.verdict='Linear TV delivery is 10% ahead of the cumulative target through 19 July. Maintain the linear plan while tightening verified integration and production reporting.';
+    }
+  });
+  p.foxLinearBaselineVersion=1;
+  return true;
+}
+function alignFanaticsSimplifiedReporting(p){
+  if(!p||p.name!=='FanaticsTV'||p.fanaticsReportingVersion===2)return false;
+  const latest=(p.snapshots||[]).slice().sort((a,b)=>(a.date||'').localeCompare(b.date||''))[p.snapshots.length-1]||null;
+  const comps=latest&&latest.media&&Array.isArray(latest.media.components)?latest.media.components:[];
+  const platforms={
+    'Kenty Blitz':['YouTube','Social'],
+    'Kenty Primetime':['YouTube','Social'],
+    'Rugby League Insider (RLI)':['YouTube','Facebook','Instagram','TikTok']
+  };
+  comps.forEach(c=>{if(platforms[c.name])c.platforms=[...platforms[c.name]];});
+  if(!comps.some(c=>c.id==='fanatics-audio-2026'||c.name==='Fanatics Audio — all shows')){
+    comps.push({id:'fanatics-audio-2026',name:'Fanatics Audio — all shows',mode:'audience',investment:'',audienceGuaranteed:'',audienceDelivered:'',platforms:['Audio — all Fanatics shows'],assets:[],weeks:[]});
+  }
+  p.fanaticsReportingVersion=2;
+  return true;
 }
 function ensureCorePartnerships(doc){
   if(!doc||!Array.isArray(doc.partnerships))return false;
@@ -1311,6 +1382,11 @@ function ensureCorePartnerships(doc){
     doc.partnerships.push(foxFootySeed());
     changed=true;
   }
+  const fox=doc.partnerships.find(p=>p.id==='fox-footy-afl-2026'||p.name==='Fox Footy AFL Partnership');
+  const fanatics=doc.partnerships.find(p=>p.name==='FanaticsTV');
+  if(alignFanaticsSimplifiedReporting(fanatics))changed=true;
+  if(alignFoxTrackedScope(fox))changed=true;
+  if(alignFoxLinearBaseline(fox))changed=true;
   return changed;
 }
 function rdcSeed(){
@@ -1508,7 +1584,7 @@ function renderBoard(){
   let blendInv=0,blendDel=0,haveBlend=false;
   const attentionRows=[];
   STATE.partnerships.forEach(p=>{ const s=latestSnap(p); const m=mediaRoll(s,p);
-    const inv=m.inv!==null?m.inv:(+p.contractedValue||0); contracted+=inv;
+    const inv=(+p.contractedValue||0)||(m.inv!==null?m.inv:0); contracted+=inv;
     if(m.inv!==null&&m.del){ blendInv+=m.spendToDate!==null?m.spendToDate:m.inv; blendDel+=m.del; haveBlend=true; }
     if(n(s.media.valueAdd)!==null)valAdd+=n(s.media.valueAdd);
     const a=partnershipAttention(p); if(a.pending||a.overdue.length||a.offTrack) attentionRows.push({p,a});
@@ -1556,7 +1632,7 @@ function printPortfolio(){
     return `<tr>
       <td><b>${esc(p.name)}</b><br><span style="color:#666;font-size:11px">${esc(p.counterparty||'')}</span></td>
       <td>${stLabel}</td>
-      <td>${money(m.inv)}</td>
+      <td>${money((+p.contractedValue||0)||(m.inv||0))}</td>
       <td>${m.del!==null?aud(m.del):(m.guar!==null?aud(m.guar)+' guar':'—')}</td>
       <td>${m.delCpm!==null?'$'+m.delCpm.toFixed(2):'—'}</td>
       <td>${m.propCpm!==null?'$'+m.propCpm.toFixed(2):'—'}</td>
@@ -1587,13 +1663,17 @@ function pcard(p){
   const m=mediaRoll(s,p);
   const ytdAudienceTarget=audienceTargetYtd(s,p);
   const audP=pctDiff(m.del,ytdAudienceTarget);
-  const cpmDelivered=m.delCpm, cpmProp=m.propCpm;
+  const cpmDelivered=m.delCpm, cpmProp=m.delCpm!==null?(m.delCpmBenchmark??m.propCpm):m.propCpm;
   const metricsHtml=`<div class="metrics">
       <div class="metric"><div class="ml"><span class="mlab">Views/listens YTD</span><span class="mval">${m.del!==null?aud(m.del):ytdAudienceTarget!==null?aud(ytdAudienceTarget)+' target':'—'}${audP!==null?`<span class="pct ${audP>=0?'pos':'neg'}">${audP>0?'+':''}${audP}%</span>`:''}</span></div>${m.del!==null&&ytdAudienceTarget!==null?bar(m.del,ytdAudienceTarget):bar(null,null)}</div>
       <div class="metric"><div class="ml"><span class="mlab">CPM YTD</span><span class="mval">${cpmDelivered!==null?'$'+cpmDelivered.toFixed(2):(cpmProp!==null?'$'+cpmProp.toFixed(2)+' proj':'—')}${cpmDelivered!==null&&cpmProp!==null?`<span class="pct ${cpmDelivered<=cpmProp?'pos':'neg'}">${cpmDelivered<=cpmProp?'▼':'▲'}</span>`:''}</span></div>${cpmDelivered!==null?barInverse(cpmDelivered,cpmProp):bar(0,1)}</div>
     </div>`;
   const va=n(s.media.valueAdd);
   const overDel=(m.hasAud&&m.del!==null&&m.guar!==null&&m.del>m.guar)?(m.del-m.guar):null;
+  const isFoxTracked=p.id==='fox-footy-afl-2026';
+  const investmentFoot=isFoxTracked
+    ?`${money(p.contractedValue)} partnership · ${money(m.inv)} tracked`
+    :(m.inv!==null?money(m.inv)+' invested':'—');
   return `<div class="pcard ${st}" role="button" tabindex="0" aria-label="Open ${esc(p.name)} partnership review" onclick="openDetail('${p.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openDetail('${p.id}')}">
     <div class="statusline"></div>
     <div class="head"><div><h3 class="name">${esc(p.name)} ${p.example?'<span class="example-tag">Example</span>':''}</h3><div class="cp">${esc(p.counterparty||'')}</div></div>
@@ -1602,7 +1682,7 @@ function pcard(p){
     <p class="verdict ${s.verdict?'':'empty'}">${s.verdict?esc(s.verdict):'No verdict written yet'}</p>
     ${metricsHtml}
     <div class="cardfoot">
-      <span class="valadd">${va?`Value-add <b>${money(va)}</b>`:(overDel?`Audience over-delivery <b>+${aud(overDel)}</b>`:'<span style="color:var(--ink-faint)">'+(m.inv!==null?money(m.inv)+' invested':'—')+'</span>')}</span>
+      <span class="valadd">${va?`Value-add <b>${money(va)}</b>`:(isFoxTracked?'<span style="color:var(--ink-faint)">'+investmentFoot+'</span>':overDel?`Audience over-delivery <b>+${aud(overDel)}</b>`:'<span style="color:var(--ink-faint)">'+investmentFoot+'</span>')}</span>
       <span class="pcard-open">Open review →</span>
     </div>
   </div>`;
@@ -1644,7 +1724,7 @@ const COMPOSITION = {
 };
 /* Live data comes from verified pr_week submissions only — a month with no verified
    submission for a show shows as a gap ("–"), it never falls back to any placeholder. */
-function platformBucket(name){ if(name==='YouTube')return 'yt'; if(name==='Acast')return 'ac'; return 'soc'; }
+function platformBucket(name){ if(name==='YouTube')return 'yt'; if(/audio|acast|spotify|apple/i.test(name||''))return 'ac'; return 'soc'; }
 function parseMonthKey(lbl){ const d=new Date(lbl); const t=d.getTime(); return isNaN(t)?null:t; }
 function sortMonthLabels(labels){ return labels.slice().sort((a,b)=>{ const da=parseMonthKey(a),db=parseMonthKey(b); if(da!==null&&db!==null)return da-db; return a<b?-1:(a>b?1:0); }); }
 function liveShowMonthly(comp){
@@ -1975,7 +2055,7 @@ function monthlyGraphPanel(p){
   const M={months, shows, tiktok};
 
   const metric=view.graphMetric||'total';
-  const METRICS=[['total','Total'],['yt','YouTube'],['soc','Social (FB+IG)'],['ac','Acast']];
+  const METRICS=[['total','Total'],['yt','YouTube'],['soc','Social (FB+IG)'],['ac','Audio']];
   const val=d=> !d?null:(metric==='total'?(d.yt+d.soc+d.ac):d[metric]);
   const palette=['#E31B23','#1F3A5F','#C38318','#356B4C'];
   const colors={}; showNames.forEach((s,i)=>colors[s]=palette[i%palette.length]);
@@ -2110,10 +2190,11 @@ function openPerfMonth(month,showName){
   const rawBreakdown=detailWeek&&detailWeek.audience&&Object.keys(detailWeek.audience).length
     ? detailWeek.audience
     : (pending!==null?(sh.pending||{})[month]:sh.data[month])||{};
-  const bucketNames={yt:'YouTube',soc:'Social (Facebook + Instagram)',ac:'Acast'};
+  const bucketNames={yt:'YouTube',soc:'Social (Facebook + Instagram)',ac:'Audio'};
   const breakdown=Object.entries(rawBreakdown).map(([k,v])=>[bucketNames[k]||k,+v||0]).filter(([,v])=>v||v===0);
   const assets=(comp&&detailWeek&&detailWeek.assets)?(comp.assets||[]).map(as=>({name:as.name,value:n(detailWeek.assets[as.id]),clip:clipHref(detailWeek,as.id)})).filter(x=>x.value!==null||x.clip):[];
   const clips=comp&&detailWeek?weekClips(comp,detailWeek):[];
+  const report=detailWeek?reportHref(detailWeek):'';
   const note=detailWeek?parseSubmissionNote(detailWeek.note||''):{source:'',comments:''};
   const canVerify=status==='pending'&&pendingWeek&&(view.role==='owner'||view.mode==='internal');
   const displayValue=pending!==null?pending:verified;
@@ -2121,7 +2202,8 @@ function openPerfMonth(month,showName){
   const prev=previousIndex>=0?perfRawValue(m,sh.data[m.months[previousIndex]]):null;
   const change=displayValue!==null&&prev?Math.round((displayValue-prev)/prev*100):null;
   const assetsHtml=assets.length?`<div class="drawer-section"><h4>Assets and integration delivery</h4><div class="drawer-assets">${assets.map(a=>`<div class="drawer-asset"><span>${esc(a.name)}</span><b>${a.value!==null?num(a.value):'Clip'}</b></div>`).join('')}</div></div>`:'';
-  const clipsHtml=clips.length?`<div class="drawer-section"><h4>Clip examples</h4><div class="drawer-clips">${clips.map(c=>`<a href="${esc(c.url)}" target="_blank" rel="noopener"><span>${esc(c.name)}</span><span>Open ↗</span></a>`).join('')}</div></div>`:'';
+  const reportHtml=report?`<div class="drawer-section"><h4>Detailed report</h4><a class="report-link" href="${esc(report)}" target="_blank" rel="noopener">Open ${esc((detailWeek.assets||{}).__report_name||'detailed monthly report')} ↗</a></div>`:'';
+  const clipsHtml=clips.length?`<div class="drawer-section"><h4>Legacy clip evidence</h4><div class="drawer-clips">${clips.map(c=>`<a href="${esc(c.url)}" target="_blank" rel="noopener"><span>${esc(c.name)}</span><span>Open ↗</span></a>`).join('')}</div></div>`:'';
   const contextHtml=(note.source||note.comments)?`<div class="drawer-section"><h4>Submission context</h4><div style="font-size:12px;line-height:1.55;color:var(--ink-soft)">${note.source?`<b style="color:var(--ink)">Source:</b> ${esc(note.source)}`:''}${note.comments?`<div style="margin-top:5px">${esc(note.comments)}</div>`:''}</div></div>`:'';
   drawerReturnFocus=document.activeElement;
   document.getElementById('drawerMount').innerHTML=`<div class="drawer-scrim" onclick="if(event.target===this)closePerfDrawer()"><aside class="perf-drawer" role="dialog" aria-modal="true" aria-labelledby="perfDrawerTitle">
@@ -2130,7 +2212,7 @@ function openPerfMonth(month,showName){
       <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px">${status!=='none'?drawerStatus(status):'<span class="wk-status wk-baseline">No delivery logged</span>'}<span style="font-size:10.5px;color:var(--ink-faint)">Select another bar to change month</span></div>
       <div class="drawer-kpis"><div><span>${pending!==null?'Submitted audience':'Verified audience'}</span><b>${displayValue!==null?aud(displayValue):'—'}</b></div><div><span>Month-on-month</span><b style="color:var(--${change===null?'ink':change>=0?'good':'bad'})">${change===null?'—':(change>0?'+':'')+change+'%'}</b></div>${pending!==null&&verified!==null?`<div><span>Last verified</span><b>${aud(verified)}</b></div>`:''}<div><span>Chart metric</span><b style="font-family:'Inter';font-size:13px">${esc(m.metricLabel)}</b></div></div>
       <div class="drawer-section"><h4>Platform breakdown</h4><div class="drawer-breakdown">${breakdown.length?breakdown.map(([k,v])=>`<div><span>${esc(k)}</span><b>${aud(v)}</b></div>`).join(''):'<div><span>No platform breakdown available</span><b>—</b></div>'}</div></div>
-      ${assetsHtml}${clipsHtml}${contextHtml}
+      ${assetsHtml}${reportHtml}${clipsHtml}${contextHtml}
       ${canVerify?`<div class="drawer-actions"><button class="btn btn-primary" onclick="verifyFromPerfDrawer('${comp.id}','${pendingWeek.id}')">✓ Verify submission</button></div>`:''}
     </div></aside></div>`;
   document.querySelector('.drawer-close')?.focus();
@@ -2219,15 +2301,16 @@ function integrationYtdPanel(p){
     const status=pct===null?'Awaiting update':pct>=100?'Complete':pct>=55?'In progress':'Watch';
     rows+=`<tr><td><b>${esc(as.name)}</b></td><td class="num">${num(target)}</td><td class="num">${has?num(delivered):'—'}</td><td class="num">${remaining!==null?num(remaining):'—'}</td><td class="num">${pct!==null?`<b style="color:var(--${tone})">${pct}%</b>`:'—'}</td><td><span class="wk-status wk-${pct===null?'pending':pct>=100?'verified':pct>=55?'pending':'rejected'}">${status}</span></td></tr>`;
   }));
-  return `<div class="panel"><div class="panel-head"><h3>Integration delivery YTD</h3><span class="lil">Current reported cumulative totals</span></div><div class="panel-body">
+  const isFoxTracked=p.id==='fox-footy-afl-2026';
+  return `<div class="panel"><div class="panel-head"><h3>${isFoxTracked?'Linear delivery YTD':'Integration delivery YTD'}</h3><span class="lil">Current reported cumulative totals</span></div><div class="panel-body">
     <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:9px;overflow:hidden;margin-bottom:16px">
       <div style="background:#fff;padding:14px"><span class="mlab">Reported executions</span><b class="mono" style="display:block;font-size:22px;margin-top:4px">${num(reported)}</b></div>
       <div style="background:#fff;padding:14px"><span class="mlab">Contracted executions</span><b class="mono" style="display:block;font-size:22px;margin-top:4px">${num(contracted)}</b></div>
       <div style="background:#fff;padding:14px"><span class="mlab">Components measured</span><b class="mono" style="display:block;font-size:22px;margin-top:4px">${measured}/${comps.reduce((n,c)=>n+(c.assets||[]).length,0)}</b></div>
     </div>
-    <details class="data-disclosure"><summary><span>Explore integration components</span><span>${measured} of ${comps.reduce((n,c)=>n+(c.assets||[]).length,0)} measured</span></summary><div class="data-disclosure-body">
-      <table class="dtable"><thead><tr><th>Integration</th><th class="num">Guaranteed</th><th class="num">Delivered YTD</th><th class="num">Remaining</th><th class="num">Fulfilment</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>
-      <div style="margin-top:12px;font-size:11.5px;color:var(--ink-faint)">Each verified ESPN submission supplies the latest cumulative YTD position. Overdelivery on one component does not offset another component's shortfall.</div>
+    <details class="data-disclosure"><summary><span>${isFoxTracked?'Explore linear components':'Explore integration components'}</span><span>${measured} of ${comps.reduce((n,c)=>n+(c.assets||[]).length,0)} measured</span></summary><div class="data-disclosure-body">
+      <table class="dtable"><thead><tr><th>${isFoxTracked?'Linear component':'Integration'}</th><th class="num">Guaranteed</th><th class="num">Delivered YTD</th><th class="num">Remaining</th><th class="num">Fulfilment</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>
+      <div style="margin-top:12px;font-size:11.5px;color:var(--ink-faint)">Each verified ${isFoxTracked?'Fox Footy':'ESPN'} submission supplies the latest cumulative YTD position. Overdelivery on one component does not offset another component's shortfall.</div>
     </div></details>
   </div></div>`;
 }
@@ -2251,7 +2334,8 @@ function currentPulse(p,s){
   const assetRows=assetPace.rows.filter(r=>r.expectedYtd!==null&&r.expectedYtd>0&&r.status!=='awaiting').length;
   const assetBehind=assetPace.behind;
   const assetAwaiting=assetPace.awaiting||[];
-  const cpmDelta=(m.delCpm!==null&&m.propCpm)?Math.round((m.delCpm-m.propCpm)/m.propCpm*100):null;
+  const cpmBenchmark=m.delCpmBenchmark??m.propCpm;
+  const cpmDelta=(m.delCpm!==null&&cpmBenchmark)?Math.round((m.delCpm-cpmBenchmark)/cpmBenchmark*100):null;
   let score=0;
   if(cpmDelta!==null) score+=cpmDelta<=0?2:(cpmDelta<=10?0:-2);
   if(audienceDelta!==null) score+=audienceDelta>=0?1:(audienceDelta>=-15?0:-2);
@@ -2264,7 +2348,7 @@ function currentPulse(p,s){
   const label={good:'On track',warn:'Watch',bad:'Off track'}[status];
   const call=status==='good'?'Maintain and optimise':status==='warn'?'Resolve current gaps':'Intervention required';
   const evidence=[];
-  if(m.delCpm!==null&&m.propCpm!==null) evidence.push(`Delivered CPM YTD is $${m.delCpm.toFixed(2)}, ${Math.abs(cpmDelta)}% ${cpmDelta<=0?'better':'worse'} than the proposed $${m.propCpm.toFixed(2)}.`);
+  if(m.delCpm!==null&&cpmBenchmark!==null) evidence.push(`Delivered CPM YTD is $${m.delCpm.toFixed(2)}, ${Math.abs(cpmDelta)}% ${cpmDelta<=0?'better':'worse'} than the comparable proposed $${cpmBenchmark.toFixed(2)}.`);
   else evidence.push('There is not enough verified delivery to calculate a dependable CPM YTD.');
   if(m.del!==null&&ytdAudienceTarget!==null) evidence.push(`Views/listens YTD are ${aud(m.del)} versus a prorated YTD target of ${aud(ytdAudienceTarget)} (${audienceDelta>0?'+':''}${audienceDelta}%).`);
   if(assetPct!==null) evidence.push(`Delivery pace is ${assetPct}% through ${assetPace.asOf.label} across ${assetRows} measured asset${assetRows!==1?'s':''}; each component is equally weighted and capped at 100% so overdelivery cannot hide another shortfall.`);
@@ -2273,6 +2357,16 @@ function currentPulse(p,s){
   if(assetAwaiting.length) evidence.push(`${assetAwaiting.length} integration component${assetAwaiting.length!==1?'s are':' is'} awaiting first verified delivery and ${assetAwaiting.length!==1?'are':'is'} not yet scored against pace.`);
   if(missing.length) evidence.push(`No verified views/listens have been received for ${missing.join(', ')}.`);
   if(pending) evidence.push(`${pending} monthly submission${pending!==1?'s are':' is'} awaiting verification and excluded from current results.`);
+  if(p.id==='fox-footy-afl-2026'){
+    const linear=(s.media.components||[]).find(c=>c.id==='fox-afl-tvcs');
+    if(linear&&n(linear.baselineAudienceYtd)!==null&&n(linear.baselineAudienceTargetYtd)!==null){
+      const gap=n(linear.baselineAudienceYtd)-n(linear.baselineAudienceTargetYtd);
+      evidence.push(`Fox Footy Linear TV is ${aud(n(linear.baselineAudienceYtd))} against a ${aud(n(linear.baselineAudienceTargetYtd))} cumulative target through ${linear.baselineAsOf||'the latest report'} — ${num(gap)} ahead (110%).`);
+      if((linear.baselineHighlights||[]).length)evidence.push(`Foxtel rating context: ${linear.baselineHighlights.join('; ')}.`);
+    }
+    const production=(s.media.components||[]).find(c=>c.id==='fox-afl-production');
+    if(production)evidence.push(production.fixedDelivered?'Production delivery has been confirmed and is included in the tracked scope.':'Production remains in the tracked scope but has not yet been marked delivered.');
+  }
   let summary;
   if(status==='good') summary='Current delivery is efficient and the verified asset record is supporting the partnership case. Maintain the plan while looking for incremental optimisation.';
   else if(status==='warn') summary='The partnership is showing positive evidence, but the current record is incomplete. Resolve the identified reporting or delivery gaps before confirming the partnership is fully on track.';
@@ -2283,7 +2377,11 @@ function currentPulse(p,s){
 function renderDetail(){
   const p=STATE.partnerships.find(x=>x.id===view.pid);
   const s=currentSnap(p); const m=mediaRoll(s,p);
-  const invShown=m.inv!==null?m.inv:p.contractedValue;
+  const isFoxTracked=p.id==='fox-footy-afl-2026';
+  const invShown=isFoxTracked?p.contractedValue:(m.inv!==null?m.inv:p.contractedValue);
+  const headlineMiddle=isFoxTracked
+    ?`<div class="dh-headline-stat"><span>Tracked scope</span><b>${moneyFull(m.inv)}</b></div>`
+    :`<div class="dh-headline-stat"><span>Contracted CPM</span><b>${m.propCpm!==null?'$'+m.propCpm.toFixed(2):'—'}</b></div>`;
 
   let html=`<div class="detail-head"><div class="dh-top">
     <div class="dh-identity"><h1 class="dh-name">${esc(p.name)} ${p.example?'<span class="example-tag">Example — safe to delete</span>':''}</h1>
@@ -2292,8 +2390,8 @@ function renderDetail(){
       <div style="display:flex;gap:6px"><button class="linkbtn" onclick="editPartnerAccess()">Partner access</button><button class="linkbtn" onclick="editPartnership('${p.id}')">Edit partnership</button></div>
     </div></div>
     <div class="dh-headline-strip" aria-label="Partnership headlines">
-      <div class="dh-headline-stat"><span>Total investment</span><b>${moneyFull(invShown)}</b></div>
-      <div class="dh-headline-stat"><span>Contracted CPM</span><b>${m.propCpm!==null?'$'+m.propCpm.toFixed(2):'—'}</b></div>
+      <div class="dh-headline-stat"><span>${isFoxTracked?'Full partnership value':'Total investment'}</span><b>${moneyFull(invShown)}</b></div>
+      ${headlineMiddle}
       <div class="dh-headline-stat period"><span>Partnership period</span><b>${fmtDate(p.termStart)} – ${fmtDate(p.termEnd)}</b></div>
     </div>
   </div>`;
@@ -2314,9 +2412,10 @@ function renderDetail(){
   const pulseLabel=pulse.label;
   const pulseClass=pulse.status;
   const callLabel=pulse.call;
-  const cpmColor=(m.delCpm!==null&&m.propCpm!==null)?(m.delCpm<=m.propCpm?'good':'bad'):'';
+  const pulseCpmBenchmark=m.delCpm!==null?(m.delCpmBenchmark??m.propCpm):m.propCpm;
+  const cpmColor=(m.delCpm!==null&&pulseCpmBenchmark!==null)?(m.delCpm<=pulseCpmBenchmark?'good':'bad'):'';
   const cpmCell=m.delCpm!==null
-    ?`<div style="grid-column:1/-1"><span>Delivered CPM YTD${m.periodMatched?' · investment YTD ÷ views/listens YTD':''}</span><b style="font-size:15px;color:var(--${cpmColor||'ink'})">$${m.delCpm.toFixed(2)}${m.propCpm!==null?` <span style="font-size:11px;font-weight:600;color:var(--ink-faint)">vs $${m.propCpm.toFixed(2)} proposed</span>`:''}</b></div>`
+    ?`<div style="grid-column:1/-1"><span>Delivered CPM YTD${m.periodMatched?' · investment YTD ÷ views/listens YTD':''}</span><b style="font-size:15px;color:var(--${cpmColor||'ink'})">$${m.delCpm.toFixed(2)}${pulseCpmBenchmark!==null?` <span style="font-size:11px;font-weight:600;color:var(--ink-faint)">vs $${pulseCpmBenchmark.toFixed(2)} comparable proposed</span>`:''}</b></div>`
     :`<div style="grid-column:1/-1"><span>Delivered CPM YTD</span><b style="color:var(--ink-faint)">Not yet measured${m.propCpm!==null?` — $${m.propCpm.toFixed(2)} proposed`:''}</b></div>`;
   html+=`<div class="panel"><div class="panel-head"><h3>Current pulse</h3><span class="lil">Live YTD review</span></div><div class="pulse-hero">
     <div class="pulse-status"><span class="statusdot sd-${pulseClass}"><i></i>${pulseLabel}</span><b class="pulse-call">${callLabel}</b></div>
@@ -2335,19 +2434,21 @@ function renderDetail(){
   </div></div></div>`;
 
   /* media */
-  html+=`<div class="panel"><div class="panel-head"><h3>Media value</h3><button class="linkbtn" onclick="editComponent(null)">＋ Show / package</button></div><div class="panel-body">`;
+  html+=`<div class="panel"><div class="panel-head"><h3>${isFoxTracked?'Linear & production tracking':'Media value'}</h3><button class="linkbtn" onclick="editComponent(null)">＋ Show / package</button></div><div class="panel-body">`;
+  if(isFoxTracked)html+=`<div class="data-note" style="margin:0 0 14px">Active review scope: Linear TVCs, Fox Footy Integrations and Production. Full partnership value is ${money(p.contractedValue)}; streaming, standalone social and digital are excluded from these performance calculations.</div>`;
   if((s.media.components||[]).length){
     s.media.components.forEach((comp,index)=>html+=componentBlock(comp,p,index));
     // roll-up
     if(m.inv!==null){
       let right;
       if(m.hasAud){ const ytdAudienceTarget=audienceTargetYtd(s,p),audP=pctDiff(m.del,ytdAudienceTarget);
-        right=`${money(m.inv)}<small>Total investment${m.spendToDate!==null?' · '+money(m.spendToDate)+' investment YTD':''}<br>${m.del!==null?aud(m.del)+' delivered YTD'+(ytdAudienceTarget!==null?' / '+aud(ytdAudienceTarget)+' YTD target':'')+(audP!==null?' ('+(audP>0?'+':'')+audP+'%)':''):ytdAudienceTarget!==null?aud(ytdAudienceTarget)+' YTD target':'Awaiting delivery'}${m.guar!==null?'<br>'+aud(m.guar)+' full guarantee':''}</small>`;
+        right=`${money(m.inv)}<small>${isFoxTracked?'Tracked investment':'Total investment'}${m.spendToDate!==null?' · '+money(m.spendToDate)+' investment YTD':''}<br>${m.del!==null?aud(m.del)+' delivered YTD'+(ytdAudienceTarget!==null?' / '+aud(ytdAudienceTarget)+' YTD target':'')+(audP!==null?' ('+(audP>0?'+':'')+audP+'%)':''):ytdAudienceTarget!==null?aud(ytdAudienceTarget)+' YTD target':'Awaiting delivery'}${m.guar!==null?'<br>'+aud(m.guar)+' full guarantee':''}</small>`;
       } else right=`${money(m.inv)}<small>total investment</small>`;
-      html+=`<div class="media-total"><span class="mt-l">Total</span><span class="mt-r">${right}</span></div>`;
+      html+=`<div class="media-total"><span class="mt-l">${isFoxTracked?'Tracked scope':'Total'}</span><span class="mt-r">${right}</span></div>`;
       if(m.hasAud&&(m.delCpm!==null||m.propCpm!==null)){
-        const cpmCol=(m.delCpm!==null&&m.propCpm!==null)?(m.delCpm<=m.propCpm?'good':'bad'):'';
-        html+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:12.5px"><span style="color:var(--ink-faint)">YTD delivered CPM${m.periodMatched?' (investment YTD ÷ views/listens YTD)':''}</span><b style="font-family:'JetBrains Mono';font-size:14px;color:var(--${cpmCol||'ink'})">${m.delCpm!==null?'$'+m.delCpm.toFixed(2):'—'}${m.propCpm!==null?` <span style="font-size:11.5px;font-weight:600;color:var(--ink-faint)">vs $${m.propCpm.toFixed(2)} proposed</span>`:''}</b></div>`;
+        const compareCpm=m.delCpm!==null?(m.delCpmBenchmark??m.propCpm):m.propCpm;
+        const cpmCol=(m.delCpm!==null&&compareCpm!==null)?(m.delCpm<=compareCpm?'good':'bad'):'';
+        html+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:12.5px"><span style="color:var(--ink-faint)">YTD delivered CPM${m.periodMatched?' (investment YTD ÷ views/listens YTD)':''}</span><b style="font-family:'JetBrains Mono';font-size:14px;color:var(--${cpmCol||'ink'})">${m.delCpm!==null?'$'+m.delCpm.toFixed(2):'—'}${compareCpm!==null?` <span style="font-size:11.5px;font-weight:600;color:var(--ink-faint)">vs $${compareCpm.toFixed(2)} comparable proposed</span>`:''}</b></div>`;
       }
     }
   } else html+=`<p style="color:var(--ink-faint);font-size:13px;margin:0">No shows or packages added for this review point.</p>`;
@@ -2626,14 +2727,17 @@ function audienceScorecards(comp,p,s,metrics){
   const cpmKind=dc===null||pc===null?'warn':dc<=pc?'good':dc<=pc*1.1?'warn':'bad';
   const cpmLabel=dc===null?'Awaiting delivery':`${Math.abs(cpmDelta)}% ${cpmDelta<=0?'cheaper':'higher'}`;
   const guaranteePct=d!==null&&g?Math.round(d/g*100):null;
-  const guaranteeKind=guaranteePct===null?'warn':guaranteePct>=100?'good':guaranteePct>=85?'warn':'bad';
-  const guaranteeLabel=guaranteePct===null?'Awaiting delivery':guaranteePct>=100?'Guarantee met':`${guaranteePct}% delivered`;
+  const guaranteeKind=guaranteePct===null?'warn':ytdTarget!==null?audienceKind:guaranteePct>=100?'good':guaranteePct>=85?'warn':'bad';
+  const guaranteeLabel=guaranteePct===null?'Awaiting delivery':guaranteePct>=100?'Guarantee met':`${guaranteePct}% complete`;
+  const periodNote=comp.baselineAsOf
+    ?` · cumulative through ${esc(comp.baselineAsOf)}`
+    :(perfMonths?` · ${perfMonths} verified month${perfMonths!==1?'s':''}`:'');
   return `<div class="media-score-grid">
     <section class="media-score ${audienceKind}">
       <span class="media-score-label">Views / listens YTD</span>
       <div class="media-score-value-row"><b class="media-score-value">${d!==null?aud(d):'—'}</b>${mediaStatus(audienceKind,audienceLabel)}</div>
       ${scoreBullet(d,ytdTarget,audienceKind)}
-      <div class="media-score-note">Target to date <b>${ytdTarget!==null?aud(ytdTarget):'—'}</b>${perfMonths?` · ${perfMonths} verified month${perfMonths!==1?'s':''}`:''}</div>
+      <div class="media-score-note">Target to date <b>${ytdTarget!==null?aud(ytdTarget):'—'}</b>${periodNote}</div>
     </section>
     <section class="media-score ${cpmKind}">
       <span class="media-score-label">Delivered CPM YTD</span>
@@ -2659,7 +2763,8 @@ function componentBlock(comp,p,index){
     const g=n(comp.audienceGuaranteed),d=audDelivered(comp,p);
     perfMonths=deliveryMonthsLogged(comp,p);
     const legacyDelivered=d!==null&&perfMonths===0;
-    const ytdTarget=(g!==null&&totalMonths&&perfMonths>0)?g*Math.min(perfMonths,totalMonths)/totalMonths:(legacyDelivered?g:null);
+    const baselineTarget=n(comp.baselineAudienceTargetYtd);
+    const ytdTarget=baselineTarget!==null?baselineTarget:(g!==null&&totalMonths&&perfMonths>0)?g*Math.min(perfMonths,totalMonths)/totalMonths:(legacyDelivered?g:null);
     const audP=pctDiff(d,ytdTarget); const pc=cpm(inv,g);
     invYtd=(totalMonths&&perfMonths>0&&inv!==null)?inv/totalMonths*Math.min(perfMonths,totalMonths):null;
     let dc=null,periodMatched=false;
@@ -2681,12 +2786,12 @@ function componentBlock(comp,p,index){
   }
   // weekly log (internal: view + verify)
   let log='';
-  if(wl){
+  if(weeksOf(comp).length){
     const periodWord=comp.assetReporting==='ytd'?'Monthly submissions':'Weekly log';
     log=`<details class="wklog"><summary>${periodWord} — ${wl} verified${weeksOf(comp).some(w=>w.status!=='verified')?' · <span style="color:var(--warn)">'+weeksOf(comp).filter(w=>w.status!=='verified').length+' pending</span>':''}</summary>
-      <table><thead><tr><th>Period</th><th class="num">Audience</th><th>Clips</th><th>Status</th><th></th></tr></thead><tbody>
-      ${weeksOf(comp).map(w=>{ const clips=weekClips(comp,w); return `<tr><td>${esc(w.label)}${w.note?` <span style="color:var(--ink-faint);font-size:10px">· ${esc(w.note)}</span>`:''}</td><td class="num">${aud(weekAudTotal(w))}</td>
-        <td>${clips.length?`<details class="clip-toggle"><summary>${clips.length} clip${clips.length>1?'s':''}</summary><div class="clip-list">${clips.map(cl=>`<a href="${esc(cl.url)}" target="_blank" rel="noopener">${esc(cl.name)}</a>`).join('')}</div></details>`:'<span style="color:var(--ink-faint)">—</span>'}</td>
+      <table><thead><tr><th>Period</th><th class="num">Audience</th><th>Detailed report</th><th>Status</th><th></th></tr></thead><tbody>
+      ${weeksOf(comp).map(w=>{ const clips=weekClips(comp,w),report=reportHref(w),reportName=(w.assets||{}).__report_name||'Open report'; return `<tr><td>${esc(w.label)}${w.note?` <span style="color:var(--ink-faint);font-size:10px">· ${esc(w.note)}</span>`:''}</td><td class="num">${aud(weekAudTotal(w))}</td>
+        <td>${report?`<a class="report-link" href="${esc(report)}" target="_blank" rel="noopener">${esc(reportName)} ↗</a>`:clips.length?`<details class="clip-toggle"><summary>Legacy evidence (${clips.length})</summary><div class="clip-list">${clips.map(cl=>`<a href="${esc(cl.url)}" target="_blank" rel="noopener">${esc(cl.name)}</a>`).join('')}</div></details>`:'<span style="color:var(--ink-faint)">—</span>'}</td>
         <td><span class="wk-status wk-${w.status||'pending'}">${w.status||'pending'}</span></td>
         <td style="text-align:right">${w.status!=='verified'?`<button class="verifybtn" onclick="verifyWeek('${comp.id}','${w.id}')">Verify</button>`:''}</td></tr>`; }).join('')}
       </tbody></table></details>`;
@@ -2778,7 +2883,7 @@ function renderPartner(){
     </div><div class="pshow-body">`;
     if(rows.length){ html+=`<div class="wk-list">`+rows.map(w=>{
         if(w.kind==='imported'){
-          const breakdown=[['YouTube',w.data.yt],['Social',w.data.soc],['Acast',w.data.ac]].filter(([,v])=>v!==undefined);
+          const breakdown=[['YouTube',w.data.yt],['Social',w.data.soc],['Audio',w.data.ac]].filter(([,v])=>v!==undefined);
           return `<div class="wk-item ${w.baseline?'is-baseline':''}"><div class="wk-l"><span class="wk-status ${w.baseline?'wk-baseline':'wk-verified'}">${w.baseline?'baseline':'verified'}</span><span>${esc(w.label)}</span><span class="wk-source">${w.baseline?'Pre-partnership · excluded from YTD':'Imported report · read-only'}</span></div>
             <div style="display:flex;align-items:center;gap:14px"><span class="wk-aud">${aud(w.total)}</span><details class="wk-breakdown"><summary>View breakdown</summary><div class="wk-breakdown-data">${breakdown.map(([label,v])=>`<span>${label}<b>${aud(v)}</b></span>`).join('')}</div></details></div></div>`;
         }
@@ -2789,8 +2894,9 @@ function renderPartner(){
           (c.assets||[]).forEach(as=>{ const raw=(w.assets||{})[as.id]; if(raw!==undefined&&raw!==null&&raw!==''){ scored++; if((+raw||0) >= (+as.perWeek||0)) onT++; } });
           if(scored){ const pc=Math.round(onT/scored*100); fulfil=`<span class="wk-fulfil wk-fulfil-${pc>=100?'ok':pc>=70?'mid':'low'}" title="${onT} of ${scored} entitlements met their per-round target">${pc}% on target</span>`; }
         }
+        const report=reportHref(w);
         return `<div class="wk-item"><div class="wk-l"><span class="wk-status wk-${w.status||'pending'}">${w.status||'pending'}</span><span>${esc(w.label)}</span>${fulfil}</div>
-        <div style="display:flex;align-items:center;gap:12px">${c.mode==='audience'?`<span class="wk-aud">${aud(weekAudTotal(w))}</span>`:''}<button class="linkbtn" onclick="openWeekForm('${c.id}','${w.id}')">Edit</button></div></div>`;
+        <div style="display:flex;align-items:center;gap:12px">${report?`<a class="report-link" href="${esc(report)}" target="_blank" rel="noopener">Detailed report ↗</a>`:''}${c.mode==='audience'?`<span class="wk-aud">${aud(weekAudTotal(w))}</span>`:''}<button class="linkbtn" onclick="openWeekForm('${c.id}','${w.id}')">Edit</button></div></div>`;
       }).join('')+`</div>`;
     } else html+=`<div class="wk-empty">No delivery received yet${nextMonth?` — ${esc(nextMonth)} reporting is due`:''}.</div>`;
     html+= nextMonth?`<button class="btn btn-primary" onclick="openWeekForm('${c.id}')">＋ Log ${esc(nextMonth)}</button>`:`<div class="wk-hint" style="margin:8px 0 0">Every reporting month is already recorded. Use Edit on a submitted month to send a correction.</div>`;
@@ -2805,7 +2911,7 @@ function setPartner(pid){ view.partnerPid=pid; render(); }
    fields when those arrays are absent so a selected month never opens blank. */
 const FANATICS_SUBMISSION_SCHEMA={
   'Kenty Blitz':{
-    platforms:['YouTube','Spotify','Apple Podcasts','Social'],
+    platforms:['YouTube','Social'],
     assets:[
       {id:'kb_sm',name:'StatMate mention',perWeek:2},
       {id:'kb_multi',name:"Kenty's Multi segment",perWeek:1},
@@ -2816,7 +2922,7 @@ const FANATICS_SUBMISSION_SCHEMA={
     ]
   },
   'Kenty Primetime':{
-    platforms:['YouTube','Spotify','Apple Podcasts','Social'],
+    platforms:['YouTube','Social'],
     assets:[
       {id:'kp_int',name:'Woodsy & Kenty integration',perWeek:1},
       {id:'kp_clips',name:'Show clips social',perWeek:2},
@@ -2824,7 +2930,7 @@ const FANATICS_SUBMISSION_SCHEMA={
     ]
   },
   'Rugby League Insider (RLI)':{
-    platforms:['YouTube','Acast','Facebook','Instagram','TikTok'],
+    platforms:['YouTube','Facebook','Instagram','TikTok'],
     assets:[
       {id:'rli_ffu',name:'Friday Fill Up segment',perWeek:1},
       {id:'rli_odds',name:'Odds overlay',perWeek:1},
@@ -2838,6 +2944,10 @@ const FANATICS_SUBMISSION_SCHEMA={
       {id:'rli_yts',name:'YT Shorts',perWeek:10},
       {id:'rli_itm',name:'In-the-Moment weekend reactive',perWeek:4}
     ]
+  },
+  'Fanatics Audio — all shows':{
+    platforms:['Audio — all Fanatics shows'],
+    assets:[]
   },
   'ESPN Linear':{
     platforms:['Linear TV audience (M18+)'],
@@ -2875,35 +2985,11 @@ const FANATICS_SUBMISSION_SCHEMA={
       {id:'fox_fc_social',name:'FoxCatcher social integrations',contractedQty:81}
     ]
   },
-  'Kayo & Foxtel Go Streaming':{
-    platforms:['Kayo DAI impressions','Foxtel Go DAI impressions'],
-    assets:[]
-  },
-  'StatMate Social':{
-    platforms:['Facebook','Instagram'],
-    assetReporting:'ytd',
-    assets:[{id:'fox_statmate_social',name:'StatMate social infographics',contractedQty:54}]
-  },
-  'FoxSports.com.au Digital':{
-    platforms:['FoxSports.com.au impressions','Video pre-roll impressions'],
-    assetReporting:'ytd',
-    assets:[
-      {id:'fox_homepage_takeovers',name:'Homepage takeovers',contractedQty:5},
-      {id:'fox_article_odds',name:'Article odds-widget campaign',contractedQty:1},
-      {id:'fox_index_odds',name:'Index / latest-news odds-widget campaign',contractedQty:1},
-      {id:'fox_match_centre',name:'Match-centre odds integration',contractedQty:1},
-      {id:'fox_score_centre',name:'Score-centre integration',contractedQty:1},
-      {id:'fox_ladder',name:'Ladder-page integration',contractedQty:1},
-      {id:'fox_fixtures',name:'Fixtures-page integration',contractedQty:1},
-      {id:'fox_launch_display',name:'Season-launch display burst',contractedQty:1},
-      {id:'fox_finals_display',name:'Finals display burst',contractedQty:1}
-    ]
-  }
 };
 function ensurePartnerSubmissionSchema(c){
   const schema=FANATICS_SUBMISSION_SCHEMA[(c&&c.name)||''];
   if(!c||!schema)return c;
-  if(!Array.isArray(c.platforms)||!c.platforms.length)c.platforms=[...schema.platforms];
+  c.platforms=[...schema.platforms];
   if(!Array.isArray(c.assets)||!c.assets.length)c.assets=schema.assets.map(a=>({...a}));
   if(schema.assetReporting&&!c.assetReporting)c.assetReporting=schema.assetReporting;
   if(!c.assetReporting&&(c.assets||[]).some(a=>a.contractedQty!==undefined))c.assetReporting='ytd';
@@ -2926,13 +3012,11 @@ function openWeekForm(cid,wid){
   let assetFields='';
   if(assets.length){
     const cumulative=c.assetReporting==='ytd';
-    assetFields=`<div class="wk-sub">${cumulative?'Integration delivery YTD':'Entitlements delivered this month'}</div><div class="wk-hint">${cumulative?'Enter the cumulative total delivered from the start of the agreement through the selected month. Update the previous YTD total—do not enter only this month’s increment.':'Enter the number of times each entitlement ran this month — a plain whole number (e.g. 4), not a percentage.'} Attach a short clip or screenshot as proof where available.</div><div class="wk-grid">`+assets.map(as=>{
-      const clipUrl=clipHref(w,as.id);
+    assetFields=`<div class="wk-sub">${cumulative?'Integration delivery YTD':'Entitlements delivered this month'}</div><div class="wk-hint">${cumulative?'Enter the cumulative total delivered from the start of the agreement through the selected month. Update the previous YTD total—do not enter only this month’s increment.':'Enter the number of times each entitlement ran this month — a plain whole number (e.g. 4), not a percentage.'}</div><div class="wk-grid">`+assets.map(as=>{
       const existing=w&&w.assets?(w.assets[as.id]??''):(cumulative?(cumulativeAssetDelivered(c,as,false)??''):'');
       const target=cumulative?`${as.contractedQty} contracted`:`${as.perWeek}/round`;
       return `<div class="wk-fld"><label>${esc(as.name)} <span class="tgt">· ${target}</span></label>
         <input type="number" min="0" step="1" id="wk_${as.id}" value="${existing}" placeholder="0">
-        <div class="wk-clip">${clipUrl?`<a href="${esc(clipUrl)}" target="_blank" rel="noopener">Current clip attached</a>`:''}<input type="file" id="wkclip_${as.id}" accept="image/*,video/*"></div>
       </div>`;
     }).join('')+`</div>`;
   } else if(c.mode==='fulfilment'){
@@ -2947,17 +3031,27 @@ function openWeekForm(cid,wid){
   }
   const monthSelect=monthOpts.length?`<select class="inp" id="w_label" ${w?'disabled':''}>${!w?'<option value="" disabled selected>Select month</option>':''}${monthOpts.map(m=>`<option value="${esc(m)}" ${w&&w.label===m?'selected':''}>${esc(m)}</option>`).join('')}</select>`:`<div class="wk-hint" style="margin:0">Every month in this show's term already has an entry. Edit an existing month above to make a correction.</div>`;
   const reverifyNote=(w&&w.status==='verified')?`<div class="wk-hint" style="color:var(--warn);margin-top:-4px;margin-bottom:14px">This month is already verified. Saving a change here will send it back to PointsBet for re-verification before it counts again.</div>`:'';
-  const reportingGuide=c.assetReporting==='ytd'
-    ?`<div style="border-left:3px solid var(--accent);background:var(--accent-soft);padding:10px 12px;margin-bottom:16px;font-size:12.5px"><b>ESPN reporting:</b> enter this month's audience and the latest cumulative integration totals YTD.</div>`
-    :`<div style="border-left:3px solid var(--accent);background:var(--accent-soft);padding:10px 12px;margin-bottom:16px;font-size:12.5px"><b>Fanatics reporting:</b> enter audience and asset delivery for the selected month only. Do not enter YTD asset totals.</div>`;
+  const reportingGuide=p.name==='FanaticsTV'&&c.name==='Fanatics Audio — all shows'
+      ?`<div style="border-left:3px solid var(--accent);background:var(--accent-soft);padding:10px 12px;margin-bottom:16px;font-size:12.5px"><b>Fanatics audio:</b> enter one combined audio total across all Fanatics shows for this month.</div>`
+      :p.name==='FanaticsTV'
+        ?`<div style="border-left:3px solid var(--accent);background:var(--accent-soft);padding:10px 12px;margin-bottom:16px;font-size:12.5px"><b>Fanatics reporting:</b> enter this show's video/social audience and asset delivery for the selected month. Audio is entered once in <b>Fanatics Audio — all shows</b>.</div>`
+        :c.assetReporting==='ytd'
+          ?`<div style="border-left:3px solid var(--accent);background:var(--accent-soft);padding:10px 12px;margin-bottom:16px;font-size:12.5px"><b>Cumulative reporting:</b> enter this month's audience and the latest cumulative integration totals YTD.</div>`
+          :`<div style="border-left:3px solid var(--accent);background:var(--accent-soft);padding:10px 12px;margin-bottom:16px;font-size:12.5px"><b>Monthly reporting:</b> enter audience and delivery for the selected month.</div>`;
+  const currentReport=reportHref(w),currentReportName=w&&w.assets&&w.assets.__report_name?w.assets.__report_name:'Current detailed report';
+  const reportField=`<div class="wk-sub">Detailed report</div><div class="report-upload">
+    ${currentReport?`<div class="report-current"><span>${esc(currentReportName)}</span><a href="${esc(currentReport)}" target="_blank" rel="noopener">Open current report ↗</a></div>`:''}
+    <label style="font-size:12px;font-weight:650">${currentReport?'Replace detailed report':'Upload detailed report'} <span style="color:var(--ink-faint);font-weight:400">(optional)</span></label>
+    <input type="file" id="w_report" accept=".pdf,.xlsx,.xls,.csv,.pptx,.ppt,.docx,.doc,image/*">
+    <div class="hint">One supporting report for this month. PDF, Excel, PowerPoint, Word or image, up to 25 MB. It stays attached so PointsBet can open it when reviewing the detail.</div>
+  </div>`;
   mount(scrim(`<div class="modal-head"><h3>${wid?'Edit month':'Log a month'} — ${esc(c.name)}</h3><button class="x" onclick="closeModal()">×</button></div>
     <div class="modal-body">
       <div class="field" style="max-width:260px"><label>Month</label>${monthSelect}</div>
       ${reverifyNote}
       ${reportingGuide}
-      ${audFields}${assetFields}
+      ${audFields}${assetFields}${reportField}
       <div class="wk-sub">Reporting information</div>
-      <div class="field"><label>Data source <span style="color:var(--accent)">*</span></label><input class="inp" id="w_source" value="${esc(submissionNote.source)}" placeholder="e.g. YouTube Analytics, Spotify, Meta or ESPN reporting"><div class="hint">Name the report or platform used for these figures.</div></div>
       <div class="field"><label>Comments <span style="color:var(--ink-faint);font-weight:400">(optional)</span></label><textarea class="inp" id="w_comments" rows="3" placeholder="Explain anomalies, corrections, unavailable figures or anything PointsBet should know.">${esc(submissionNote.comments)}</textarea></div>
     </div>
     <div class="modal-foot"><div>${wid?`<button class="btn btn-danger" onclick="deleteWeek('${cid}','${wid}')">Delete month</button>`:''}</div>
@@ -2970,39 +3064,40 @@ async function saveWeek(cid,wid){
   const w=wid?(c.weeks||[]).find(x=>x.id===wid):null;
   const monthEl=document.getElementById('w_label');
   const label=monthEl?(monthEl.value||'').trim():''; if(!label){toast('Select a month');return;}
-  const source=(document.getElementById('w_source').value||'').trim();
   const comments=(document.getElementById('w_comments').value||'').trim();
-  if(!source){toast('Add the data source before submitting');return;}
-  const note=formatSubmissionNote(source,comments);
+  const note=comments;
   const audience={}; let audienceEntries=0;
   (c.platforms||[]).forEach(pl=>{ const v=document.getElementById('wa_'+slug(pl)); if(v&&v.value!==''){audience[pl]=+v.value;audienceEntries++;} });
   const assetsObj={};
   let assetEntries=0;
-  const clipUploads=[];
   if((c.assets||[]).length){
     c.assets.forEach(as=>{
       const v=document.getElementById('wk_'+as.id); if(v&&v.value!==''){assetsObj[as.id]=+v.value;assetEntries++;}
       const existingClip=w&&w.assets?w.assets[as.id+'__clip']:null;
-      const fileInput=document.getElementById('wkclip_'+as.id);
-      if(fileInput&&fileInput.files&&fileInput.files[0]) clipUploads.push({assetId:as.id,file:fileInput.files[0]});
-      else if(existingClip) assetsObj[as.id+'__clip']=existingClip;
+      if(existingClip) assetsObj[as.id+'__clip']=existingClip;
     });
   } else if(c.mode==='fulfilment'){ const v=document.getElementById('wk_qty'); if(v&&v.value!==''){assetsObj.qty=+v.value;assetEntries++;} }
   if(c.mode==='audience'&&(c.platforms||[]).length&&!audienceEntries){toast('Enter at least one audience figure for this month');return;}
   if((c.assets||[]).length&&!assetEntries){toast(c.assetReporting==='ytd'?'Enter the current integration totals YTD':'Enter at least one asset delivery figure for this month');return;}
 
-  if(clipUploads.length){
-    if(!SB){ toast("Saved the numbers, but clips can't upload without a live connection"); clipUploads.length=0; }
+  const previousReport=w&&w.assets?w.assets.__report:null;
+  const previousReportName=w&&w.assets?w.assets.__report_name:null;
+  if(previousReport)assetsObj.__report=previousReport;
+  if(previousReportName)assetsObj.__report_name=previousReportName;
+  const reportInput=document.getElementById('w_report');
+  const reportFile=reportInput&&reportInput.files&&reportInput.files[0];
+  if(reportFile){
+    if(reportFile.size>25*1024*1024){toast('Detailed report must be 25 MB or smaller');return;}
+    if(!SB){toast('Detailed reports require the live version of the portal');return;}
     else{
       const btn=document.querySelector('.modal-foot .btn-primary'); if(btn){btn.disabled=true; btn.textContent='Uploading…';}
       try{
-        for(const {assetId,file} of clipUploads){
-          const path=`${c.partnership_id||view.partnerPid}/${cid}/${slug(label)}/${assetId}-${Date.now()}-${slug(file.name)}`;
-          const {error:upErr}=await SB.storage.from('pr-clips').upload(path,file,{upsert:true});
-          if(upErr) throw upErr;
-          assetsObj[assetId+'__clip']='storage:'+path;
-        }
-      }catch(e){ toast('Clip upload failed: '+e.message); if(btn){btn.disabled=false; btn.textContent='Submit';} return; }
+        const path=`${c.partnership_id||view.partnerPid}/${cid}/${slug(label)}/report-${Date.now()}-${slug(reportFile.name)}`;
+        const {error:upErr}=await SB.storage.from('pr-clips').upload(path,reportFile,{upsert:true});
+        if(upErr)throw upErr;
+        assetsObj.__report='storage:'+path;
+        assetsObj.__report_name=reportFile.name;
+      }catch(e){toast('Detailed report upload failed: '+e.message);if(btn){btn.disabled=false;btn.textContent='Submit';}return;}
     }
   }
 
@@ -3043,7 +3138,7 @@ async function ownerRefreshWeeks(){ if(!SB)return; hydrateWeeks(await sbLoadWeek
 
 function inferPublishedPartnershipName(pid,shows){
   if(pid==='espn-linear-2026'||(shows||[]).some(s=>s.name==='ESPN Linear'))return 'ESPN Linear Partnership';
-  if(pid==='fox-footy-afl-2026'||(shows||[]).some(s=>/^Fox Footy|^Kayo & Foxtel Go|^StatMate Social|^FoxSports\.com\.au/.test(s.name||'')))return 'Fox Footy AFL Partnership';
+  if(pid==='fox-footy-afl-2026'||(shows||[]).some(s=>/^Fox Footy/.test(s.name||'')))return 'Fox Footy AFL Partnership';
   if((shows||[]).some(s=>/^Kenty|Rugby League Insider/.test(s.name||'')))return 'FanaticsTV';
   return (shows&&shows[0]&&shows[0].partnership_name)||'Your partnership';
 }
@@ -3193,7 +3288,7 @@ function metricCard(label,value,compare='',tone=''){
 }
 function metricValue(p,s,key){
   const m=mediaRoll(s,p), c=s.commercial||{};
-  if(key==='media_value') return m.inv;
+  if(key==='media_value') return (+p.contractedValue||0)||(m.inv||null);
   if(key==='reach') return m.del!==null?m.del:m.guar;
   if(key==='cpm') return m.delCpm!==null?m.delCpm:m.propCpm;
   if(key==='ngr') return n(c.ngrAct);
@@ -3210,7 +3305,7 @@ function benchmarkBase(p,s,key){
   if(view.benchmarkBasis==='previous'){ const prev=previousSnapshot(p,s); return {label:'Previous review',value:prev?metricValue(p,prev,key):null,sample:prev?1:0}; }
   if(view.benchmarkBasis==='target'){
     const c=s.commercial||{}; const m=mediaRoll(s);
-    const maps={ngr:n(c.ngrExp),actives:n(c.activesExp),reach:m.guar,cpm:m.propCpm,delivery:100,media_value:n(p.contractedValue)};
+    const maps={ngr:n(c.ngrExp),actives:n(c.activesExp),reach:m.guar,cpm:m.delCpmBenchmark??m.propCpm,delivery:100,media_value:n(p.contractedValue)};
     return {label:'Plan / target',value:maps[key]??null,sample:1};
   }
   const vals=STATE.partnerships.map(x=>metricValue(x,currentSnap(x),key)).filter(v=>v!==null);
@@ -3224,11 +3319,15 @@ function deltaInfo(key,current,base){
 function setBenchmarkBasis(value){view.benchmarkBasis=value;render();}
 function renderEfficiency(p,s){
   const m=mediaRoll(s,p);
-  const comps=(s.media.components||[]).filter(c=>c.mode==='audience');
-  let html=moduleHero('Media efficiency','Media efficiency','How the money spent on this partnership converts into audience, per show and blended. Investment is set per show and is the single source of truth for every CPM.',`<button class="btn btn-primary" onclick="editComponent(null)">＋ Show / package</button>`);
-  html+=`<div class="metric-strip">${metricCard('Total investment',money(m.inv),'Sum of per-show costs')}${metricCard('Investment YTD',m.spendToDate!==null?money(m.spendToDate):'—','Prorated to verified delivery period')}${metricCard('Views/listens YTD',metricFormat('reach',m.del!==null?m.del:m.guar),m.del!==null?'From monthly performance':'Guaranteed')}${metricCard('Blended delivered CPM YTD',m.delCpm!==null?'$'+m.delCpm.toFixed(2):'—',m.periodMatched?'Investment YTD ÷ views/listens YTD':'Across all shows')}${metricCard('Proposed CPM',m.propCpm!==null?'$'+m.propCpm.toFixed(2):'—','At guaranteed delivery')}</div>`;
+  const isFoxTracked=p.id==='fox-footy-afl-2026';
+  const comps=(s.media.components||[]).filter(c=>isFoxTracked||c.mode==='audience');
+  const efficiencyCopy=isFoxTracked
+    ?`Efficiency for the active ${money(m.inv)} Linear TVCs, Fox Footy Integrations and Production scope. The full ${money(p.contractedValue)} partnership remains visible but streaming, standalone social and digital do not affect these calculations.`
+    :'How the money spent on this partnership converts into audience, per show and blended. Investment is set per show and is the single source of truth for every CPM.';
+  let html=moduleHero('Media efficiency',isFoxTracked?'Tracked media efficiency':'Media efficiency',efficiencyCopy,`<button class="btn btn-primary" onclick="editComponent(null)">＋ Show / package</button>`);
+  html+=`<div class="metric-strip">${metricCard(isFoxTracked?'Tracked investment':'Total investment',money(m.inv),isFoxTracked?`${money(p.contractedValue)} full partnership value`:'Sum of per-show costs')}${metricCard('Investment YTD',m.spendToDate!==null?money(m.spendToDate):'—','Prorated to verified delivery period')}${metricCard('Views/listens YTD',metricFormat('reach',m.del!==null?m.del:m.guar),m.del!==null?'From monthly performance':'Guaranteed')}${metricCard('Blended delivered CPM YTD',m.delCpm!==null?'$'+m.delCpm.toFixed(2):'—',m.periodMatched?'Investment YTD ÷ views/listens YTD':'Across all shows')}${metricCard('Proposed CPM',m.propCpm!==null?'$'+m.propCpm.toFixed(2):'—','At guaranteed delivery')}</div>`;
   // per-show CPM table
-  html+=`<section class="panel"><div class="panel-head"><h3>CPM by show</h3><span class="lil">Investment YTD ÷ views/listens YTD</span></div><div class="panel-body"><table class="dtable"><thead><tr><th>Show</th><th class="num">Total investment</th><th class="num">Investment YTD</th><th class="num">Views/listens YTD</th><th class="num">Delivered CPM YTD</th><th class="num">Proposed CPM</th></tr></thead><tbody>`;
+  html+=`<section class="panel"><div class="panel-head"><h3>${isFoxTracked?'Investment and CPM by tracked area':'CPM by show'}</h3><span class="lil">Investment YTD ÷ views/listens YTD</span></div><div class="panel-body"><table class="dtable"><thead><tr><th>${isFoxTracked?'Tracked area':'Show'}</th><th class="num">Total investment</th><th class="num">Investment YTD</th><th class="num">Views/listens YTD</th><th class="num">Delivered CPM YTD</th><th class="num">Proposed CPM</th></tr></thead><tbody>`;
   if(comps.length){
     const totalMonths=termMonths(p);
     comps.forEach(c=>{
@@ -3239,7 +3338,7 @@ function renderEfficiency(p,s){
       const dcCls=(dc!==null&&pc!==null)?(dc<=pc?'good':'bad'):'';
       html+=`<tr><td><b>${esc(c.name)}</b></td><td class="num">${inv!==null?money(inv):'—'}</td><td class="num">${invYtd!==null?money(invYtd):'—'}</td><td class="num">${d!==null?aud(d):(g!==null?aud(g)+' guar':'—')}</td><td class="num"><b style="color:var(--${dcCls||'ink'})">${dc!==null?'$'+dc.toFixed(2):'—'}</b></td><td class="num">${pc!==null?'$'+pc.toFixed(2):'—'}</td></tr>`;
     });
-    html+=`<tr style="border-top:2px solid var(--line)"><td><b>Partnership (blended)</b></td><td class="num"><b>${money(m.inv)}</b></td><td class="num"><b>${m.spendToDate!==null?money(m.spendToDate):'—'}</b></td><td class="num"><b>${m.del!==null?aud(m.del):(m.guar!==null?aud(m.guar)+' guar':'—')}</b></td><td class="num"><b>${m.delCpm!==null?'$'+m.delCpm.toFixed(2):'—'}</b></td><td class="num"><b>${m.propCpm!==null?'$'+m.propCpm.toFixed(2):'—'}</b></td></tr>`;
+    html+=`<tr style="border-top:2px solid var(--line)"><td><b>${isFoxTracked?'Reported scope (comparable)':'Partnership (blended)'}</b></td><td class="num"><b>${money(isFoxTracked?(m.reportedInv??m.inv):m.inv)}</b></td><td class="num"><b>${m.spendToDate!==null?money(m.spendToDate):'—'}</b></td><td class="num"><b>${m.del!==null?aud(m.del):(m.guar!==null?aud(m.guar)+' guar':'—')}</b></td><td class="num"><b>${m.delCpm!==null?'$'+m.delCpm.toFixed(2):'—'}</b></td><td class="num"><b>${(m.delCpmBenchmark??m.propCpm)!==null?'$'+(m.delCpmBenchmark??m.propCpm).toFixed(2):'—'}</b></td></tr>`;
   } else {
     html+=`<tr><td colspan="6" style="color:var(--ink-faint)">No audience shows on this partnership yet.</td></tr>`;
   }
@@ -3264,7 +3363,7 @@ function renderExecutive(p,s){
   const status={good:'Performing above expectations',warn:'Mixed performance',bad:'Requires review'}[pulse.status]||'Insufficient data';
   const m=mediaRoll(s,p);
   const metrics=[
-    ['Investment',money(m.inv)],
+    [p.id==='fox-footy-afl-2026'?'Tracked investment':'Investment',money(m.inv)],
     ['Reach',metricFormat('reach',metricValue(p,s,'reach'))],
     ['Delivered CPM',m.delCpm!==null?'$'+m.delCpm.toFixed(2):'—'],
     ['Delivery pace',metricFormat('delivery',metricValue(p,s,'delivery'))]
@@ -3274,7 +3373,8 @@ function renderExecutive(p,s){
   const benchLabels={reach:'Reach',cpm:'Delivered CPM',delivery:'Delivery pace'};
   const basis=benchKeys.map(k=>benchmarkBase(p,s,k)); const first=basis[0];
   const draftChange=m.del!==null&&m.guar!==null?`Audience delivery is ${Math.round((m.del-m.guar)/m.guar*100)}% against the guarantee`:'Audience delivery is not yet complete enough to compare with the guarantee';
-  const draftCpm=m.delCpm!==null?`, at a delivered CPM of $${m.delCpm.toFixed(2)}${m.propCpm!==null?` versus $${m.propCpm.toFixed(2)} proposed`:''}`:'';
+  const draftBenchmark=m.delCpmBenchmark??m.propCpm;
+  const draftCpm=m.delCpm!==null?`, at a delivered CPM of $${m.delCpm.toFixed(2)}${draftBenchmark!==null?` versus $${draftBenchmark.toFixed(2)} comparable proposed`:''}`:'';
   let html=moduleHero('Board-ready view','Executive summary','A concise, printable decision surface — named evidence, a recommended action, and how this partnership compares. Never an overall partnership score.',`<button class="btn btn-ghost" onclick="window.print()">Print / save PDF</button>`);
   html+=`<div class="metric-strip">${metrics.map(x=>metricCard(x[0],x[1],x[0]==='Delivered CPM'&&m.periodMatched?'Spend to date vs audience to date':`As at ${fmtDate(s.date)}`)).join('')}</div>`;
   // draft summary (absorbed from AI insights)
