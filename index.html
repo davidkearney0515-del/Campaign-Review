@@ -1835,6 +1835,19 @@ function perfTargetAt(m,show,index){
   for(let i=0;i<=index;i++)if(!perfIsBaseline(m,show,i))elapsed++;
   return target.guarantee*Math.min(elapsed,target.termMonths)/target.termMonths;
 }
+function perfTargetMonthAt(m,show,index){
+  const target=m.targets&&m.targets[show];
+  if(!target)return null;
+  if(target.targetByMonth){
+    const v=+target.targetByMonth[m.months[index]];
+    return Number.isFinite(v)?v:null;
+  }
+  if(!target.guarantee||!target.termMonths)return null;
+  return target.guarantee/target.termMonths;
+}
+function perfProjectedDeliveredMode(m){
+  return /Fox Footy/i.test(m.partnershipName||'') && (m.viewMode||'monthly')==='target';
+}
 function perfPoint(m,show,index,pending){
   const mode=m.viewMode||'monthly',mo=m.months[index];
   if(mode==='monthly')return perfRawValue(m,pending?(m.shows[show].pending||{})[mo]:m.shows[show].data[mo]);
@@ -1847,17 +1860,33 @@ function perfPoint(m,show,index,pending){
 function perfFormat(m,value){
   return (m.viewMode||'monthly')==='target'?(value===null?'—':Math.round(value)+'%'):aud(value);
 }
+function perfAxisFormat(m,value){
+  return perfProjectedDeliveredMode(m)?aud(value):perfFormat(m,value);
+}
 function buildPerfChartSVG(spec){
   const { months, shows, order, colors, metricLabel, partnershipName, asAt } = spec;
   const A = order;
+  const projectedDelivered=perfProjectedDeliveredMode(spec);
   const W=1200, H=675;
   const padL=82, padR=46, padTop=152, padBottom=128;
   const plotW=W-padL-padR;
   const plotTop=padTop, plotBottom=H-padBottom, plotH=plotBottom-plotTop;
 
   let dataMax=0;
-  months.forEach((mo,i)=>A.forEach(s=>{ const v=perfPoint(spec,s,i,false); const pv=spec.showPending!==false&&perfHasPendingThrough(spec,s,i)?perfPoint(spec,s,i,true):null; if(v!==null)dataMax=Math.max(dataMax,v); if(pv!==null)dataMax=Math.max(dataMax,pv); }));
-  const yMax=(spec.viewMode==='target')?Math.max(120,niceMax(dataMax||100)):niceMax(dataMax||1);
+  months.forEach((mo,i)=>A.forEach(s=>{
+    if(projectedDelivered){
+      const projected=perfTargetMonthAt(spec,s,i);
+      const delivered=perfRawValue(spec,shows[s].data[mo]);
+      if(projected!==null)dataMax=Math.max(dataMax,projected);
+      if(delivered!==null)dataMax=Math.max(dataMax,delivered);
+      return;
+    }
+    const v=perfPoint(spec,s,i,false);
+    const pv=spec.showPending!==false&&perfHasPendingThrough(spec,s,i)?perfPoint(spec,s,i,true):null;
+    if(v!==null)dataMax=Math.max(dataMax,v);
+    if(pv!==null)dataMax=Math.max(dataMax,pv);
+  }));
+  const yMax=(spec.viewMode==='target'&&!projectedDelivered)?Math.max(120,niceMax(dataMax||100)):niceMax(dataMax||1);
   const yFor=v=> plotBottom - (v/yMax)*plotH;
 
   const groupW=plotW/months.length;
@@ -1874,7 +1903,7 @@ function buildPerfChartSVG(spec){
   // title block
   g+=`<text x="${padL}" y="44" font-family="${F.body}" font-size="10" font-weight="700" fill="#E31B23" letter-spacing="1.4">PARTNERSHIP REVIEW</text>`;
   g+=`<text x="${padL}" y="76" font-family="${F.head}" font-size="28" font-weight="700" fill="${C.ink}" letter-spacing="-0.5">Monthly performance</text>`;
-  const viewLabel={monthly:'Monthly delivery',cumulative:'Cumulative YTD',target:'Against YTD target'}[spec.viewMode||'monthly'];
+  const viewLabel=projectedDelivered?'Projected vs delivered':{monthly:'Monthly delivery',cumulative:'Cumulative YTD',target:'Against YTD target'}[spec.viewMode||'monthly'];
   const sub=`${partnershipName}  ·  ${metricLabel}  ·  ${viewLabel}  ·  ${months[0]}–${months[months.length-1]}`;
   g+=`<text x="${padL}" y="101" font-family="${F.body}" font-size="14" fill="${C.soft}">${esc(sub)}</text>`;
   g+=`<text x="${W-padR}" y="44" text-anchor="end" font-family="${F.body}" font-size="11" font-weight="700" fill="${C.ink}" letter-spacing="0.5">POINTSBET</text>`;
@@ -1913,9 +1942,9 @@ function buildPerfChartSVG(spec){
   for(let i=0;i<=ticks;i++){
     const v=yMax*i/ticks, y=yFor(v);
     g+=`<line x1="${padL}" y1="${y.toFixed(1)}" x2="${W-padR}" y2="${y.toFixed(1)}" stroke="${i===0?C.line:C.lineSoft}" stroke-width="1"/>`;
-    g+=`<text x="${padL-10}" y="${(y+4).toFixed(1)}" text-anchor="end" font-family="${F.mono}" font-size="11" fill="${C.faint}">${perfFormat(spec,v)}</text>`;
+    g+=`<text x="${padL-10}" y="${(y+4).toFixed(1)}" text-anchor="end" font-family="${F.mono}" font-size="11" fill="${C.faint}">${perfAxisFormat(spec,v)}</text>`;
   }
-  if(spec.viewMode==='target'){
+  if(spec.viewMode==='target'&&!projectedDelivered){
     const ty=yFor(100);
     g+=`<line x1="${padL}" y1="${ty.toFixed(1)}" x2="${W-padR}" y2="${ty.toFixed(1)}" stroke="${C.ink}" stroke-width="1.4" stroke-dasharray="6 4" opacity=".65"/>`;
     g+=`<text x="${W-padR}" y="${(ty-7).toFixed(1)}" text-anchor="end" font-family="${F.body}" font-size="10" font-weight="700" fill="${C.ink}">YTD TARGET · 100%</text>`;
@@ -1928,6 +1957,31 @@ function buildPerfChartSVG(spec){
     const startX=gx+groupW/2-spread/2;
     A.forEach((s,si)=>{
       const sh=shows[s];
+      if(projectedDelivered){
+        const projected=perfTargetMonthAt(spec,s,gi);
+        const delivered=perfRawValue(spec,sh.data[mo]);
+        const bx=startX+si*(barW+barGap);
+        const pairGap=6;
+        const pairW=Math.min(32,Math.max(16,(barW*1.9-pairGap)/2));
+        const px=bx-pairW/2-pairGap/2;
+        const dx=bx+pairW/2+pairGap/2;
+        if(projected!==null){
+          const h=Math.max((projected/yMax)*plotH,2);
+          const y=plotBottom-h;
+          g+=`<rect x="${px.toFixed(1)}" y="${y.toFixed(1)}" width="${pairW.toFixed(1)}" height="${h.toFixed(1)}" rx="3" fill="#EEF1F5" stroke="#CBD2DC" stroke-width="1"/>`;
+        }
+        if(delivered!==null){
+          const h=Math.max((delivered/yMax)*plotH,2);
+          const y=plotBottom-h;
+          const pct=projected?Math.round(delivered/projected*100):null;
+          g+=`<rect x="${dx.toFixed(1)}" y="${y.toFixed(1)}" width="${pairW.toFixed(1)}" height="${h.toFixed(1)}" rx="3" fill="${colors[s]}"/>`;
+          g+=`<text x="${(dx+pairW/2).toFixed(1)}" y="${(y-8).toFixed(1)}" text-anchor="middle" font-family="${F.mono}" font-size="11" fill="${C.soft}" font-weight="500">${aud(delivered)}</text>`;
+          if(pct!==null)g+=`<text x="${(px+pairW+pairGap/2).toFixed(1)}" y="${(Math.min(yFor(projected||0),y)-24).toFixed(1)}" text-anchor="middle" font-family="${F.body}" font-size="10" font-weight="700" fill="${pct>=100?'#356B4C':'#C38318'}">${pct}%</text>`;
+        } else {
+          g+=`<text x="${(dx+pairW/2).toFixed(1)}" y="${(plotBottom-6).toFixed(1)}" text-anchor="middle" font-family="${F.body}" font-size="12" fill="#C4C9D2">-</text>`;
+        }
+        return;
+      }
       const vv=perfPoint(spec,s,gi,false), pv=spec.showPending!==false&&perfHasPendingThrough(spec,s,gi)?perfPoint(spec,s,gi,true):null;
       const hasV=vv!==null, hasP=pv!==null;
       const bx=startX+si*(barW+barGap);
@@ -1953,11 +2007,19 @@ function buildPerfChartSVG(spec){
 
   // legend — show colour keys
   const legY=H-79; let lx=padL;
-  A.forEach(s=>{
-    g+=`<rect x="${lx}" y="${legY-9}" width="12" height="12" rx="2.5" fill="${colors[s]}"/>`;
-    g+=`<text x="${lx+18}" y="${legY+1}" font-family="${F.body}" font-size="12.5" fill="${C.ink}">${esc(s)}</text>`;
-    lx+=18+8+String(s).length*7.2+26;
-  });
+  if(projectedDelivered){
+    g+=`<rect x="${lx}" y="${legY-9}" width="12" height="12" rx="2.5" fill="#EEF1F5" stroke="#CBD2DC"/>`;
+    g+=`<text x="${lx+18}" y="${legY+1}" font-family="${F.body}" font-size="12.5" fill="${C.ink}">projected</text>`;
+    lx+=96;
+    g+=`<rect x="${lx}" y="${legY-9}" width="12" height="12" rx="2.5" fill="${colors[A[0]]||'#E31B23'}"/>`;
+    g+=`<text x="${lx+18}" y="${legY+1}" font-family="${F.body}" font-size="12.5" fill="${C.ink}">delivered</text>`;
+  } else {
+    A.forEach(s=>{
+      g+=`<rect x="${lx}" y="${legY-9}" width="12" height="12" rx="2.5" fill="${colors[s]}"/>`;
+      g+=`<text x="${lx+18}" y="${legY+1}" font-family="${F.body}" font-size="12.5" fill="${C.ink}">${esc(s)}</text>`;
+      lx+=18+8+String(s).length*7.2+26;
+    });
+  }
   // legend — state keys
   const legY2=H-52; let sx=padL;
   const stateKey=(draw,label)=>{ g+=draw(sx); g+=`<text x="${sx+22}" y="${legY2+1}" font-family="${F.body}" font-size="12" fill="${C.soft}">${label}</text>`; sx+=22+label.length*6.4+28; };
@@ -1990,6 +2052,21 @@ function perfRows(m){
   });
 }
 function perfTableHTML(m){
+  if(perfProjectedDeliveredMode(m)){
+    const rows=m.months.map((mo,i)=>{
+      const projected=m.order.reduce((t,s)=>t+(perfTargetMonthAt(m,s,i)||0),0);
+      const delivered=m.order.reduce((t,s)=>t+(perfRawValue(m,m.shows[s].data[mo])||0),0);
+      const hasDelivered=m.order.some(s=>perfRawValue(m,m.shows[s].data[mo])!==null);
+      const pct=projected&&hasDelivered?Math.round(delivered/projected*100):null;
+      return {label:mo,projected:projected||null,delivered:hasDelivered?delivered:null,pct};
+    });
+    return `<details class="perf-table"><summary>Data table &amp; export figures</summary>
+      <div style="margin-top:10px"><button class="perf-x" onclick="copyPerfData()">Copy for Excel</button>
+      <table class="dtable" style="margin-top:8px"><thead><tr><th>Month</th><th class="num">Projected</th><th class="num">Delivered</th><th class="num">Delivery</th></tr></thead><tbody>
+      ${rows.map(r=>`<tr><td>${esc(r.label)}</td><td class="num">${r.projected!==null?aud(r.projected):'—'}</td><td class="num"><b>${r.delivered!==null?aud(r.delivered):'—'}</b></td><td class="num">${r.pct!==null?`<b style="color:var(--${r.pct>=100?'good':'warn'})">${r.pct}%</b>`:'—'}</td></tr>`).join('')}
+      </tbody></table>
+      <div style="margin-top:6px;font-size:11px;color:var(--ink-faint)">Projected is the monthly proposed audience from the Foxtel tracking file; delivered is the verified monthly 30-second audience.</div></div></details>`;
+  }
   const rows=perfRows(m);
   const head=`<tr><th>Month</th>${m.order.map(s=>`<th class="num">${esc(s)}</th>`).join('')}<th class="num">Total</th></tr>`;
   const body=rows.map(r=>`<tr><td>${esc(r.label)}</td>${r.cells.map(c=>{
@@ -2005,6 +2082,17 @@ function perfTableHTML(m){
 }
 function perfDataTSV(){
   const m=view._chartModel; if(!m||!m.order||!m.order.length)return '';
+  if(perfProjectedDeliveredMode(m)){
+    const header=['Month','Projected','Delivered','Delivery %'].join('\t');
+    const lines=m.months.map((mo,i)=>{
+      const projected=m.order.reduce((t,s)=>t+(perfTargetMonthAt(m,s,i)||0),0);
+      const delivered=m.order.reduce((t,s)=>t+(perfRawValue(m,m.shows[s].data[mo])||0),0);
+      const hasDelivered=m.order.some(s=>perfRawValue(m,m.shows[s].data[mo])!==null);
+      const pct=projected&&hasDelivered?Math.round(delivered/projected*100):'';
+      return [mo,projected||'',hasDelivered?delivered:'',pct].join('\t');
+    });
+    return `Monthly performance\t${m.partnershipName}\tProjected vs delivered\n${header}\n${lines.join('\n')}`;
+  }
   const rows=perfRows(m);
   const header=['Month',...m.order,'Total (verified)'].join('\t');
   const lines=rows.map(r=>[r.label,...r.cells.map(c=>c.value!==null?c.value:''),r.total!==null?r.total:''].join('\t'));
@@ -2106,8 +2194,20 @@ function monthlyGraphPanel(p){
   const showPending=view.graphPending!==false;
   // Stash the exact model the chart is drawn from, so exploration and export stay WYSIWYG.
   const chartModel=view._chartModel={ months:M.months, shows:M.shows, order:A, colors, metric, metricLabel:((METRICS.find(x=>x[0]===metric)||[])[1])||'Total', partnershipName:p.name,viewMode,targets,showPending };
-  let max=0; M.months.forEach((mo,i)=>A.forEach(show=>{const v=perfPoint(chartModel,show,i,false),pv=showPending&&perfHasPendingThrough(chartModel,show,i)?perfPoint(chartModel,show,i,true):null;if(v!==null&&v>max)max=v;if(pv!==null&&pv>max)max=pv;}));
-  max=viewMode==='target'?Math.max(120,max*1.12||120):(max*1.14||1);
+  const projectedDelivered=perfProjectedDeliveredMode(chartModel);
+  let max=0; M.months.forEach((mo,i)=>A.forEach(show=>{
+    if(projectedDelivered){
+      const projected=perfTargetMonthAt(chartModel,show,i);
+      const delivered=perfRawValue(chartModel,M.shows[show].data[mo]);
+      if(projected!==null&&projected>max)max=projected;
+      if(delivered!==null&&delivered>max)max=delivered;
+      return;
+    }
+    const v=perfPoint(chartModel,show,i,false),pv=showPending&&perfHasPendingThrough(chartModel,show,i)?perfPoint(chartModel,show,i,true):null;
+    if(v!==null&&v>max)max=v;
+    if(pv!==null&&pv>max)max=pv;
+  }));
+  max=(viewMode==='target'&&!projectedDelivered)?Math.max(120,max*1.12||120):(max*1.14||1);
   const W=640,H=290,top=42,base=238,x0=34,plotW=W-46;
   const groupW=plotW/M.months.length, barW=Math.max(8,Math.min(34,(groupW-26)/A.length));
   let bars='';
@@ -2115,6 +2215,32 @@ function monthlyGraphPanel(p){
     const gx=x0+gi*groupW;
     A.forEach((s,si)=>{
       const sh=M.shows[s];
+      if(projectedDelivered){
+        const projected=perfTargetMonthAt(chartModel,s,gi);
+        const delivered=perfRawValue(chartModel,sh.data[mo]);
+        const spread=A.length*barW+(A.length-1)*6;
+        const bx=gx+groupW/2-spread/2+si*(barW+6);
+        const pairGap=5;
+        const pairW=Math.max(9,Math.min(20,(barW*1.9-pairGap)/2));
+        const px=bx-pairW/2-pairGap/2;
+        const dx=bx+pairW/2+pairGap/2;
+        bars+=`<g class="perf-bar" role="button" tabindex="0" data-month="${esc(mo)}" data-show="${esc(s)}" aria-label="${esc(s+' '+mo+', projected '+aud(projected||0)+', delivered '+(delivered!==null?aud(delivered):'not logged')+'. Open monthly details.')}" onclick="openPerfMonth(this.dataset.month,this.dataset.show)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openPerfMonth(this.dataset.month,this.dataset.show)}">`;
+        if(projected!==null){
+          const projectedH=Math.max(projected===0?2:(projected/max)*(base-top),0);
+          bars+=`<rect x="${px.toFixed(1)}" y="${(base-projectedH).toFixed(1)}" width="${pairW.toFixed(1)}" height="${projectedH.toFixed(1)}" rx="3" fill="#EEF1F5" stroke="#CBD2DC"><title>Projected: ${aud(projected)}</title></rect>`;
+        }
+        if(delivered!==null){
+          const deliveredH=Math.max(delivered===0?2:(delivered/max)*(base-top),0);
+          const pct=projected?Math.round(delivered/projected*100):null;
+          bars+=`<rect x="${dx.toFixed(1)}" y="${(base-deliveredH).toFixed(1)}" width="${pairW.toFixed(1)}" height="${deliveredH.toFixed(1)}" rx="3" fill="${colors[s]}"><title>Delivered: ${aud(delivered)}${pct!==null?' · '+pct+'% of projected':''}</title></rect>`;
+          bars+=`<text x="${(dx+pairW/2).toFixed(1)}" y="${(base-deliveredH-5).toFixed(1)}" text-anchor="middle" font-size="9" fill="#5A616E" font-family="'JetBrains Mono',monospace">${aud(delivered)}</text>`;
+          if(pct!==null)bars+=`<text x="${(gx+groupW/2).toFixed(1)}" y="${Math.max(top+10,base-Math.max(projected||0,delivered)/max*(base-top)-18).toFixed(1)}" text-anchor="middle" font-size="9" fill="var(--${pct>=100?'good':'warn'})" font-weight="700">${pct}%</text>`;
+        } else {
+          bars+=`<text x="${(dx+pairW/2).toFixed(1)}" y="${base-4}" text-anchor="middle" font-size="10" fill="#B8BDC7">–</text>`;
+        }
+        bars+='</g>';
+        return;
+      }
       const verifiedV=perfPoint(chartModel,s,gi,false);
       const hasPendingThrough=showPending&&perfHasPendingThrough(chartModel,s,gi);
       const pendingV=hasPendingThrough?perfPoint(chartModel,s,gi,true):null;
@@ -2143,6 +2269,7 @@ function monthlyGraphPanel(p){
   const showChips=showNames.map(s=>`<label style="display:inline-flex;align-items:center;gap:6px;font-size:12.5px;margin-right:14px;cursor:pointer"><input type="checkbox" ${view.graphShows.includes(s)?'checked':''} onchange="toggleGraphShow('${s}')" style="accent-color:${colors[s]};cursor:pointer"><span style="width:10px;height:10px;border-radius:2px;background:${colors[s]};display:inline-block"></span>${esc(s)}</label>`).join('');
   const baseNote = A.some(s=>M.shows[s].baselineUntil) ? `<span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--ink-faint)"><span style="width:10px;height:10px;border-radius:2px;background:${palette[1]};opacity:.35;border:1px dashed ${palette[1]};display:inline-block"></span>pre-sponsorship (not counted)</span>` : '';
   const pendingNote = showPending&&A.some(s=>Object.keys(M.shows[s].pending||{}).length) ? `<span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#9A6609;margin-left:12px"><span style="width:10px;height:10px;border-radius:2px;background:repeating-linear-gradient(135deg,#F7EBD2 0 3px,#EED9AF 3px 5px);border:2px dashed #C38318;display:inline-block"></span>◷ submitted · pending verification (not counted)</span>` : '';
+  const projectedDeliveredNote = projectedDelivered ? `<span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-soft);margin-left:12px"><span style="width:10px;height:10px;border-radius:2px;background:#EEF1F5;border:1px solid #CBD2DC;display:inline-block"></span>projected</span><span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-soft);margin-left:12px"><span style="width:10px;height:10px;border-radius:2px;background:${colors[A[0]]||'#E31B23'};display:inline-block"></span>delivered</span>` : '';
   const btns=METRICS.map(([k,l])=>`<button class="chip ${metric===k?'on':''}" onclick="setGraphMetric('${k}')">${l}</button>`).join('');
   const viewBtns=[['monthly','Monthly'],['cumulative','Cumulative YTD'],['target','Against target']].map(([k,l])=>`<button class="${viewMode===k?'on':''}" onclick="setGraphView('${k}')">${l}</button>`).join('');
   // month-over-month (last two months present), for selected shows + metric
@@ -2170,10 +2297,10 @@ function monthlyGraphPanel(p){
   }
   const exportMenu=`<details class="perf-export-menu"><summary>Download chart</summary><div class="perf-export-pop"><button onclick="downloadPerfPng();this.closest('details').removeAttribute('open')"><span>PowerPoint PNG</span><small>2400 × 1350</small></button><button onclick="downloadPerfSvg();this.closest('details').removeAttribute('open')"><span>Vector SVG</span><small>16:9</small></button><button onclick="copyPerfData();this.closest('details').removeAttribute('open')"><span>Copy for Excel</span><small>TSV</small></button></div></details>`;
   const defs=`<defs><pattern id="screenPendingHatch" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(45)"><rect width="7" height="7" fill="#F7EBD2"/><line x1="0" y1="0" x2="0" y2="7" stroke="#C38318" stroke-width="1.7" opacity=".25"/></pattern><pattern id="screenBaselineHatch" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(45)"><rect width="7" height="7" fill="#F1F3F6"/><line x1="0" y1="0" x2="0" y2="7" stroke="#667085" stroke-width="1.4" opacity=".2"/></pattern></defs>`;
-  const targetLine=viewMode==='target'?`<line class="perf-target-line" x1="${x0}" y1="${(base-(100/max)*(base-top)).toFixed(1)}" x2="${W-10}" y2="${(base-(100/max)*(base-top)).toFixed(1)}"/><text class="perf-target-label" x="${W-12}" y="${(base-(100/max)*(base-top)-5).toFixed(1)}" text-anchor="end">YTD TARGET · 100%</text>`:'';
+  const targetLine=viewMode==='target'&&!projectedDelivered?`<line class="perf-target-line" x1="${x0}" y1="${(base-(100/max)*(base-top)).toFixed(1)}" x2="${W-10}" y2="${(base-(100/max)*(base-top)).toFixed(1)}"/><text class="perf-target-label" x="${W-12}" y="${(base-(100/max)*(base-top)-5).toFixed(1)}" text-anchor="end">YTD TARGET · 100%</text>`:'';
   const pendingToggle=`<button class="chip ${showPending?'on':''}" onclick="toggleGraphPending()" aria-pressed="${showPending}">◷ Pending ${showPending?'on':'off'}</button>`;
   return `<div class="panel"><div class="panel-head"><h3>Monthly performance</h3><div class="perf-toolbar"><div class="perf-view-toggle" aria-label="Chart view">${viewBtns}</div><div class="filters">${btns}${pendingToggle}</div>${exportMenu}</div></div><div class="panel-body">
-    <div style="margin-bottom:12px;display:flex;flex-wrap:wrap;align-items:center;gap:6px 0">${showChips}${baseNote}${pendingNote}</div>
+    <div style="margin-bottom:12px;display:flex;flex-wrap:wrap;align-items:center;gap:6px 0">${showChips}${projectedDeliveredNote}${baseNote}${pendingNote}</div>
     <svg class="perf-chart" role="img" aria-labelledby="perfChartTitle perfChartDesc" viewBox="0 0 ${W} ${H}" width="100%" style="max-width:100%;display:block"><title id="perfChartTitle">${esc(p.name)} monthly performance</title><desc id="perfChartDesc">Use the show, metric and view controls to explore delivery. Select any bar to open its monthly detail. Solid bars are verified; amber hatched bars are pending.</desc>${defs}<line x1="${x0}" y1="${base}" x2="${W-10}" y2="${base}" stroke="#E1E4E9"/>${targetLine}${bars}</svg>
     ${mom}
     ${Object.keys(M.tiktok).length?`<div style="margin-top:8px;font-size:12px;color:var(--ink-soft);border-top:1px solid var(--line-soft);padding-top:10px"><b>TikTok — Fanatics channel total</b> (channel-wide, not show-attributable): ${M.months.filter(mo=>M.tiktok[mo]!=null).map(mo=>mo+' '+aud(M.tiktok[mo])).join(' · ')}.</div>`:''}
