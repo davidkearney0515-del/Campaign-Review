@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Partnership Review Dashboard 2026 — Fanatics Audio + History Corrections</title>
+<title>Partnership Review Dashboard 2026 — Fox Footy Monthly Audience</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -1272,16 +1272,16 @@ function espnSeed(){
 }
 function foxFootySeed(){
   return { id:'fox-footy-afl-2026', name:'Fox Footy AFL Partnership', counterparty:'Fox Footy / Foxtel Media', category:'AFL',
-    termStart:'2026-03-01', termEnd:'2026-10-06', contractedValue:5075300, foxScopeVersion:2, foxLinearBaselineVersion:1,
+    termStart:'2026-03-01', termEnd:'2026-10-06', contractedValue:5075300, foxScopeVersion:2, foxLinearBaselineVersion:2,
     snapshots:[{ id:'fox-footy-2026-current', label:'2026 Partnership', date:'2026-08-02', status:'warn', call:'renew',
       verdict:'Renew with tighter delivery discipline: Fox Footy remains the core qualified AFL environment, with this review focused on linear TVCs, integrations and production delivery.',
       context:'The full approved AFL partnership is $5.0753m. This dashboard actively reviews the $2.9753m Linear TVCs, Fox Footy Integrations and Production scope; streaming, standalone social and FoxSports.com.au digital remain part of the commercial agreement but are outside this active review.',
       commercial:blankCommercial(),
       media:{ valueAdd:'', components:[
         { id:'fox-afl-tvcs', name:'Fox Footy Linear TVCs', mode:'audience', investment:1378200,
-          audienceGuaranteed:7984677, audienceDelivered:'', baselineAudienceYtd:5853800,
-          baselineAudienceTargetYtd:5329097, baselineMonthsElapsed:5, baselineAsOf:'19 Jul 2026',
-          baselineSource:'Foxtel — PointsBet AFL Tracking TV (CUME)',
+          audienceGuaranteed:7984677, audienceDelivered:'', baselineAudienceYtd:6117800,
+          baselineAudienceTargetYtd:5597503.79, baselineMonthsElapsed:5, baselineAsOf:'26 Jul 2026',
+          baselineSource:'Foxtel Media x PointsBet 2026 Linear AFL Tracking — weekly delivery through 26 Jul 2026',
           baselineHighlights:['AFL 360 audiences +6% YoY','Bounce audiences +8.4% YoY','First Crack flat YoY','Midweek Tackle +8% YoY'],
           platforms:['Linear TV commercial impressions'], assetReporting:'ytd',
           assets:[{id:'fox_tvcs',name:'Commercial spots — Sun to Thu',contractedQty:310}], weeks:[] },
@@ -1302,13 +1302,13 @@ function foxFootySeed(){
           entitlements:['StatMate production and boosting support'] }
       ]},
       assessment:{
-        deliverables:['5.85m cumulative Linear TV audience delivered against a 5.33m target through 19 July','310 linear commercial spots across Sunday to Thursday','Weekly Fox Footy integrations spanning AFL 360, First Crack and FoxCatcher','Production support delivered against the agreed scope'],
-        winning:['Linear TV audience is 110% of the cumulative target through 19 July — 524,703 ahead','AFL 360 audiences are up 6% YoY and Bounce audiences are up 8.4% YoY','Midweek Tackle audiences are up 8% YoY while First Crack is flat','Fox Footy remains the core qualified AFL environment and a major share of dedicated AFL media'],
+        deliverables:['6.12m Linear TV audience delivered against a 5.60m target through 26 July','310 linear commercial spots across Sunday to Thursday','Weekly Fox Footy integrations spanning AFL 360, First Crack and FoxCatcher','Production support delivered against the agreed scope'],
+        winning:['Linear TV audience is 109% of target through 26 July — 520,296 ahead','July delivered 1.34m audience, 17% above its 1.14m monthly target','AFL 360 audiences are up 6% YoY and Bounce audiences are up 8.4% YoY','Midweek Tackle audiences are up 8% YoY while First Crack is flat','Fox Footy remains the core qualified AFL environment and a major share of dedicated AFL media'],
         falling:['Magazine-program audiences softened year on year','Verified linear audience and integration evidence still need to be supplied consistently','The size of the tracked investment requires clear delivery accountability'],
         evolution:['Concentrate integration weight around Thursday post-game','Report verified linear audience monthly and attach representative integration clips','Confirm production completion and evidence against the agreed scope','Review YTD pace and delivered CPM before further investment decisions'],
         levers:{
           growth:{rating:'watch',note:'The AFL platform remains strategically important, but renewal value depends on stronger measurable linear and integration delivery.'},
-          audience:{rating:'good',note:'Linear TV cumulative audience is 5.85m against a 5.33m target through 19 July (110%), supported by YoY growth for AFL 360, Bounce and Midweek Tackle.'},
+          audience:{rating:'good',note:'Linear TV audience is 6.12m against a 5.60m target through 26 July (109%). Monthly delivery has exceeded target in every reported month.'},
           channels:{rating:'good',note:'Linear TVCs and Fox Footy integrations provide the core tracked reach, with Thursday post-game the standout integration opportunity.'},
           compliance:{rating:'watch',note:'Monthly linear reporting, integration clip evidence and production confirmation are required across the tracked scope.'}
         }
@@ -1333,24 +1333,24 @@ function alignFoxTrackedScope(p){
   return true;
 }
 function alignFoxLinearBaseline(p){
-  if(!p||p.id!=='fox-footy-afl-2026'||p.foxLinearBaselineVersion===1)return false;
+  if(!p||p.id!=='fox-footy-afl-2026'||p.foxLinearBaselineVersion===2)return false;
   const seeded=foxFootySeed().snapshots[0];
   (p.snapshots||[]).forEach(s=>{
     const comp=((s.media&&s.media.components)||[]).find(c=>c.id==='fox-afl-tvcs');
     if(comp){
-      comp.baselineAudienceYtd=5853800;
-      comp.baselineAudienceTargetYtd=5329097;
+      comp.baselineAudienceYtd=6117800;
+      comp.baselineAudienceTargetYtd=5597503.79;
       comp.baselineMonthsElapsed=5;
-      comp.baselineAsOf='19 Jul 2026';
-      comp.baselineSource='Foxtel — PointsBet AFL Tracking TV (CUME)';
+      comp.baselineAsOf='26 Jul 2026';
+      comp.baselineSource='Foxtel Media x PointsBet 2026 Linear AFL Tracking — weekly delivery through 26 Jul 2026';
       comp.baselineHighlights=['AFL 360 audiences +6% YoY','Bounce audiences +8.4% YoY','First Crack flat YoY','Midweek Tackle +8% YoY'];
     }
     if(s.id==='fox-footy-2026-current'||s===p.snapshots[p.snapshots.length-1]){
       s.assessment=seeded.assessment;
-      s.verdict='Linear TV delivery is 10% ahead of the cumulative target through 19 July. Maintain the linear plan while tightening verified integration and production reporting.';
+      s.verdict='Linear TV delivery is 9% ahead of target through 26 July, with every reported month above target. Maintain the linear plan while tightening verified integration and production reporting.';
     }
   });
-  p.foxLinearBaselineVersion=1;
+  p.foxLinearBaselineVersion=2;
   return true;
 }
 function alignFanaticsSimplifiedReporting(p){
@@ -1715,6 +1715,21 @@ const MONTHLY = {
         Jun:{yt:7850,  soc:11047, ac:0}
       }}
     }
+  },
+  'Fox Footy AFL Partnership': {
+    months:['Mar','Apr','May','Jun','Jul'],
+    tiktok:{},
+    shows:{
+      'Fox Footy Linear TVCs':{ baselineUntil:null, targetByMonth:{
+        Mar:1179143.90, Apr:956540.33, May:1237070.025, Jun:1085450.405, Jul:1139299.13
+      }, data:{
+        Mar:{linear:1275100},
+        Apr:{linear:967800},
+        May:{linear:1308000},
+        Jun:{linear:1228400},
+        Jul:{linear:1338500}
+      }}
+    }
   }
 };
 /* July audience composition (from Fanatics July Audience Report, accurate 24/7/26) — backs the Audience lever */
@@ -1725,14 +1740,19 @@ const COMPOSITION = {
 };
 /* Live data comes from verified pr_week submissions only — a month with no verified
    submission for a show shows as a gap ("–"), it never falls back to any placeholder. */
-function platformBucket(name){ if(name==='YouTube')return 'yt'; if(/audio|acast|spotify|apple/i.test(name||''))return 'ac'; return 'soc'; }
+function platformBucket(name){
+  if(name==='YouTube')return 'yt';
+  if(/audio|acast|spotify|apple/i.test(name||''))return 'ac';
+  if(/linear|television|commercial impressions|\btv\b/i.test(name||''))return 'linear';
+  return 'soc';
+}
 function parseMonthKey(lbl){ const d=new Date(lbl); const t=d.getTime(); return isNaN(t)?null:t; }
 function sortMonthLabels(labels){ return labels.slice().sort((a,b)=>{ const da=parseMonthKey(a),db=parseMonthKey(b); if(da!==null&&db!==null)return da-db; return a<b?-1:(a>b?1:0); }); }
 function liveShowMonthly(comp){
   const data={}, tiktok={};
   dedupedVerifiedWeeks(comp).forEach(w=>{
     const mo=w.label; if(!mo) return;
-    const bucket=data[mo]||(data[mo]={yt:0,soc:0,ac:0});
+    const bucket=data[mo]||(data[mo]={yt:0,soc:0,ac:0,linear:0});
     Object.entries(w.audience||{}).forEach(([plat,v])=>{
       const val=+v||0; bucket[platformBucket(plat)]+=val;
       if(plat==='TikTok') tiktok[mo]=(tiktok[mo]||0)+val;
@@ -1749,7 +1769,7 @@ function pendingShowMonthly(comp){
   const data={};
   Object.values(byLabel).forEach(w=>{
     const mo=w.label;if(!mo)return;
-    const bucket=data[mo]||(data[mo]={yt:0,soc:0,ac:0});
+    const bucket=data[mo]||(data[mo]={yt:0,soc:0,ac:0,linear:0});
     Object.entries(w.audience||{}).forEach(([plat,v])=>{bucket[platformBucket(plat)]+=+v||0;});
   });
   return data;
@@ -1771,7 +1791,7 @@ function niceMax(raw){
 }
 function perfRawValue(m,d){
   if(!d)return null;
-  return m.metric==='total'?(+d.yt||0)+(+d.soc||0)+(+d.ac||0):(+d[m.metric]||0);
+  return m.metric==='total'?Object.values(d).reduce((sum,v)=>sum+(+v||0),0):(+d[m.metric]||0);
 }
 function perfIsBaseline(m,show,index){
   const b=m.shows[show]&&m.shows[show].baselineUntil;
@@ -1800,7 +1820,17 @@ function perfHasPendingThrough(m,show,index){
 }
 function perfTargetAt(m,show,index){
   const target=m.targets&&m.targets[show];
-  if(!target||!target.guarantee||!target.termMonths)return null;
+  if(!target)return null;
+  if(target.targetByMonth){
+    let exact=0,has=false;
+    for(let i=0;i<=index;i++){
+      if(perfIsBaseline(m,show,i))continue;
+      const v=+target.targetByMonth[m.months[i]];
+      if(Number.isFinite(v)){exact+=v;has=true;}
+    }
+    if(has)return exact;
+  }
+  if(!target.guarantee||!target.termMonths)return null;
   let elapsed=0;
   for(let i=0;i<=index;i++)if(!perfIsBaseline(m,show,i))elapsed++;
   return target.guarantee*Math.min(elapsed,target.termMonths)/target.termMonths;
@@ -1945,7 +1975,7 @@ function buildPerfChartSVG(spec){
 /* --- export + data-table plumbing — all derive from the model the panel stashed, so they respect the
    current show filter and metric exactly as drawn --- */
 function perfRows(m){
-  const val=d=>!d?null:(m.metric==='total'?(d.yt+d.soc+d.ac):d[m.metric]);
+  const val=d=>!d?null:(m.metric==='total'?Object.values(d).reduce((sum,v)=>sum+(+v||0),0):d[m.metric]);
   return m.months.map((mo,i)=>{
     const cells=m.order.map(s=>{
       const sh=m.shows[s]; const isB=sh.baselineUntil&&i<=m.months.indexOf(sh.baselineUntil);
@@ -2056,15 +2086,18 @@ function monthlyGraphPanel(p){
   const tiktok={...staticTiktok, ...liveTiktok};
   const M={months, shows, tiktok};
 
-  const metric=view.graphMetric||'total';
-  const METRICS=[['total','Total'],['yt','YouTube'],['soc','Social (FB+IG)'],['ac','Audio']];
-  const val=d=> !d?null:(metric==='total'?(d.yt+d.soc+d.ac):d[metric]);
+  const presentBuckets=new Set();
+  showNames.forEach(name=>[...Object.values(shows[name].data||{}),...Object.values(shows[name].pending||{})].forEach(d=>Object.keys(d||{}).forEach(k=>presentBuckets.add(k))));
+  const METRICS=[['total','Total'],...([['linear','Linear TV'],['yt','YouTube'],['soc','Social (FB+IG)'],['ac','Audio']].filter(([key])=>presentBuckets.has(key)))];
+  let metric=view.graphMetric||'total';
+  if(!METRICS.some(([key])=>key===metric))metric='total';
+  const val=d=> !d?null:(metric==='total'?Object.values(d).reduce((sum,v)=>sum+(+v||0),0):d[metric]);
   const palette=['#E31B23','#1F3A5F','#C38318','#356B4C'];
   const colors={}; showNames.forEach((s,i)=>colors[s]=palette[i%palette.length]);
   const targets={};
   (s.media.components||[]).filter(c=>c.mode==='audience').forEach(c=>{
     const key=staticShowKey(staticM,c.name)||c.name;
-    targets[key]={guarantee:n(c.audienceGuaranteed),termMonths:termMonths(p)};
+    targets[key]={guarantee:n(c.audienceGuaranteed),termMonths:termMonths(p),targetByMonth:staticShows[key]&&staticShows[key].targetByMonth||null};
   });
   if(!view.graphShows) view.graphShows=['Kenty Blitz'];
   const active=showNames.filter(s=>view.graphShows.includes(s));
@@ -2144,7 +2177,7 @@ function monthlyGraphPanel(p){
     <svg class="perf-chart" role="img" aria-labelledby="perfChartTitle perfChartDesc" viewBox="0 0 ${W} ${H}" width="100%" style="max-width:100%;display:block"><title id="perfChartTitle">${esc(p.name)} monthly performance</title><desc id="perfChartDesc">Use the show, metric and view controls to explore delivery. Select any bar to open its monthly detail. Solid bars are verified; amber hatched bars are pending.</desc>${defs}<line x1="${x0}" y1="${base}" x2="${W-10}" y2="${base}" stroke="#E1E4E9"/>${targetLine}${bars}</svg>
     ${mom}
     ${Object.keys(M.tiktok).length?`<div style="margin-top:8px;font-size:12px;color:var(--ink-soft);border-top:1px solid var(--line-soft);padding-top:10px"><b>TikTok — Fanatics channel total</b> (channel-wide, not show-attributable): ${M.months.filter(mo=>M.tiktok[mo]!=null).map(mo=>mo+' '+aud(M.tiktok[mo])).join(' · ')}.</div>`:''}
-    <div style="margin-top:6px;font-size:11.5px;color:var(--ink-faint)">${staticMonths.length?`RLI Mar–May greyed as pre-sponsorship baseline (delivery clock from June). Kenty Blitz includes Ask Kenty. ${staticMonths.join('–')} figures from Fanatics' reissued per-platform reports.`:''} ${liveMonthSet.size?`${sortMonthLabels([...liveMonthSet]).join(', ')} from partner-submitted monthly reports. Amber dashed bars are awaiting verification and remain excluded from YTD totals, CPM and the Partnership Pulse.`:''}</div>
+    <div style="margin-top:6px;font-size:11.5px;color:var(--ink-faint)">${staticMonths.length?(p.id==='fox-footy-afl-2026'?`${staticMonths.join('–')} verified Linear TV audience derived from Foxtel Media's weekly 30-second tracking report through 26 Jul 2026. Monthly targets use the corresponding proposed weekly audience figures.`:`RLI Mar–May greyed as pre-sponsorship baseline (delivery clock from June). Kenty Blitz includes Ask Kenty. ${staticMonths.join('–')} figures from Fanatics' reissued per-platform reports.`):''} ${liveMonthSet.size?`${sortMonthLabels([...liveMonthSet]).join(', ')} from partner-submitted monthly reports. Amber dashed bars are awaiting verification and remain excluded from YTD totals, CPM and the Partnership Pulse.`:''}</div>
     ${perfTableHTML(view._chartModel)}
     ${comp}
   </div></div>`;
@@ -2192,7 +2225,7 @@ function openPerfMonth(month,showName){
   const rawBreakdown=detailWeek&&detailWeek.audience&&Object.keys(detailWeek.audience).length
     ? detailWeek.audience
     : (pending!==null?(sh.pending||{})[month]:sh.data[month])||{};
-  const bucketNames={yt:'YouTube',soc:'Social (Facebook + Instagram)',ac:'Audio'};
+  const bucketNames={yt:'YouTube',soc:'Social (Facebook + Instagram)',ac:'Audio',linear:'Linear TV audience'};
   const breakdown=Object.entries(rawBreakdown).map(([k,v])=>[bucketNames[k]||k,+v||0]).filter(([,v])=>v||v===0);
   const assets=(comp&&detailWeek&&detailWeek.assets)?(comp.assets||[]).map(as=>({name:as.name,value:n(detailWeek.assets[as.id]),clip:clipHref(detailWeek,as.id)})).filter(x=>x.value!==null||x.clip):[];
   const clips=comp&&detailWeek?weekClips(comp,detailWeek):[];
@@ -2363,7 +2396,8 @@ function currentPulse(p,s){
     const linear=(s.media.components||[]).find(c=>c.id==='fox-afl-tvcs');
     if(linear&&n(linear.baselineAudienceYtd)!==null&&n(linear.baselineAudienceTargetYtd)!==null){
       const gap=n(linear.baselineAudienceYtd)-n(linear.baselineAudienceTargetYtd);
-      evidence.push(`Fox Footy Linear TV is ${aud(n(linear.baselineAudienceYtd))} against a ${aud(n(linear.baselineAudienceTargetYtd))} cumulative target through ${linear.baselineAsOf||'the latest report'} — ${num(gap)} ahead (110%).`);
+      const pace=Math.round(n(linear.baselineAudienceYtd)/n(linear.baselineAudienceTargetYtd)*100);
+      evidence.push(`Fox Footy Linear TV is ${aud(n(linear.baselineAudienceYtd))} against a ${aud(n(linear.baselineAudienceTargetYtd))} target through ${linear.baselineAsOf||'the latest report'} — ${num(gap)} ahead (${pace}%).`);
       if((linear.baselineHighlights||[]).length)evidence.push(`Foxtel rating context: ${linear.baselineHighlights.join('; ')}.`);
     }
     const production=(s.media.components||[]).find(c=>c.id==='fox-afl-production');
@@ -2843,7 +2877,7 @@ function importedHistory(c,p){
   const baselineIndex=sh.baselineUntil?staticM.months.indexOf(sh.baselineUntil):-1;
   return staticM.months.filter(mo=>sh.data[mo]).map(mo=>{
     const correction=weeksOf(c).filter(w=>w.status==='verified'&&monthMatches(w.label,mo)).sort((a,b)=>(b.submittedAt||'').localeCompare(a.submittedAt||''))[0]||null;
-    const d=correction?Object.entries(correction.audience||{}).reduce((out,[platform,value])=>{out[platformBucket(platform)]+=+value||0;return out;},{yt:0,ac:0,soc:0}):sh.data[mo], i=staticM.months.indexOf(mo);
+    const d=correction?Object.entries(correction.audience||{}).reduce((out,[platform,value])=>{out[platformBucket(platform)]+=+value||0;return out;},{yt:0,ac:0,soc:0,linear:0}):sh.data[mo], i=staticM.months.indexOf(mo);
     return {kind:'imported',id:`imported_${slug(c.name)}_${mo}`,label:importedMonthLabel(mo,p),
       total:Object.values(d).reduce((a,v)=>a+(+v||0),0),data:d,baseline:baselineIndex>=0&&i<=baselineIndex,
       corrected:!!correction,correctionId:correction&&correction.id};
@@ -2888,7 +2922,7 @@ function renderPartner(){
     </div><div class="pshow-body">`;
     if(rows.length){ html+=`<div class="wk-list">`+rows.map(w=>{
         if(w.kind==='imported'){
-          const breakdown=[['YouTube',w.data.yt],['Social',w.data.soc],['Audio',w.data.ac]].filter(([,v])=>v!==undefined);
+          const breakdown=[['Linear TV',w.data.linear],['YouTube',w.data.yt],['Social',w.data.soc],['Audio',w.data.ac]].filter(([,v])=>v!==undefined);
           return `<div class="wk-item ${w.baseline?'is-baseline':''}"><div class="wk-l"><span class="wk-status ${w.baseline?'wk-baseline':'wk-verified'}">${w.baseline?'baseline':'verified'}</span><span>${esc(w.label)}</span><span class="wk-source">${w.corrected?'Verified correction':w.baseline?'Pre-partnership · excluded from YTD':'Imported report'}</span></div>
             <div style="display:flex;align-items:center;gap:14px"><span class="wk-aud">${aud(w.total)}</span><details class="wk-breakdown"><summary>View breakdown</summary><div class="wk-breakdown-data">${breakdown.map(([label,v])=>`<span>${label}<b>${aud(v)}</b></span>`).join('')}</div></details><button class="linkbtn" onclick="openWeekForm('${c.id}','${w.correctionId||''}','${esc(w.label)}')">${w.corrected?'Edit':'Correct'}</button></div></div>`;
         }
