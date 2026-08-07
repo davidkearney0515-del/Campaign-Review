@@ -1056,7 +1056,14 @@ function performanceDelivery(c,p){
   const data=staticShow?{...staticShow.data}:{};
   const baselineUntil=staticShow?staticShow.baselineUntil:null;
   const live=liveShowMonthly(c).data;
-  Object.entries(live).forEach(([mo,d])=>{ const matched=staticMonths.find(sm=>monthMatches(sm,mo)); data[matched||mo]=d; });
+  Object.entries(live).forEach(([mo,d])=>{
+    const matched=staticMonths.find(sm=>monthMatches(sm,mo));
+    const key=matched||mo;
+    const importedTotal=Object.values(data[key]||{}).reduce((a,v)=>a+(+v||0),0);
+    const liveTotal=Object.values(d||{}).reduce((a,v)=>a+(+v||0),0);
+    if(importedTotal>0&&liveTotal===0)return;
+    data[key]=d;
+  });
   const baselineIndex=baselineUntil?staticMonths.indexOf(baselineUntil):-1;
   const counted=Object.entries(data).filter(([mo])=>{
     const i=staticMonths.indexOf(mo);
@@ -1719,9 +1726,6 @@ const MONTHLY = {
         May:{yt:12220, soc:81108, ac:0},
         Jun:{yt:7850,  soc:11047, ac:0},
         Jul:{yt:15825, soc:26796, ac:0}
-      }},
-      'Chiming In':{ baselineUntil:null, data:{
-        Jul:{yt:88719, soc:358643, ac:17860}
       }}
     }
   },
@@ -2166,7 +2170,13 @@ function monthlyGraphPanel(p){
     const newMonths=Object.keys(liveData);
     const pendingMonths=Object.keys(pendingData);
     if(newMonths.length||pendingMonths.length){ if(!shows[showKey])shows[showKey]={baselineUntil:null,data:{},pending:{}}; }
-    newMonths.forEach(mo=>{ shows[showKey].data[normaliseMonth(mo)]=liveData[mo]; });
+    newMonths.forEach(mo=>{
+      const key=normaliseMonth(mo);
+      const importedTotal=Object.values((shows[showKey]&&shows[showKey].data&&shows[showKey].data[key])||{}).reduce((a,v)=>a+(+v||0),0);
+      const liveTotal=Object.values(liveData[mo]||{}).reduce((a,v)=>a+(+v||0),0);
+      if(importedTotal>0&&liveTotal===0)return;
+      shows[showKey].data[key]=liveData[mo];
+    });
     pendingMonths.forEach(mo=>{ shows[showKey].pending[normaliseMonth(mo)]=pendingData[mo]; });
     if(!shows[showKey] && (Object.keys(liveData).length||Object.keys(pendingData).length)){ shows[showKey]={baselineUntil:null,data:{},pending:{}}; }
     Object.entries(liveTk).forEach(([mo,v])=>{ const key=normaliseMonth(mo); liveTiktok[key]=(liveTiktok[key]||0)+v; });
