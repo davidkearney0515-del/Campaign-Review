@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Partnership Review Dashboard 2026 — Fox Footy Monthly Audience</title>
+<title>Partnership Review Dashboard 2026 — Portfolio Audience Cards</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -603,6 +603,23 @@
   .pcard-decision small{font-size:8.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-faint);font-weight:800}
   .pcard-open{font-size:10.5px;color:var(--ink-soft);font-weight:700;transition:transform .18s ease,color .18s ease}
   .pcard:hover .pcard-open{color:var(--brand);transform:translateX(3px)}
+  .pcard-audience{margin:8px 0 14px;padding:12px 0 2px;border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft)}
+  .pcard-audience-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px}
+  .pcard-audience-title{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-faint);font-weight:800}
+  .pcard-audience-total{font-family:'JetBrains Mono';font-size:13px;font-weight:700;color:var(--ink);text-align:right}
+  .pcard-audience-total small{display:block;font-family:'Inter';font-size:10px;color:var(--ink-faint);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-top:1px}
+  .pcard-chart{height:118px;display:flex;align-items:flex-end;gap:8px;padding:6px 0 0}
+  .pcard-month{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px}
+  .pcard-bars{height:86px;width:100%;display:flex;align-items:flex-end;justify-content:center;gap:3px}
+  .pcard-bar{width:20px;min-height:2px;border-radius:5px 5px 2px 2px;background:var(--brand);position:relative;transition:height .24s ease,opacity .18s ease}
+  .pcard-bar.target{background:#D8DEE7;border:1px solid #C6CEDA}
+  .pcard-bar.good{background:var(--good)} .pcard-bar.warn{background:var(--warn)} .pcard-bar.bad{background:var(--bad)}
+  .pcard-bar.baseline{background:#D8DEE7;border:1px dashed #9AA3B2}
+  .pcard-bar-label{font-family:'JetBrains Mono';font-size:9px;color:var(--ink-soft);line-height:1;white-space:nowrap}
+  .pcard-month-label{font-size:9.5px;color:var(--ink-faint);font-weight:800;line-height:1}
+  .pcard-audience-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:7px;font-size:10.5px;color:var(--ink-soft)}
+  .pcard-audience-foot b{font-family:'JetBrains Mono';color:var(--ink)}
+  .pcard-audience-empty{height:96px;border:1px dashed var(--line);border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--ink-faint);font-size:12px;background:#FAFBFC}
 
   .pulse-hero{padding:18px 20px 16px;background:linear-gradient(180deg,#fff,#FCFCFD)}
   .pulse-hero .pulse-status{margin-bottom:16px}
@@ -1664,6 +1681,70 @@ function printPortfolio(){
   setTimeout(()=>{ w.focus(); w.print(); }, 300);
 }
 Object.assign(window,{printPortfolio});
+function staticMonthlyAudienceRows(p){
+  const staticM=(typeof MONTHLY!=='undefined'&&p)?MONTHLY[p.name]:null;
+  if(!staticM||!staticM.months||!staticM.shows)return [];
+  return staticM.months.map((mo,i)=>{
+    let delivered=0,hasDelivered=false,target=0,hasTarget=false;
+    Object.entries(staticM.shows).forEach(([showName,show])=>{
+      const baselineIndex=show.baselineUntil?staticM.months.indexOf(show.baselineUntil):-1;
+      const baseline=baselineIndex>=0&&i<=baselineIndex;
+      const data=(show.data||{})[mo];
+      if(data&&!baseline){
+        delivered+=Object.values(data).reduce((sum,v)=>sum+(+v||0),0);
+        hasDelivered=true;
+      }
+      if(show.targetByMonth&&show.targetByMonth[mo]!==undefined){
+        target+=+show.targetByMonth[mo]||0;
+        hasTarget=true;
+      }
+    });
+    return {label:mo,delivered:hasDelivered?delivered:null,target:hasTarget?target:null};
+  });
+}
+function portfolioAudienceCard(p,s,m){
+  const rows=staticMonthlyAudienceRows(p);
+  const ytdTarget=audienceTargetYtd(s,p);
+  if(rows.length){
+    const max=Math.max(1,...rows.flatMap(r=>[r.delivered||0,r.target||0]));
+    const latest=[...rows].reverse().find(r=>r.delivered!==null);
+    const deliveredYtd=rows.reduce((sum,r)=>sum+(r.delivered||0),0);
+    const targetYtd=rows.reduce((sum,r)=>sum+(r.target||0),0);
+    const hasTargets=rows.some(r=>r.target!==null);
+    const pct=hasTargets&&targetYtd?Math.round(deliveredYtd/targetYtd*100):null;
+    const bars=rows.map(r=>{
+      const deliveredH=r.delivered!==null?Math.max(2,(r.delivered/max)*68):0;
+      const targetH=r.target!==null?Math.max(2,(r.target/max)*68):0;
+      const tone=r.target===null?'':r.delivered===null?'warn':r.delivered>=r.target?'good':r.delivered>=r.target*.85?'warn':'bad';
+      const targetBar=r.target!==null?`<span class="pcard-bar target" style="height:${targetH.toFixed(1)}px" title="${esc(r.label)} projected ${aud(r.target)}"></span>`:'';
+      const deliveredBar=r.delivered!==null?`<span class="pcard-bar ${tone}" style="height:${deliveredH.toFixed(1)}px" title="${esc(r.label)} delivered ${aud(r.delivered)}"></span>`:`<span class="pcard-bar baseline" style="height:2px" title="${esc(r.label)} awaiting audience"></span>`;
+      return `<div class="pcard-month"><div class="pcard-bars">${targetBar}${deliveredBar}</div><div class="pcard-bar-label">${r.delivered!==null?aud(r.delivered):'--'}</div><div class="pcard-month-label">${esc(r.label)}</div></div>`;
+    }).join('');
+    const foot=hasTargets
+      ?`<span>Delivered vs projected</span><b>${pct!==null?pct+'%':'--'}</b>`
+      :`<span>Latest ${latest?esc(latest.label):'month'}</span><b>${latest?aud(latest.delivered):'--'}</b>`;
+    return `<div class="pcard-audience">
+      <div class="pcard-audience-head"><div><div class="pcard-audience-title">Audience delivery</div></div><div class="pcard-audience-total">${aud(deliveredYtd)}<small>YTD delivered</small></div></div>
+      <div class="pcard-chart">${bars}</div>
+      <div class="pcard-audience-foot">${foot}</div>
+    </div>`;
+  }
+  if(m.del!==null||ytdTarget!==null){
+    const max=Math.max(m.del||0,ytdTarget||0,1);
+    const deliveredH=m.del!==null?Math.max(3,(m.del/max)*68):0;
+    const targetH=ytdTarget!==null?Math.max(3,(ytdTarget/max)*68):0;
+    const pct=ytdTarget&&m.del!==null?Math.round(m.del/ytdTarget*100):null;
+    return `<div class="pcard-audience">
+      <div class="pcard-audience-head"><div class="pcard-audience-title">Audience delivery</div><div class="pcard-audience-total">${m.del!==null?aud(m.del):'--'}<small>YTD delivered</small></div></div>
+      <div class="pcard-chart" style="justify-content:center;gap:14px">
+        ${ytdTarget!==null?`<div class="pcard-month" style="max-width:74px"><div class="pcard-bars"><span class="pcard-bar target" style="height:${targetH.toFixed(1)}px"></span></div><div class="pcard-bar-label">${aud(ytdTarget)}</div><div class="pcard-month-label">Target</div></div>`:''}
+        ${m.del!==null?`<div class="pcard-month" style="max-width:74px"><div class="pcard-bars"><span class="pcard-bar ${pct===null?'':pct>=100?'good':pct>=85?'warn':'bad'}" style="height:${deliveredH.toFixed(1)}px"></span></div><div class="pcard-bar-label">${aud(m.del)}</div><div class="pcard-month-label">Delivered</div></div>`:''}
+      </div>
+      <div class="pcard-audience-foot"><span>YTD pace</span><b>${pct!==null?pct+'%':'Pending'}</b></div>
+    </div>`;
+  }
+  return `<div class="pcard-audience"><div class="pcard-audience-head"><div class="pcard-audience-title">Audience delivery</div></div><div class="pcard-audience-empty">Awaiting audience delivery</div></div>`;
+}
 function pcard(p){
   const s=latestSnap(p); const st=currentPulse(p,s).status||'none';
   const stLabel={good:'On track',warn:'Watch',bad:'Off track',none:'Not set'}[st];
@@ -1687,6 +1768,7 @@ function pcard(p){
     <div class="head"><div><h3 class="name">${esc(p.name)} ${p.example?'<span class="example-tag">Example</span>':''}</h3><div class="cp">${esc(p.counterparty||'')}</div></div>
       <div class="pcard-decision"><small>Recommendation</small><span class="callbadge call-${s.call||'evolve'}">${esc(callLabel)}</span></div></div>
     <div class="snapmeta"><span class="cat">${esc(p.category)}</span><span class="statusdot sd-${st}"><i></i>${stLabel}</span><span>${esc(s.label)} · ${fmtDate(s.date)}</span></div>
+    ${portfolioAudienceCard(p,s,m)}
     <p class="verdict ${s.verdict?'':'empty'}">${s.verdict?esc(s.verdict):'No verdict written yet'}</p>
     ${metricsHtml}
     <div class="cardfoot">
