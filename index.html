@@ -1693,26 +1693,35 @@ function pcard(p){
 /* ===== Monthly performance data (extracted from Fanatics views reports; reconciles to report totals) ===== */
 const MONTHLY = {
   'FanaticsTV': {
-    months:['Mar','Apr','May','Jun'],
-    tiktok:{Mar:837860, Apr:1916054, May:2692438, Jun:1727162},
+    months:['Mar','Apr','May','Jun','Jul'],
+    tiktok:{Mar:837860, Apr:1916054, May:2692438, Jun:1727162, Jul:1117921},
     shows:{
       'Kenty Blitz':{ baselineUntil:null, data:{
         Mar:{yt:248960,  soc:1294709, ac:130320},
         Apr:{yt:806523,  soc:1101241, ac:154373},
         May:{yt:1404588, soc:1658585, ac:204109},
-        Jun:{yt:1147033, soc:3690469, ac:208224}
+        Jun:{yt:1147033, soc:3690469, ac:208224},
+        Jul:{yt:1167068, soc:5063716, ac:192015}
+      }},
+      'Kenty Primetime':{ baselineUntil:null, data:{
+        Jul:{yt:292987, soc:1512532, ac:29237}
       }},
       'Rugby League Insider':{ baselineUntil:'May', data:{
         Mar:{yt:139048,  soc:500865,  ac:24421},
         Apr:{yt:421114,  soc:314809,  ac:34957},
         May:{yt:1230400, soc:1436162, ac:44552},
-        Jun:{yt:951923,  soc:2588082, ac:53774}
+        Jun:{yt:951923,  soc:2588082, ac:53774},
+        Jul:{yt:1097495, soc:4742298, ac:70479}
       }},
       'Take the Points':{ baselineUntil:null, data:{
         Mar:{yt:937,   soc:0,     ac:0},
         Apr:{yt:10823, soc:17411, ac:0},
         May:{yt:12220, soc:81108, ac:0},
-        Jun:{yt:7850,  soc:11047, ac:0}
+        Jun:{yt:7850,  soc:11047, ac:0},
+        Jul:{yt:15825, soc:26796, ac:0}
+      }},
+      'Chiming In':{ baselineUntil:null, data:{
+        Jul:{yt:88719, soc:358643, ac:17860}
       }}
     }
   },
@@ -2176,7 +2185,7 @@ function monthlyGraphPanel(p){
 
   const presentBuckets=new Set();
   showNames.forEach(name=>[...Object.values(shows[name].data||{}),...Object.values(shows[name].pending||{})].forEach(d=>Object.keys(d||{}).forEach(k=>presentBuckets.add(k))));
-  const METRICS=[['total','Total'],...([['linear','Linear TV'],['yt','YouTube'],['soc','Social (FB+IG)'],['ac','Audio']].filter(([key])=>presentBuckets.has(key)))];
+  const METRICS=[['total','Total'],...([['linear','Linear TV'],['yt','YouTube'],['soc','Social'],['ac','Audio']].filter(([key])=>presentBuckets.has(key)))];
   let metric=view.graphMetric||'total';
   if(!METRICS.some(([key])=>key===metric))metric='total';
   const val=d=> !d?null:(metric==='total'?Object.values(d).reduce((sum,v)=>sum+(+v||0),0):d[metric]);
@@ -2304,7 +2313,7 @@ function monthlyGraphPanel(p){
     <svg class="perf-chart" role="img" aria-labelledby="perfChartTitle perfChartDesc" viewBox="0 0 ${W} ${H}" width="100%" style="max-width:100%;display:block"><title id="perfChartTitle">${esc(p.name)} monthly performance</title><desc id="perfChartDesc">Use the show, metric and view controls to explore delivery. Select any bar to open its monthly detail. Solid bars are verified; amber hatched bars are pending.</desc>${defs}<line x1="${x0}" y1="${base}" x2="${W-10}" y2="${base}" stroke="#E1E4E9"/>${targetLine}${bars}</svg>
     ${mom}
     ${Object.keys(M.tiktok).length?`<div style="margin-top:8px;font-size:12px;color:var(--ink-soft);border-top:1px solid var(--line-soft);padding-top:10px"><b>TikTok — Fanatics channel total</b> (channel-wide, not show-attributable): ${M.months.filter(mo=>M.tiktok[mo]!=null).map(mo=>mo+' '+aud(M.tiktok[mo])).join(' · ')}.</div>`:''}
-    <div style="margin-top:6px;font-size:11.5px;color:var(--ink-faint)">${staticMonths.length?(p.id==='fox-footy-afl-2026'?`${staticMonths.join('–')} verified Linear TV audience derived from Foxtel Media's weekly 30-second tracking report through 26 Jul 2026. Monthly targets use the corresponding proposed weekly audience figures.`:`RLI Mar–May greyed as pre-sponsorship baseline (delivery clock from June). Kenty Blitz includes Ask Kenty. ${staticMonths.join('–')} figures from Fanatics' reissued per-platform reports.`):''} ${liveMonthSet.size?`${sortMonthLabels([...liveMonthSet]).join(', ')} from partner-submitted monthly reports. Amber dashed bars are awaiting verification and remain excluded from YTD totals, CPM and the Partnership Pulse.`:''}</div>
+    <div style="margin-top:6px;font-size:11.5px;color:var(--ink-faint)">${staticMonths.length?(p.id==='fox-footy-afl-2026'?`${staticMonths.join('–')} verified Linear TV audience derived from Foxtel Media's weekly 30-second tracking report through 26 Jul 2026. Monthly targets use the corresponding proposed weekly audience figures.`:`RLI Mar–May greyed as pre-sponsorship baseline (delivery clock from June). Kenty Blitz includes Ask Kenty. ${staticMonths.join('–')} figures from Fanatics' per-platform reports; July 2026 uses Fanatics' July report and combines Instagram, Facebook and TikTok under Social.`):''} ${liveMonthSet.size?`${sortMonthLabels([...liveMonthSet]).join(', ')} from partner-submitted monthly reports. Amber dashed bars are awaiting verification and remain excluded from YTD totals, CPM and the Partnership Pulse.`:''}</div>
     ${perfTableHTML(view._chartModel)}
     ${comp}
   </div></div>`;
